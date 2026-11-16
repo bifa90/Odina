@@ -71,6 +71,7 @@ assets/logo/   الهوية البصرية (SVG · PNG · ICO)
 tools/         سكربتات البناء (MIT)
 ui-preview.html  معاينة الواجهة — 7 لغات، ملف واحد
 LICENSING.md   كيف يندمج AGPL مع MIT
+NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 ```
 
 ### ابدأ من هنا
@@ -86,9 +87,10 @@ LICENSING.md   كيف يندمج AGPL مع MIT
 
 ## الترخيص
 
-- **البرنامج:** AGPL-3.0-or-later — `LICENSE`
+- **البرنامج:** AGPL-3.0-or-later — `LICENSE` (نص خالص غير معدّل)
 - **الأدوات:** MIT — `LICENSE-TOOLS`
 - **الخطوط:** SIL OFL 1.1 — `fonts/vendor/*/LICENSE`
+- **إشعار النطاق والهوية:** `NOTICE`
 
 AGPL **لا تمنع** استخدام Odina في شركة أو مؤسسة مجانًا. القيد على التوزيع والخدمة، لا على الاستخدام. التفصيل في `LICENSING.md`.
 
