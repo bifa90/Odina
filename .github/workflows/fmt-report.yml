@@ -1,30 +1,21 @@
 # Copyright (c) 2026 bifa90 — Odina
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# TEMPORARY. The sandbox writing this branch has no Rust toolchain and cannot
-# read logs or artifacts (the results host is unreachable). A pull request is
-# the one output that needs no `contents: write` and can be read back through
-# the API, so this job formats the code and opens a PR from the result. Mode
-# `report` runs clippy and puts the diagnostics in the PR body.
-# Deleted as soon as the branch is green.
+# TEMPORARY. The sandbox writing this branch has no Rust toolchain, and job
+# logs and artifacts are both unreachable from it. Check-run annotations are
+# the one readable channel, so this job dumps the rustfmt diff and the clippy
+# diagnostics into single, newline-escaped annotations. Deleted when green.
 
 name: fmt-report
 
 on:
   workflow_dispatch:
-    inputs:
-      mode:
-        description: "report = clippy only, fix = commit the format result"
-        type: choice
-        options: [report, fix]
-        default: report
   push:
     branches:
       - 'arena/3113ebbf-odina'
 
 permissions:
   contents: read
-  pull-requests: write
 
 jobs:
   report:
@@ -41,39 +32,30 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: clippy
+      - name: collect
         run: |
-          {
-            echo '### clippy (default build)'
-            echo '```'
-            cargo clippy --workspace --all-targets -- -D warnings 2>&1 | tail -120 || true
-            echo '```'
-            echo '### clippy (instrument build)'
-            echo '```'
-            cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings 2>&1 | tail -120 || true
-            echo '```'
-          } > body.md
+          cargo fmt --all
+          git diff --no-color > /tmp/fmt.diff || true
+          cargo clippy --workspace --all-targets -- -D warnings > /tmp/c.txt 2>&1 || true
+          cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings > /tmp/i.txt 2>&1 || true
+          cat > /tmp/emit.py <<'PY'
+          import pathlib, sys
 
-      - name: open a PR with the report (and the formatted code, if asked)
-        env:
-          GH_TOKEN: ${{ github.token }}
-          MODE: ${{ github.event.inputs.mode || 'report' }}
-        run: |
-          if [ "$MODE" = "fix" ]; then
-            cargo fmt --all
-            git diff --stat >> body.md
-          fi
-          echo "" >> body.md
-          echo "Rust version: $(rustc --version)" >> body.md
-          # A PR from a run does not need contents:write on the repository.
-          gh pr create \
-            --base "$GITHUB_REF_NAME" \
-            --head "$GITHUB_REF_NAME" \
-            --title "ci: format result and lint report [ci-skip]" \
-            --body-file body.md || true
-          # `gh pr create` cannot open a PR from the same branch, so fall back to
-          # an issue, which also carries the text and needs no write permission
-          # beyond the token's default.
-          gh issue create \
-            --title "ci report $GITHUB_SHA" \
-            --body-file body.md || true
+          def esc(text):
+              return (text.replace('%', '%25')
+                          .replace('\r', '%0D')
+                          .replace('\n', '%0A'))
+
+          def emit(tag, path, limit):
+              p = pathlib.Path(path)
+              if not p.exists():
+                  print('::error::' + tag + ' MISSING')
+                  return
+              body = p.read_text(encoding='utf-8', errors='replace')[:limit]
+              print('::error::' + tag + ' ' + esc(body))
+
+          emit('FMT', '/tmp/fmt.diff', 12000)
+          emit('CLIPPY', '/tmp/c.txt', 12000)
+          emit('INSTR', '/tmp/i.txt', 12000)
+          PY
+          python3 /tmp/emit.py
