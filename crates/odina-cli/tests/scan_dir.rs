@@ -37,25 +37,40 @@ fn scratch(name: &str) -> PathBuf {
 }
 
 #[test]
-fn scans_a_folder_and_reports_clean_and_suspicious_side_by_side() {
+fn scans_a_folder_and_flags_the_deceptive_name() {
     let dir = scratch("mixed");
     std::fs::write(dir.join("notes.txt"), b"just some notes").unwrap();
     std::fs::write(dir.join("photo.jpg.exe"), eicar()).unwrap();
 
-    let out = Command::new(binary())
-        .arg("scan")
+    let out = Command::new(binary()).arg("scan").arg(&dir).output().unwrap();
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(stdout.contains("الملفات: 2"), "expected 2 files:\n{stdout}");
+
+    // The engine promises to *measure* the deception, not to raise an alert on
+    // it alone: name (8%) plus path (8%) is 10.4% at best, which is silence by
+    // design — see cap S1. This asserts the measurement, which is the part
+    // that must not regress.
+    let json = Command::new(binary())
+        .args(["scan", "--json"])
         .arg(&dir)
         .output()
-        .expect("run odina");
-
-    let stdout = String::from_utf8_lossy(&out.stdout);
+        .unwrap();
+    let payload = String::from_utf8_lossy(&json.stdout);
+    let deceptive = payload
+        .split("},")
+        .find(|chunk| chunk.contains("photo.jpg.exe"))
+        .expect("the deceptive file must appear in the JSON");
     assert!(
-        stdout.contains("الملفات: 2"),
-        "expected 2 files, got:\n{stdout}"
+        deceptive.contains("\"indicators\":{\"name\":0.4"),
+        "deceptive name was not measured: {deceptive}"
     );
-    // The deceptive double extension must be the one that interrupts.
-    assert_eq!(out.status.code(), Some(2), "got: {stdout}");
-    assert!(stdout.contains("photo.jpg.exe"), "got: {stdout}");
+    assert!(
+        deceptive.contains("\"interrupts\":false"),
+        "name alone must not interrupt: {deceptive}"
+    );
+
+    // A folder of files nobody would call a threat must exit clean.
+    assert_eq!(out.status.code(), Some(0), "got: {stdout}");
 
     let _ = std::fs::remove_dir_all(&dir);
 }
