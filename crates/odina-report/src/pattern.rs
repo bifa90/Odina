@@ -155,9 +155,7 @@ fn is_vocabulary_segment(segment: &str) -> bool {
 /// Split a pattern into the segments the emitter is allowed to produce and
 /// report whether all of them are vocabulary.
 fn only_vocabulary(pattern: &str) -> bool {
-    pattern
-        .split(['.', '\\'])
-        .all(is_vocabulary_segment)
+    pattern.split(['.', '\\']).all(is_vocabulary_segment)
 }
 
 /// Public form of the vocabulary check, so a validator can refuse a pattern
