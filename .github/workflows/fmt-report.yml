@@ -88,6 +88,8 @@ jobs:
                       print("ok", path, resp.status)
               except Exception as err:
                   body = err.read().decode()[:300] if hasattr(err, "read") else str(err)
-                  print("FAIL", path, body)
+                  msg = "PUSHFAIL " + path + " " + body.replace("\n", " ")
+                  print(msg)
+                  os.system("echo \"::error::%s\"" % msg.replace('"', "'")[:250])
           PYEOF
           python3 /tmp/push.py
