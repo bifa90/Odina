@@ -271,8 +271,8 @@ mod tests {
         // what the perf layer depends on.
         let m = Meter::now();
         assert!(m.at.is_some());
-        if m.rss_kb.is_some() {
-            assert!(m.rss_kb.unwrap() > 0, "a running process has memory");
+        if let Some(rss) = m.rss_kb {
+            assert!(rss > 0, "a running process has memory");
         }
     }
 

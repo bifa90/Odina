@@ -24,7 +24,7 @@ use std::path::{Path, PathBuf};
 use odina_core::hashing::{hash_reader, FileHashes};
 use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds, Verdict};
 use odina_report::report::{Report, REPORT_SCHEMA};
-use odina_report::{measure, pattern, pe};
+use odina_report::{measure, pe};
 
 /// The app version written into every exported report.
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -128,6 +128,10 @@ pub fn report_for(s: &Scanned) -> Report {
 
 /// Default output file. A fixed name, so the user can find it, and no
 /// timestamp in the name: the date belongs in the file, not in a path.
+///
+/// Only the instrumented path writes a file, so a default build would see
+/// this as dead code without the allow.
+#[cfg_attr(not(feature = "instrument"), allow(dead_code))]
 pub fn default_out() -> PathBuf {
     PathBuf::from("odina-check.json")
 }
