@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
 # TEMPORARY. The sandbox writing this branch has no Rust toolchain, and job
-# logs and artifacts are both unreachable from it. Check-run annotations are
-# the one readable channel, so this job dumps the rustfmt diff and the clippy
-# diagnostics into single, newline-escaped annotations. Deleted when green.
+# logs and artifacts are unreachable from it. Check-run annotations are the one
+# readable channel; they truncate at a newline and cap at 10 per step, so the
+# report is newline-joined with a marker and split across steps.
+# Deleted as soon as the branch is green.
 
 name: fmt-report
 
@@ -35,27 +36,103 @@ jobs:
       - name: collect
         run: |
           cargo fmt --all
-          git diff --no-color > /tmp/fmt.diff || true
-          cargo clippy --workspace --all-targets -- -D warnings > /tmp/c.txt 2>&1 || true
-          cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings > /tmp/i.txt 2>&1 || true
-          cat > /tmp/emit.py <<'PY'
-          import pathlib, sys
+          git diff --no-color > /tmp/fmt.txt || true
+          cargo clippy --workspace --all-targets -- -D warnings > /tmp/clippy.txt 2>&1 || true
+          cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings > /tmp/instr.txt 2>&1 || true
+          cat > /tmp/split.py <<'PY'
+          import pathlib
 
-          def esc(text):
-              return (text.replace('%', '%25')
-                          .replace('\r', '%0D')
-                          .replace('\n', '%0A'))
+          SEP = '<NL>'
+          out = pathlib.Path('/tmp/chunks')
+          out.mkdir(exist_ok=True)
 
-          def emit(tag, path, limit):
+          text = []
+          for tag, path in (('FMT', '/tmp/fmt.txt'),
+                            ('CLIPPY', '/tmp/clippy.txt'),
+                            ('INSTR', '/tmp/instr.txt')):
               p = pathlib.Path(path)
-              if not p.exists():
-                  print('::error::' + tag + ' MISSING')
-                  return
-              body = p.read_text(encoding='utf-8', errors='replace')[:limit]
-              print('::error::' + tag + ' ' + esc(body))
+              body = p.read_text(encoding='utf-8', errors='replace') if p.exists() else 'MISSING'
+              body = body.replace('\x1b', '')
+              text.append('==== ' + tag + ' ====')
+              text.extend(body.splitlines() or ['(empty)'])
 
-          emit('FMT', '/tmp/fmt.diff', 12000)
-          emit('CLIPPY', '/tmp/c.txt', 12000)
-          emit('INSTR', '/tmp/i.txt', 12000)
+          joined = SEP.join(text)
+          size = 1200
+          pieces = [joined[i:i + size] for i in range(0, len(joined), size)] or ['(empty)']
+          for i, piece in enumerate(pieces):
+              (out / ('%03d' % i)).write_text(piece.replace('\n', ' '), encoding='utf-8')
+          print('pieces', len(pieces))
           PY
-          python3 /tmp/emit.py
+          python3 /tmp/split.py
+
+      - name: emit 0
+        run: |
+          for i in 0 1 2 3 4 5 6 7 8 9; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 1
+        run: |
+          for i in 10 11 12 13 14 15 16 17 18 19; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 2
+        run: |
+          for i in 20 21 22 23 24 25 26 27 28 29; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 3
+        run: |
+          for i in 30 31 32 33 34 35 36 37 38 39; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 4
+        run: |
+          for i in 40 41 42 43 44 45 46 47 48 49; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 5
+        run: |
+          for i in 50 51 52 53 54 55 56 57 58 59; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 6
+        run: |
+          for i in 60 61 62 63 64 65 66 67 68 69; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
+
+      - name: emit 7
+        run: |
+          for i in 70 71 72 73 74 75 76 77 78 79; do
+            f=$(printf '/tmp/chunks/%%03d' "$i")
+            if [ -f "$f" ]; then
+              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
+            fi
+          done
