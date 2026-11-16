@@ -61,10 +61,21 @@ jobs:
 
 
 
-      - name: clippy, both profiles, raw
+      - name: tests
         continue-on-error: true
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1 || true
-          tail -c 1500 /tmp/c1.txt | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::C1 /'
-          cargo clippy -p odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
-          tail -c 1500 /tmp/c2.txt | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::C2 /'
+          cargo test --workspace --locked > /tmp/t1.txt 2>&1 || true
+          grep -E '^(test .*FAILED|failures:|---- .* stdout|error|assertion|thread )' /tmp/t1.txt | head -40 | tr '\n' '|' | sed 's/^/::error::T1 /'
+          tail -c 700 /tmp/t1.txt | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::T2 /'
+
+      - name: instrument tests
+        continue-on-error: true
+        run: |
+          cargo test -p odina-cli --features instrument --locked > /tmp/t3.txt 2>&1 || true
+          grep -E '^(test .*FAILED|failures:|error|assertion|thread )' /tmp/t3.txt | head -40 | tr '\n' '|' | sed 's/^/::error::T3 /'
+          tail -c 700 /tmp/t3.txt | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::T4 /'
+
+      - name: windows-style clippy
+        continue-on-error: true
+        run: |
+          RUSTFLAGS="-D warnings" cargo clippy --workspace --all-targets --locked 2>&1 | tail -c 1500 | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::W1 /'
