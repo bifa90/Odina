@@ -68,27 +68,51 @@ docs/          الموجّه الكامل (v15) · الخطوط · التعري
 fonts/         خطوط مضمّنة + حزم CDN، مع sha256 لكل ملف
 locales/       ملفات Fluent للغات العشر
 assets/logo/   الهوية البصرية (SVG · PNG · ICO)
-tools/         سكربتات البناء (MIT)
+tools/         سكربتات البناء (MIT) · tools/ci/ بوابات الجودة
+crates/        النواة (odina-core): البصمات والتقييم — بلا نظام تشغيل
+site/          مانيفست الموقع (site.json) — ما يُنشر على odinaav.web.app
 ui-preview.html  معاينة الواجهة — 7 لغات، ملف واحد
+Cargo.toml     مساحة عمل Rust (عضو واحد الآن: odina-core)
 LICENSING.md   كيف يندمج AGPL مع MIT
+NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 ```
 
 ### ابدأ من هنا
 
 | إن أردت | اقرأ |
 |---------|------|
-| فهم المشروع كاملًا | `docs/odina-agent-prompt-v16.md` |
+| فهم المشروع كاملًا | `docs/odina-agent-prompt-v17.md` |
+| **قواعد الحماية والتنفيذ** | `docs/spec/` — ست وثائق ملزمة |
 | رفع الخطوط على موقعك | `docs/cdn-fonts.md` |
 | فهم الترخيص | `LICENSING.md` |
+| **البوابات و CI** | `docs/ci.md` |
+| **كود Rust: ما بُني وحدوده** | `docs/rust-workspace.md` |
+| **نشر الموقع** | `docs/site-deploy.md` |
+| **التوقيع المجاني (0 ريال)** | `docs/code-signing.md` |
 | رؤية الواجهة | `ui-preview.html` (يحتاج سيرفر محلي) |
+| رؤية الشعار بأحجامه | `logo-review.html` |
+| **نصوص كل شاشة** | `docs/design/screens-v1.md` |
+| **ما نفعله الآن وبأي ترتيب** | **`docs/roadmap.md`** |
+
+### الوثائق الملزمة (`docs/spec/`)
+
+| الوثيقة | تحكم |
+|---------|------|
+| `protection-policy-v1.md` | الجدران الثلاثة · Pause · التصنيف · وثيقة نفي |
+| `scoring-spec-v1.md` | 10 أوزان · سقوف · Veto · عتبات · منطقة تدرّج |
+| `report-schema-v1.md` | 16 حقلًا · أنماط بدل أسماء · قائمة سوداء |
+| `usb-security-spec-v1.md` | Hot-Trigger · Device Trust · P0–P3 · القواعد الثماني |
+| `localization-spec-v1.md` | 10 لغات · الخطوط · RTL · pseudo-l10n |
+| `design-system-v1.md` | رموز مُقاسة · أزرار · وصول · RTL |
 
 ---
 
 ## الترخيص
 
-- **البرنامج:** AGPL-3.0-or-later — `LICENSE`
+- **البرنامج:** AGPL-3.0-or-later — `LICENSE` (نص خالص غير معدّل)
 - **الأدوات:** MIT — `LICENSE-TOOLS`
 - **الخطوط:** SIL OFL 1.1 — `fonts/vendor/*/LICENSE`
+- **إشعار النطاق والهوية:** `NOTICE`
 
 AGPL **لا تمنع** استخدام Odina في شركة أو مؤسسة مجانًا. القيد على التوزيع والخدمة، لا على الاستخدام. التفصيل في `LICENSING.md`.
 

@@ -20,7 +20,7 @@ wall.signatures.title = File database
 wall.signatures.on = Active
 wall.signatures.off = Inactive
 wall.behavior.title = Deep behavior scan
-wall.behavior.on = Listening
+wall.behavior.on = Active
 wall.behavior.off = Idle
 wall.proactive.title = Proactive protection
 wall.proactive.on = Active
@@ -48,8 +48,7 @@ scan.clean_result = Nothing harmful was found.
 
 ## ── Alerts — CONFIRMED (never auto-dismiss) ───────────────
 alert.confirmed.title = We stopped a known threat
-alert.confirmed.body = { $file } is a confirmed threat and has been quarantined.
-alert.confirmed.note = It was moved aside, not deleted. You can restore it.
+alert.confirmed.body = { $file } is a confirmed threat and has been isolated — not deleted.
 
 ## ── Alerts — HIGHLY SUSPICIOUS ───────────────────────────
 alert.suspicious.title = A program is trying to reach your files
@@ -59,12 +58,12 @@ alert.suspicious.note = We stopped it temporarily.
 
 ## ── Alerts — SUSPICIOUS ───────────────────────────────────
 alert.unsure.title = This program is unusual
-alert.unsure.body = { $file } is new here and behaves unusually. Do you know it?
+alert.unsure.body = { $file } is new here and behaving oddly.
 
 ## ── Alerts — PUA / CRACK (medium risk) ────────────────────
 alert.pua.title = This looks like a cracking tool
-alert.pua.body = { $file } bypasses licensing protection of paid software. You decide what runs on your device.
-alert.pua.allowed = Allow anyway
+alert.pua.body = { $file } bypasses licensing protection of paid software.
+alert.pua.allowed = Allow it
 alert.pua.quarantine = Move aside
 
 ## ── Alert buttons (exactly 2 + "why?") ────────────────────
@@ -90,14 +89,13 @@ quarantine.restore_note = The original location is kept.
 quarantine.retention = Kept for { $days } days
 
 ## ── Pause ─────────────────────────────────────────────────
-pause.title = Pause protection
+pause.title = Pause
 pause.duration.10 = 10 minutes
 pause.duration.30 = 30 minutes
 pause.duration.60 = 1 hour
-pause.duration.until_reboot = Until restart
-pause.warning = You will not be protected until { $until }.
-pause.confirm = Pause anyway
-pause.badge = Protection is paused
+pause.warning = We stop the alerts until { $until }. We are still protecting you.
+pause.confirm = Confirm
+pause.badge = Alerts paused · protection still on
 
 ## ── Status / errors ──────────────────────────────────────
 error.generic = Something went wrong. We did not change anything.
@@ -108,3 +106,45 @@ error.offline = No update yet. Protection still works.
 update.available = Update available
 update.ask = Check for updates and download them?
 update.db_age_warning = Your threat list is { $days } days old.
+
+## ── Path ──────────────────────────────────────────────
+path.label = Path
+path.copy = Copy path
+path.open_folder = Open folder
+trust.title = Trust foundations
+word.isolated = isolated
+word.temporary = temporarily
+tip.quarantine = Moved to an encrypted store — its original location is kept and it can be restored.
+tip.suspended = We stopped it now. It works again only if you allow it.
+quarantine.hint = Everything stays until you decide · never auto-deleted
+quarantine.keep = Keep it
+quarantine.delete = Delete permanently
+quarantine.delete_note = Cannot be undone. No other copy.
+quarantine.cleanup_title = In quarantine for { $days } days
+quarantine.cleanup_choose = Delete the ones I selected
+error.false_positive = We got this file wrong — fixed.
+error.locked = Could not isolate it: the file is open right now.
+
+## ── Turn protection off (user's explicit decision) ────────
+pause.confirm_disable = Turn protection off for { $minutes} minutes
+disable.title = Turn protection off
+disable.warning_title = Serious risk
+disable.body = We do not just stop the alerts — we stop protecting. No file will be scanned and no threat blocked. Your device is completely unprotected.
+disable.responsibility = This is your decision, and the responsibility is yours for that period.
+disable.choose = Choose a duration
+disable.duration.peak = Until the peak hour ends
+disable.duration.30 = 30 minutes
+disable.duration.60 = 1 hour
+disable.duration.until_reboot = Until I restart
+disable.refused = Protection cannot be turned off right now
+disable.refused_quarantine = There is a quarantined file you have not decided on yet. Review it first.
+disable.refused_scanning = A scan is running. Wait for it or stop it first.
+disable.refused_active_threat = An unresolved threat is still open. We will not turn protection off while it is.
+state.unprotected = Protection is off
+state.unprotected_until = Protection off until { $until}
+state.unprotected_badge = Unprotected — by your decision
+action.turn_off = Turn protection off
+action.turn_on = Turn protection back on
+disable.re_enable_note = You can turn protection back on at any moment — no password.
+disable.reminder = { $minutes} minutes left before protection comes back automatically.
+pause.resume_report = While alerts were paused: { $count} file(s) isolated

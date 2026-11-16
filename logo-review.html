@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Odina — مراجعة الشعار (R3)</title>
+<style>
+  :root{--bg:#F7F8FA;--surface:#fff;--text:#14181C;--text2:#4A5560;--text3:#5F6B77;
+        --border:rgba(20,24,28,.12);--navy:#0A2540;--gold:#D4AF37;--ok:#157A4B;--danger:#B3261E}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;
+       line-height:1.5;padding:28px 20px 60px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--text3);font-size:13px;margin:0 0 24px}
+  section{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+          padding:18px;margin-bottom:16px}
+  h2{font-size:14px;margin:0 0 14px;color:var(--text2);font-weight:600}
+  .row{display:flex;flex-wrap:wrap;gap:22px;align-items:flex-end}
+  .cell{text-align:center}
+  .cell .lbl{font-size:11px;color:var(--text3);margin-top:8px;font-variant-numeric:tabular-nums}
+  .box{display:grid;place-items:center;border-radius:8px}
+  .light{background:#fff;outline:1px solid var(--border)}
+  .card{background:#F7F8FA;outline:1px solid var(--border)}
+  .dark{background:#1B1D20}
+  .navy{background:var(--navy)}
+  .sand{background:#EFE0BE}
+  .grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+  .cmp{display:flex;gap:26px;align-items:flex-end;flex-wrap:wrap}
+  .bad{border:2px solid var(--danger);border-radius:8px;padding:8px}
+  .good{border:2px solid var(--ok);border-radius:8px;padding:8px}
+  .note{background:#EFF1F4;border-radius:8px;padding:10px 12px;font-size:12.5px;color:var(--text2);margin-top:14px}
+  .tray{background:#20242B;border-radius:8px;padding:6px 10px;display:flex;align-items:center;gap:8px;color:#E8ECEF;font-size:12px}
+  .taskbar{background:#1F1F1F;border-radius:8px;padding:8px 12px;display:flex;align-items:center;gap:10px}
+  .tbico{width:24px;height:24px;display:grid;place-items:center;border-radius:4px}
+  .tbico.active{background:rgba(255,255,255,.14)}
+  table{border-collapse:collapse;width:100%;font-size:12.5px}
+  th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--border)}
+  th{color:var(--text3);font-weight:600;font-size:11.5px}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:11.5px;background:#EFF1F4;padding:1px 5px;border-radius:4px}
+  .hint{font-size:12px;color:var(--text3);margin-top:10px}
+</style>
+</head>
+<body>
+
+<h1>مراجعة الشعار — البوابة R3</h1>
+<p class="sub">الشعار الحقيقي من <code>assets/logo/</code> بأحجام الاستخدام الفعلية. الملف للقراءة فقط — لا تعديل عليه.</p>
+
+<section>
+  <h2>1 · الأحجام الحقيقية على خلفية فاتحة</h2>
+  <div class="row">
+    <div class="cell"><div class="box light" style="width:120px;height:120px"><img src="assets/logo/png/light/odina-128.png" width="128" height="128" alt=""></div><div class="lbl">128</div></div>
+    <div class="cell"><div class="box light" style="width:64px;height:64px"><img src="assets/logo/png/light/odina-64.png" width="64" height="64" alt=""></div><div class="lbl">64 — المثبّت</div></div>
+    <div class="cell"><div class="box light" style="width:48px;height:48px"><img src="assets/logo/png/light/odina-48.png" width="48" height="48" alt=""></div><div class="lbl">48 — سطح المكتب</div></div>
+    <div class="cell"><div class="box light" style="width:32px;height:32px"><img src="assets/logo/png/light/odina-32.png" width="32" height="32" alt=""></div><div class="lbl">32 — القائمة</div></div>
+    <div class="cell"><div class="box light" style="width:24px;height:24px"><img src="assets/logo/png/light/odina-24.png" width="24" height="24" alt=""></div><div class="lbl">24 — شريط المهام</div></div>
+    <div class="cell"><div class="box light" style="width:16px;height:16px"><img src="assets/logo/png/light/odina-16.png" width="16" height="16" alt=""></div><div class="lbl">16 — الأيقونة الصغيرة</div></div>
+  </div>
+  <div class="note">الحجم الحاسم هو <b>16</b>. إن بقي القوس مقروءًا وهُويّة البوابة مفهومة عنده، فالشعار ناجح. وإن التصق العمود بالقوس، الحل هو ملف <code>16-light</code> البديل (بلا عمود) — لا إعادة تصميم.</div>
+</section>
+
+<section>
+  <h2>2 · الحجم الحاسم 16 بكسل — نسختان</h2>
+  <div class="cmp">
+    <div class="good">
+      <div style="display:flex;gap:10px;align-items:center">
+        <img src="assets/logo/png/light/odina-16.png" width="16" height="16" alt="">
+        <span style="font-size:12px">16 عادي (بعمود)</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+        <img src="assets/logo/png/light/odina-16.png" width="32" height="32" alt="" style="image-rendering:pixelated">
+        <span style="font-size:11px;color:#5F6B77">مكبّر 2× للفحص</span>
+      </div>
+    </div>
+    <div class="good">
+      <div style="display:flex;gap:10px;align-items:center">
+        <img src="assets/logo/svg/odina-icon-16-light.svg" width="16" height="16" alt="">
+        <span style="font-size:12px">16 مبسّط (بلا عمود)</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;margin-top:8px">
+        <img src="assets/logo/svg/odina-icon-16-light.svg" width="32" height="32" alt="" style="image-rendering:pixelated">
+        <span style="font-size:11px;color:#5F6B77">مكبّر 2× للفحص</span>
+      </div>
+    </div>
+  </div>
+  <div class="hint">قاعدة الموجّه: من 16 إلى 32 بكسل يُستخدم <code>ARCH_SMALL</code> (خط أعرض، بلا عمود).</div>
+</section>
+
+<section>
+  <h2>3 · الخلفيات الداكنة والسوداء</h2>
+  <div class="row">
+    <div class="cell"><div class="box dark" style="width:72px;height:72px"><img src="assets/logo/png/dark/odina-64.png" width="64" height="64" alt=""></div><div class="lbl">داكن · 64</div></div>
+    <div class="cell"><div class="box navy" style="width:72px;height:72px"><img src="assets/logo/png/dark/odina-64.png" width="64" height="64" alt=""></div><div class="lbl">كحلي · 64</div></div>
+    <div class="cell"><div class="box sand" style="width:72px;height:72px"><img src="assets/logo/svg/odina-icon-light.svg" width="64" height="64" alt=""></div><div class="lbl">رملي · 64</div></div>
+    <div class="cell"><div class="box light" style="width:72px;height:72px"><img src="assets/logo/svg/odina-icon-mono-black.svg" width="64" height="64" alt=""></div><div class="lbl">أحادي أسود</div></div>
+    <div class="cell"><div class="box dark" style="width:72px;height:72px"><img src="assets/logo/svg/odina-icon-mono-white.svg" width="64" height="64" alt=""></div><div class="lbl">أحادي أبيض</div></div>
+  </div>
+</section>
+
+<section>
+  <h2>4 · في سياقه الحقيقي</h2>
+  <div class="grid2">
+    <div>
+      <div class="tray"><img src="assets/logo/png/dark/odina-24.png" width="16" height="16" alt=""><span>Odina</span><span style="opacity:.6;margin-inline-start:auto">16 في صينية النظام</span></div>
+      <div class="taskbar" style="margin-top:10px">
+        <div class="tbico"><img src="assets/logo/png/dark/odina-32.png" width="20" height="20" alt=""></div>
+        <div class="tbico active"><img src="assets/logo/png/dark/odina-32.png" width="24" height="24" alt=""></div>
+        <div class="tbico"><span style="color:#9AA3AB;font-size:12px">…</span></div>
+      </div>
+      <div class="hint">شريط المهام: 24 نشط · 20 غير نشط</div>
+    </div>
+    <div>
+      <div class="box light" style="padding:16px;text-align:center;outline:1px solid var(--border)">
+        <img src="assets/logo/svg/odina-icon-light.svg" width="56" height="56" alt="">
+        <div style="font-size:15px;font-weight:600;margin-top:8px">Odina</div>
+        <div style="font-size:12px;color:var(--text3)">أنت محمي</div>
+        <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+          <div style="background:#0E7C6B;color:#fff;font-size:12px;padding:6px 14px;border-radius:6px">افحص الآن</div>
+          <div style="border:1px solid var(--border);font-size:12px;padding:6px 14px;border-radius:6px">إيقاف مؤقت</div>
+        </div>
+      </div>
+      <div class="hint">الشاشة الرئيسية: الشعار 56 بكسل</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2>5 · الأصول المتوفرة</h2>
+  <table>
+    <tr><th>الملف</th><th>المقاس</th><th>الاستخدام</th></tr>
+    <tr><td><code>odina.ico</code></td><td>16→256</td><td>أيقونة الملف التنفيذي والمثبّت</td></tr>
+    <tr><td><code>png/light/</code> · <code>png/dark/</code></td><td>16 24 32 48 64 128 256 512 1024</td><td>سطح المكتب · القوائم · الصينية</td></tr>
+    <tr><td><code>png/mono-black/</code> · <code>mono-white/</code></td><td>كاملة</td><td>طباعة · مستندات · خلفيات صعبة</td></tr>
+    <tr><td><code>svg/odina-icon-16-light.svg</code></td><td>16–32</td><td>القوس المبسّط بلا عمود</td></tr>
+    <tr><td><code>press/odina-2048-sand.png</code></td><td>2048</td><td>صحافة · متاجر · عرض</td></tr>
+  </table>
+</section>
+
+<div class="note" style="font-size:13px">
+  <b>ما يُطلب منك:</b> انظر إلى الحجم <b>16</b> في القسم 1 و2. هل ترى بوابة؟ إن نعم — R3 مغلقة. وإن لا — نُبدّل إلى النسخة المبسّطة، وهذا تعديل ملف لا إعادة تصميم.
+</div>
+
+</body>
+</html>

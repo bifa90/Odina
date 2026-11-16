@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+
+[package]
+name = "odina-core"
+description = "Hashing and scoring. No I/O beyond reading file bytes, no OS calls, no async."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+sha2 = "0.10"
+
+[dev-dependencies]

@@ -1,0 +1,64 @@
+Odina
+Copyright (C) 2026  bifa90  <https://github.com/bifa90/Odina>
+
+This file carries the scope information that does not belong inside the
+license text itself. `LICENSE` must remain the unmodified GNU AGPL v3 so
+that GitHub and other tools can identify it automatically.
+
+=====================================================================
+1. WHAT THIS PROJECT IS LICENSED UNDER
+=====================================================================
+
+  Program (source code, threat database and rules, build output,
+  installer, UI strings) .......... GNU AGPL v3.0 or later
+                                    see LICENSE
+  SPDX: AGPL-3.0-or-later
+
+  Developer tools under tools/ .... MIT
+                                    see LICENSE-TOOLS
+  SPDX: MIT
+
+  Bundled fonts under fonts/vendor/ SIL Open Font License 1.1
+                                    see each font folder's LICENSE
+  SPDX: OFL-1.1
+
+  Brand identity (the Bab Musa gate mark, the wordmark, the icon set)
+  ................................. governed by docs/design/logo-spec-v1.md
+                                    Not granted by either software license.
+
+A human-readable explanation of the split is in LICENSING.md.
+
+=====================================================================
+2. NO CLA — CONTRIBUTIONS STAY UNDER AGPL
+=====================================================================
+
+There is no Contributor License Agreement. Anyone who contributes keeps
+their copyright and licenses their contribution under AGPL-3.0-or-later.
+As a consequence the project cannot later be relicensed into a closed
+product; this is intentional, not an oversight.
+
+=====================================================================
+3. NO WARRANTY
+=====================================================================
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero
+General Public License for more details.
+
+=====================================================================
+4. HISTORY OF THIS FILE
+=====================================================================
+
+Commits before 2026-11-16 shipped an MIT `LICENSE`. Those commits remain
+MIT for anyone who obtained them; that grant cannot be withdrawn
+retroactively. AGPL-3.0-or-later governs this repository from
+2026-11-16 onward.
+
+=====================================================================
+5. NETWORK USE (AGPL SECTION 13)
+=====================================================================
+
+If you run a modified version of Odina as a network service, section 13
+requires you to offer the Corresponding Source to the users of that
+service. A "Source" link in the interface is enough.

@@ -1,0 +1,20 @@
+{
+  "$comment": "Manifest for the public site. The deploy script publishes ONLY what is listed here — there are no exclusion rules and no size heuristics. Add a file here and it ships; forget it and it does not. Paths are repo-relative and support * and ** globs.",
+  "schema": "odina-site/v1",
+  "site": "odinaav",
+  "fonts_cdn_base": "",
+  "$fonts_comment": "Leave empty to ship no fonts (the UI falls back to system fonts by design). Set it to the folder you upload to your own domain, e.g. https://example.com/odina/fonts/ — every 'fonts/vendor/' reference in the shipped HTML is rewritten to it at build time.",
+  "rename": {
+    "ui-preview.html": "index.html"
+  },
+  "include": [
+    "ui-preview.html",
+    "logo-review.html",
+    "assets/logo/svg/*.svg",
+    "assets/logo/png/*/*.png",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "$include_comment": "Deliberately excluded: fonts/ (23 MB, served from your CDN), docs/ (reading material, belongs on GitHub), tools/ (developer only), locales/ (compiled into the app), *.py and *.sh."
+}
