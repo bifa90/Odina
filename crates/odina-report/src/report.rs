@@ -14,7 +14,8 @@
 //! the test at the bottom counts them by name, so adding a seventeenth is a
 //! failing build rather than a code review nobody did.
 
-use crate::{measure::Attributes, pattern};
+use crate::measure::Attributes;
+use crate::pattern;
 
 /// The schema string a v1 report must carry.
 pub const REPORT_SCHEMA: &str = "odina-report/v1";

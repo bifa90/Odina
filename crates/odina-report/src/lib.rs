@@ -27,7 +27,7 @@ pub mod report;
 
 pub use measure::Attributes;
 pub use pattern::{name_pattern, path_pattern};
-pub use report::{Report, ReportError, REPORT_SCHEMA, MAX_REPORT_BYTES};
+pub use report::{Report, ReportError, MAX_REPORT_BYTES, REPORT_SCHEMA};
 
 /// Crate version, so a report can name the exact writer that produced it.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
