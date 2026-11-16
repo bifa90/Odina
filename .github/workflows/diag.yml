@@ -1,0 +1,36 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Temporary: formats the workspace on a runner (the dev machine has no rustfmt)
+# and records the clippy result. Deleted once the build is green.
+
+name: diag
+
+on:
+  push:
+    paths:
+      - '.github/workflows/diag.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: clippy
+        run: |
+          cargo clippy --workspace --all-targets -- -D warnings \
+            2>&1 | sed 's/\x1b\[[0-9;]*m//g' | tail -40 > diag.txt
+          echo done
+      - name: format and commit
+        run: |
+          cargo fmt --all
+          git config user.name "odina-bot"
+          git config user.email "bifa90@users.noreply.github.com"
+          git add -A
+          git commit -m "style(rust): cargo fmt + clippy report (CI)" || exit 0
+          git push
