@@ -58,12 +58,14 @@ fn scans_a_folder_and_flags_the_deceptive_name() {
         .output()
         .unwrap();
     let payload = String::from_utf8_lossy(&json.stdout);
-    let deceptive = payload
-        .split("},")
-        .find(|chunk| chunk.contains("photo.jpg.exe"))
-        .expect("the deceptive file must appear in the JSON");
+
+    // Parsing with a real idea of the structure instead of splitting on "},":
+    // an object containing "hashes":{...} ends with "}}," so a naive split cuts
+    // the object in half and every assertion after it is meaningless.
+    let deceptive = json_object_for(&payload, "photo.jpg.exe")
+        .unwrap_or_else(|| panic!("the deceptive file must appear in the JSON: {payload}"));
     assert!(
-        deceptive.contains("\"indicators\":{\"name\":0.4"),
+        deceptive.contains("\"name\":0.4"),
         "deceptive name was not measured: {deceptive}"
     );
     assert!(
@@ -132,4 +134,51 @@ fn selftest_matches_the_published_digest() {
         "got: {stdout}"
     );
     assert_eq!(out.status.code(), Some(0), "got: {stdout}");
+}
+
+/// Return the one JSON object in `payload` that mentions `needle`, using brace
+/// depth rather than string splitting. Small enough to be honest about, and it
+/// fails loudly instead of silently returning the wrong slice.
+fn json_object_for(payload: &str, needle: &str) -> Option<String> {
+    let bytes = payload.as_bytes();
+    let mut depth = 0usize;
+    let mut start = None;
+    let mut in_string = false;
+    let mut escaped = false;
+
+    for (i, &b) in bytes.iter().enumerate() {
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if b == b'\\' {
+                escaped = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            continue;
+        }
+        match b {
+            b'"' => in_string = true,
+            b'{' => {
+                if depth == 0 {
+                    start = Some(i);
+                }
+                depth += 1;
+            }
+            b'}' => {
+                depth -= 1;
+                if depth == 0 {
+                    if let Some(s) = start {
+                        let candidate = &payload[s..=i];
+                        if candidate.contains(needle) {
+                            return Some(candidate.to_string());
+                        }
+                    }
+                    start = None;
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
