@@ -42,6 +42,7 @@ jobs:
             cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 || true
           } > report.txt
           wc -l report.txt
+          head -c 3000 report.txt
 
       - name: publish the report through the contents API
         env:
