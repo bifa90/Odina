@@ -46,11 +46,11 @@ jobs:
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: build
-        run: cargo build --workspace
+        run: cargo build --workspace --locked
 
       - name: test
-        run: cargo test --workspace
+        run: cargo test --workspace --locked
 
       - name: doc
         if: matrix.os == 'ubuntu-latest'
-        run: cargo test --workspace --doc
+        run: cargo test --workspace --doc --locked
