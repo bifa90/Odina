@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
+
 """Regenerate fonts/manifests/*.json from fonts/vendor/*.
 
 Run after updating any font package. Every file gets name + size + sha256 so the
