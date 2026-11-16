@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odina — معاينة الواجهة (v1)</title>
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   Odina — UI Preview · ملف واحد قابل للتعديل
+   الخطوط المسجّلة هنا من fonts/vendor/ (محلية). عند فتح الملف من
+   القرص تأكد أن مجلد fonts/ بجانبه. الخطوط الآسيوية ← خطوط النظام.
+   الألوان والنصوص مأخوذة من docs/odina-agent-prompt-v10.md (§23.3، §36.2)
+   ══════════════════════════════════════════════════════════════════ */
+
+@font-face{font-family:'Inter';src:url('fonts/vendor/inter/inter-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Inter';src:url('fonts/vendor/inter/inter-latin-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'IBM Plex Sans Arabic';src:url('fonts/vendor/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'IBM Plex Sans Arabic';src:url('fonts/vendor/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-600-normal.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'PT Sans';src:url('fonts/vendor/pt-sans/pt-sans-cyrillic-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'PT Sans';src:url('fonts/vendor/pt-sans/pt-sans-cyrillic-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'Noto Sans Devanagari';src:url('fonts/vendor/noto-sans-devanagari/noto-sans-devanagari-devanagari-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
+
+:root{
+  --accent:#0E7C6B; --ok:#157A4B; --warn:#8A5200; --danger:#B3261E; --focus:#0B5FFF;
+  --bg:#F7F8FA; --surface:#FFFFFF; --surface2:#EFF1F4;
+  --text:#14181C; --text2:#4A5560; --text3:#6B7783;
+  --border:rgba(20,24,28,.10); --shadow:0 1px 2px rgba(10,37,64,.08),0 4px 12px rgba(10,37,64,.06);
+  --navy:#0A2540; --gold:#D4AF37;
+  --ff:'Inter','Segoe UI',system-ui,sans-serif;
+  --radius:8px; --r-sm:4px; --r-lg:12px;
+}
+html[data-theme="dark"]{
+  --bg:#1B1D20; --surface:#24272B; --surface2:#2C3035;
+  --text:#F2F4F6; --text2:#B7C0C8; --text3:#8D99A4;
+  --border:rgba(242,244,246,.12); --shadow:0 1px 2px rgba(0,0,0,.4);
+  --accent:#3FC7B0; --ok:#4ED08A; --warn:#E0A33A; --danger:#FF7B72; --focus:#8AB4FF;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ff);line-height:1.45;-webkit-font-smoothing:antialiased}
+
+/* اتجاهات اللغة */
+html[dir="rtl"] body{line-height:1.55}
+[data-lang="ja"]{--ff:'Yu Gothic UI','Meiryo UI','Noto Sans JP',system-ui,sans-serif;line-height:1.6}
+[data-lang="zh-Hans"]{--ff:'Microsoft YaHei UI','Noto Sans SC',system-ui,sans-serif;line-height:1.6}
+[data-lang="zh-Hant"]{--ff:'Microsoft JhengHei','Noto Sans TC',system-ui,sans-serif;line-height:1.6}
+[data-lang="ar"]{--ff:'IBM Plex Sans Arabic','Segoe UI',system-ui,sans-serif}
+[data-lang="ru"]{--ff:'PT Sans','Segoe UI',system-ui,sans-serif}
+[data-lang="hi"]{--ff:'Noto Sans Devanagari','Nirmala UI',system-ui,sans-serif;line-height:1.7}
+[data-lang="en"],[data-lang="es"],[data-lang="de"],[data-lang="fr"],[data-lang="pt-BR"]{--ff:'Inter','Segoe UI',system-ui,sans-serif}
+
+/* شريط الأدوات العلوي */
+.topbar{position:sticky;top:0;z-index:50;display:flex;gap:12px;align-items:center;
+  padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.2px}
+.brand svg{display:block}
+.spacer{flex:1}
+select,button{font-family:inherit;font-size:14px}
+select{padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);cursor:pointer}
+.tog{padding:8px 14px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);cursor:pointer;font-weight:600}
+.tog:hover{border-color:var(--accent)}
+
+.wrap{max-width:1080px;margin:0 auto;padding:28px 20px 80px}
+.sec{margin-bottom:44px}
+.sec>h2{font-size:20px;font-weight:600;margin:0 0 4px}
+.sec>p.hint{color:var(--text3);font-size:13px;margin:0 0 18px}
+
+/* ═══ الشاشة الرئيسية ═══ */
+.app{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  box-shadow:var(--shadow);padding:26px;max-width:520px;margin:0 auto}
+.shield{display:flex;flex-direction:column;align-items:center;gap:8px;padding:10px 0 22px}
+.shield .label{font-size:22px;font-weight:600}
+.shield .sub{font-size:13px;color:var(--text2)}
+
+.walls{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);padding-top:8px}
+.wall{display:flex;align-items:center;gap:12px;padding:12px 6px;border-radius:var(--r-sm)}
+.wall:hover{background:var(--surface2)}
+.wall .ico{width:20px;height:20px;flex:0 0 20px;display:grid;place-items:center}
+.wall .nm{flex:1;font-size:14px}
+.wall .st{font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;
+  border:1px solid currentColor;white-space:nowrap}
+.st.on{color:var(--ok)} .st.idle{color:var(--text3)} .st.off{color:var(--warn)}
+.pill{width:34px;height:18px;border-radius:99px;background:var(--ok);position:relative;flex:0 0 34px}
+.pill.idle{background:var(--text3);opacity:.4}
+.pill::after{content:'';position:absolute;top:2px;inset-inline-end:2px;width:14px;height:14px;border-radius:50%;background:#fff}
+.pill.idle::after{inset-inline-end:auto;inset-inline-start:2px}
+
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.btn{flex:1;min-height:44px;padding:11px 16px;border-radius:var(--r-sm);border:1px solid transparent;
+  font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.primary{background:var(--accent);color:#fff}
+html[data-theme="dark"] .btn.primary{background:var(--accent);color:#0B1416}
+.btn.ghost{background:transparent;border-color:var(--border);color:var(--text)}
+.btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.btn.danger{background:var(--danger);color:#fff}
+html[data-theme="dark"] .btn.danger{color:#0B1416}
+
+/* ═══ التنبيهات ═══ */
+.alerts{display:flex;flex-direction:column;gap:14px;max-width:560px;margin:0 auto}
+.alert{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:16px 18px;box-shadow:var(--shadow);border-inline-start:4px solid var(--accent)}
+.alert.confirmed{border-inline-start-color:var(--danger)}
+.alert.high{border-inline-start-color:var(--danger)}
+.alert.medium{border-inline-start-color:var(--warn)}
+.alert.low{border-inline-start-color:var(--accent)}
+.alert .t{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center}
+.alert .b{color:var(--text2);font-size:14px;margin:6px 0 0}
+.alert .why{font-size:12px;color:var(--text3);margin-top:8px;text-decoration:underline;cursor:pointer}
+.alert .row{display:flex;gap:10px;margin-top:14px;align-items:center}
+.alert .row .btn{flex:0 0 auto;min-width:104px}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
+.badge.conf{color:var(--danger)} .badge.med{color:var(--warn)} .badge.low{color:var(--ok)}
+
+/* ═══ USB ═══ */
+.usb{max-width:520px;margin:0 auto;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:18px 20px;box-shadow:var(--shadow)}
+.bar{height:8px;border-radius:99px;background:var(--surface2);margin:12px 0 8px;overflow:hidden}
+.bar>i{display:block;height:100%;width:34%;background:var(--accent);border-radius:99px}
+
+/* ═══ الألوان ═══ */
+.swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.sw{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.sw .chip{height:52px}
+.sw .meta{padding:8px 10px;font-size:12px}
+.sw .meta b{display:block;font-size:13px}
+.sw .meta span{color:var(--text3)}
+
+/* ═══ الخطوط ═══ */
+.fonts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.fcard .nm{font-size:12px;color:var(--text3);margin-bottom:6px;font-family:'Inter',sans-serif}
+.fcard .smp{font-size:19px;line-height:1.5}
+.fcard .tag{display:inline-block;margin-top:8px;font-size:11px;padding:2px 8px;border-radius:99px;
+  border:1px solid var(--border);color:var(--text3);font-family:'Inter',sans-serif}
+
+
+
+
+
+/* ═══ نظام الأيقونات (SVG · ليست إيموجي) ═══ */
+.i{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.75;
+  stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;display:inline-block}
+.i.sm{width:15px;height:15px;stroke-width:1.9;vertical-align:-2px}
+.i.lg{width:22px;height:22px}
+.wall .ico .i{width:19px;height:19px;color:var(--text2)}
+.tcard .ticon .i{width:21px;height:21px;color:var(--accent);stroke-width:1.7}
+.alert .t .i{width:20px;height:20px;stroke-width:1.85}
+.alert.confirmed .t .i{color:var(--danger)}
+.alert.high .t .i{color:var(--warn)}
+.alert.medium .t .i{color:var(--warn)}
+.alert.low .t .i{color:var(--info, var(--accent))}
+.pcopy .i{width:15px;height:15px}
+.sec h2 .i{width:19px;height:19px;color:var(--text3);margin-inline-end:6px}
+
+/* ═══ وضع العرض الحقيقي ═══ */
+body.real .review-only{display:none}
+body.real .wrap{max-width:560px;padding-top:18px}
+body.real .hint{display:none}
+body.real .sec + .sec{margin-top:26px}
+.tog.on{background:var(--accent);color:#fff;border-color:transparent}
+/* ═══ أسس الثقة ═══ */
+.trustgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px}
+.tcard{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.ticon{font-size:18px;line-height:1}
+.tt{font-weight:600;font-size:14px;margin:6px 0 4px}
+.td{font-size:12.5px;color:var(--text2);line-height:1.6}
+
+/* ═══ شرح عند الطلب (tooltip) ═══ */
+.tip{border-bottom:1px dashed var(--text3);cursor:help;color:var(--text3);font-size:12px;
+  position:relative;padding-bottom:1px}
+.tip:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:2px}
+.tip:hover::after,.tip:focus::after{content:attr(data-tip);position:absolute;z-index:60;
+  inset-inline-start:0;bottom:calc(100% + 8px);width:max-content;max-width:280px;
+  background:var(--text);color:var(--bg);font-size:12px;line-height:1.5;padding:7px 10px;
+  border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.22);white-space:normal;font-weight:400}
+
+/* ═══ صندوق العزل ═══ */
+.qitem{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--border)}
+.qitem:last-child{border-bottom:0}
+.qmain{flex:1;min-width:0}
+.qname{font-weight:600;font-size:14px}
+.qpath{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:11.5px;color:var(--text3);
+  direction:ltr;unicode-bidi:isolate;text-align:left;word-break:break-all;margin:2px 0 4px}
+.qmeta{font-size:12px;color:var(--text2)}
+.qacts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn.sm{min-height:34px;padding:6px 12px;font-size:13px;flex:0 0 auto}
+@media (max-width:560px){.qitem{flex-direction:column}.qacts{justify-content:flex-start}}
+
+/* ═══ مسار الملف داخل التنبيه ═══ */
+.pathrow{margin:10px 0 0;border:1px solid var(--border);border-radius:var(--r-sm);
+  background:var(--surface2);padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
+.pathrow .plabel{font-size:11px;font-weight:600;color:var(--text3);white-space:nowrap;padding-top:2px}
+.pathrow .pval{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:12.5px;
+  color:var(--text);direction:ltr;unicode-bidi:isolate;text-align:left;word-break:break-all;
+  flex:1;line-height:1.5}
+.pathrow .pcopy{background:none;border:0;cursor:pointer;color:var(--text3);font-size:14px;
+  padding:0 2px;line-height:1}
+.pathrow .pcopy:hover{color:var(--accent)}
+.pathactions{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.linkbtn{background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--text2);
+  text-decoration:underline;cursor:pointer}
+.linkbtn:hover{color:var(--accent)}
+
+.note{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+  padding:14px 16px;font-size:13px;color:var(--text2);max-width:760px}
+.note b{color:var(--text)}
+code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2);
+  padding:1px 5px;border-radius:3px}
+</style>
+</head>
+<body data-lang="ar">
+
+<div class="topbar">
+  <div class="brand">
+    <svg width="24" height="24" viewBox="0 0 1024 1024" aria-hidden="true">
+      <path d="M512 176 C622 214 788 320 788 500 L788 688 C788 794 664 852 512 852 C360 852 236 794 236 688 L236 500 C236 320 402 214 512 176 Z"
+            fill="none" stroke="var(--navy)" stroke-width="112" stroke-linejoin="round" stroke-linecap="round"
+            transform="translate(512 512) scale(1.13) translate(-512 -512)"/>
+      <path d="M476 592 Q476 566 502 566 L522 566 Q548 566 548 592 L548 756 L476 756 Z"
+            fill="var(--gold)" transform="translate(512 512) scale(1.13) translate(-512 -512)"/>
+    </svg>
+    <span>Odina</span>
+  </div>
+  <div class="spacer"></div>
+  <label style="font-size:13px;color:var(--text3)" for="lang">اللغة</label>
+  <select id="lang" aria-label="Language">
+    <option value="ar">العربية (ar)</option>
+    <option value="en">English (en)</option>
+    <option value="zh-Hans">简体中文 (zh-Hans)</option>
+    <option value="ja">日本語 (ja)</option>
+    <option value="es">Español (es)</option>
+    <option value="ru">Русский (ru)</option>
+    <option value="hi">हिन्दी (hi)</option>
+  </select>
+  <button class="tog" id="theme">الوضع الداكن</button>
+  <button class="tog" id="mode">كل الأقسام</button>
+  <button class="tog" id="popout" title="open standalone"><svg class="i sm"><use href="#i-external"/></svg></button>
+</div>
+
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <!-- ══ أيقونات Odina · 24×24 · stroke 1.75 · currentColor ══ -->
+  <symbol id="i-db" viewBox="0 0 24 24"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v6c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/><path d="M5 12v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2.5-6 4 12L16 12h5"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.2-2.9 7.9-7 9-4.1-1.1-7-4.8-7-9V6l7-3z"/></symbol>
+  <symbol id="i-shield-check" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.2-2.9 7.9-7 9-4.1-1.1-7-4.8-7-9V6l7-3z"/><path d="M8.8 12.1l2.2 2.2 4.2-4.4"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
+  <symbol id="i-square" viewBox="0 0 24 24"><rect x="4.5" y="4.5" width="15" height="15" rx="3.5"/></symbol>
+  <symbol id="i-calm" viewBox="0 0 24 24"><path d="M3 10c3-3.4 6-3.4 9 0s6 3.4 9 0"/><path d="M3 16.5c3-3.4 6-3.4 9 0s6 3.4 9 0" opacity=".55"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M6.5 20h11"/><path d="M4 8h16"/><path d="M4 8l-2.2 5h4.4L4 8z"/><path d="M20 8l-2.2 5h4.4L20 8z"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><path d="M8.2 3h7.6L21 8.2v7.6L15.8 21H8.2L3 15.8V8.2L8.2 3z"/><path d="M12 7.8v5.4"/><circle cx="12" cy="16.4" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.8l8.4 15.2H3.6L12 3.8z"/><path d="M12 9.5v4.4"/><circle cx="12" cy="16.6" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="8" r="4"/><path d="M10.9 10.9L20 20"/><path d="M17 17l2-2"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 11v5.2"/><circle cx="12" cy="8.1" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2.4"/><path d="M15.5 5.5H7.4A1.9 1.9 0 0 0 5.5 7.4v8.1"/></symbol>
+  <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14v4.6A1.4 1.4 0 0 1 16.6 20H5.4A1.4 1.4 0 0 1 4 18.6V7.4A1.4 1.4 0 0 1 5.4 6H10"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11"/><path d="M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 21V6"/><path d="M9 9l3-3 3 3"/><rect x="10" y="17" width="4" height="4" rx="1"/><path d="M12 12.5l-4-2V8"/><circle cx="8" cy="7" r="1.6"/></symbol>
+  <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M4 12h15"/><path d="M13.5 6.5L20 12l-6.5 5.5"/></symbol>
+  <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.6A1.6 1.6 0 0 1 5.1 6h4l2 2.4h6.8a1.6 1.6 0 0 1 1.6 1.6v7.4a1.6 1.6 0 0 1-1.6 1.6H5.1a1.6 1.6 0 0 1-1.6-1.6V7.6z"/></symbol>
+</svg>
+
+<div class="wrap">
+
+  <!-- ══════════ 1. الشاشة الرئيسية ══════════ -->
+  <section class="sec">
+    <h2><svg class="i"><use href="#i-shield"/></svg><span data-k="sec.main">1 · الشاشة الرئيسية</span></h2>
+    <p class="hint" data-k="sec.main.hint">≤ 8 عناصر · 3 جدران · زرّان · لا مصطلحات تقنية</p>
+
+    <div class="app">
+      <div class="shield">
+        <svg width="76" height="76" viewBox="0 0 1024 1024" aria-hidden="true">
+          <path d="M512 176 C622 214 788 320 788 500 L788 688 C788 794 664 852 512 852 C360 852 236 794 236 688 L236 500 C236 320 402 214 512 176 Z"
+                fill="none" stroke="var(--ok)" stroke-width="104" stroke-linejoin="round" stroke-linecap="round"/>
+          <path d="M452 520 L494 562 L576 470" fill="none" stroke="var(--ok)" stroke-width="58"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="label" data-k="state.protected">أنت محمي</div>
+        <div class="sub" data-k="shield.sub">3 جدران فعّالة · قاعدة التهديدات محدّثة</div>
+      </div>
+
+      <div class="walls">
+        <div class="wall">
+          <span class="ico"><svg class="i"><use href="#i-db"/></svg></span>
+          <span class="nm" data-k="wall.signatures.title">قاعدة بيانات الملفات</span>
+          <span class="st on" data-k="wall.signatures.on">فعّال</span>
+          <span class="pill"></span>
+        </div>
+        <div class="wall">
+          <span class="ico"><svg class="i"><use href="#i-pulse"/></svg></span>
+          <span class="nm" data-k="wall.behavior.title">الفحص السلوكي العميق</span>
+          <span class="st idle" data-k="wall.behavior.off">خامل</span>
+          <span class="pill idle"></span>
+        </div>
+        <div class="wall">
+          <span class="ico"><svg class="i"><use href="#i-shield-check"/></svg></span>
+          <span class="nm" data-k="wall.proactive.title">الحماية الاستباقية</span>
+          <span class="st on" data-k="wall.proactive.on">فعّال</span>
+          <span class="pill"></span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" data-k="action.scan_now">افحص الآن</button>
+        <button class="btn ghost" data-k="action.pause">إيقاف مؤقت</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 1b. أسس الثقة ══════════ -->
+  <section class="sec review-only">
+    <h2 data-k="trust.title">أسس الثقة — دستور الواجهة</h2>
+    <p class="hint" data-k="trust.sub">كل شاشة تُقاس على هذه الأربعة. وعند التعارض: الأمان ← عدم الإزعاج ← الوضوح ← البساطة ← الجمال.</p>
+    <div class="trustgrid">
+      <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-eye"/></svg></div><div class="tt" data-k="trust.1t">الوضوح</div>
+        <div class="td" data-k="trust.1d">نقول ما حدث، لا ما هو التقنية. جملة واحدة. ولا «تمّ» بلا سبب.</div></div>
+      <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-square"/></svg></div><div class="tt" data-k="trust.2t">البساطة</div>
+        <div class="td" data-k="trust.2d">زرّان كحد أقصى. خيار واحد أساسي. صفر إعداد مطلوب.</div></div>
+      <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-calm"/></svg></div><div class="tt" data-k="trust.3t">الطمأنينة</div>
+        <div class="td" data-k="trust.3d">بلا حدث = بلا نافذة. ≤ 3 إشعارات يوميًا. لا Modal أبدًا.</div></div>
+      <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-scale"/></svg></div><div class="tt" data-k="trust.4t">معرفة العواقب</div>
+        <div class="td" data-k="trust.4d">عاقبة كل زر مكتوبة قبله لا بعده. والخيار الآمن هو الظاهر.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 2. التنبيهات ══════════ -->
+  <section class="sec review-only">
+    <h2 data-k="sec.alerts">2 · التنبيهات</h2>
+    <p class="hint" data-k="sec.alerts.hint">نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب</p>
+
+    <div class="alerts">
+      <!-- مؤكد: لا حذف، لا استرجاع — فقط عرض صندوق العزل -->
+      <div class="alert confirmed">
+        <div class="t"><svg class="i"><use href="#i-stop"/></svg><span><span class="badge conf" data-k="badge.confirmed">مؤكد</span>&nbsp;
+          <span data-k="alert.confirmed.title">أوقفنا تهديدًا معروفًا</span></span></div>
+        <p class="b" data-k="alert.confirmed.body">عُزل PhotoTool.exe — لم يُحذف.</p>
+        <div class="pathrow">
+          <span class="plabel" data-k="path.label">المسار</span>
+          <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\PhotoTool.exe</span>
+          <button class="pcopy" title="copy" data-copy="C:\Users\Ahmed\Downloads\PhotoTool.exe"><svg class="i"><use href="#i-copy"/></svg></button>
+        </div>
+        <div class="row">
+          <button class="btn primary" data-k="alert.confirmed.cta">فتح صندوق العزل</button>
+          <span class="tip" tabindex="0" data-tipkey="tip.quarantine" data-k="word.isolated">معزول</span>
+          <span class="why" data-k="action.why">لماذا؟</span>
+        </div>
+      </div>
+
+      <!-- مشتبه بشدة: قرار فوري، زرّان -->
+      <div class="alert high">
+        <div class="t"><svg class="i"><use href="#i-alert"/></svg><span><span class="badge conf" data-k="badge.high">مشتبه بشدة</span>&nbsp;
+          <span data-k="alert.suspicious.title">برنامج يحاول الوصول إلى ملفاتك</span></span></div>
+        <p class="b" data-k="alert.suspicious.body">PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.</p>
+        <div class="row">
+          <button class="btn ghost" data-k="button.allow">السماح</button>
+          <button class="btn primary" data-k="button.block">المنع</button>
+          <span class="tip" tabindex="0" data-tipkey="tip.suspended" data-k="word.temporary">مؤقتًا</span>
+          <span class="why" data-k="action.why">لماذا؟</span>
+        </div>
+      </div>
+
+      <!-- خطر متوسط -->
+      <div class="alert medium">
+        <div class="t"><svg class="i"><use href="#i-key"/></svg><span><span class="badge med" data-k="badge.pua">خطر متوسط</span>&nbsp;
+          <span data-k="alert.pua.title">يبدو أنها أداة كسر حماية</span></span></div>
+        <p class="b" data-k="alert.pua.body">setup-key.exe يتجاوز حماية ترخيص برنامج مدفوع.</p>
+        <div class="pathrow">
+          <span class="plabel" data-k="path.label">المسار</span>
+          <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</span>
+          <button class="pcopy" title="copy" data-copy="C:\Users\Ahmed\Downloads\setup-key.exe"><svg class="i"><use href="#i-copy"/></svg></button>
+        </div>
+        <div class="row">
+          <button class="btn ghost" data-k="alert.pua.quarantine">انقله جانبًا</button>
+          <button class="btn primary" data-k="alert.pua.allowed">اسمح به</button>
+          <span class="why" data-k="action.why">لماذا؟</span>
+        </div>
+      </div>
+
+      <!-- مشتبه -->
+      <div class="alert low">
+        <div class="t"><svg class="i"><use href="#i-info"/></svg><span><span class="badge low" data-k="badge.low">مشتبه</span>&nbsp;
+          <span data-k="alert.unsure.title">هذا البرنامج غير مألوف</span></span></div>
+        <p class="b" data-k="alert.unsure.body">newapp.exe جديد هنا ويتصرف بغرابة.</p>
+        <div class="row">
+          <button class="btn ghost" data-k="button.allow">السماح</button>
+          <button class="btn primary" data-k="button.block">المنع</button>
+          <span class="why" data-k="action.why">لماذا؟</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="note" style="margin-top:16px">
+      <b data-k="tips.legend">الشرح عند الطلب:</b>
+      <span data-k="tips.body">مرّر المؤشر فوق الكلمة <u>المسطّرة</u> لترى سطرًا واحدًا · اضغطها ليفتح بحثًا شارحًا بلغتك (Google · Baidu · Yahoo Japan · Yandex).</span>
+    </div>
+  </section>
+
+  <!-- ══════════ 2b. صندوق العزل ══════════ -->
+  <section class="sec review-only">
+    <h2><svg class="i"><use href="#i-folder"/></svg><span data-k="quarantine.title">3 · صندوق العزل — هنا فقط يوجد «حذف»</span></h2>
+    <p class="hint" data-k="quarantine.hint">كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا</p>
+
+    <div class="app" style="max-width:620px">
+      <div class="qitem">
+        <div class="qmain">
+          <div class="qname">PhotoTool.exe</div>
+          <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\PhotoTool.exe</div>
+          <div class="qmeta"><span data-k="q.reason1">تهديد مؤكد</span> · <span data-k="quarantine.retention">يُحفظ 30 يومًا</span></div>
+        </div>
+        <div class="qacts">
+          <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
+          <button class="btn ghost sm" data-k="quarantine.restore">استرجاع</button>
+          <button class="btn danger sm" data-k="quarantine.delete">حذف نهائي</button>
+        </div>
+      </div>
+
+      <div class="qitem">
+        <div class="qmain">
+          <div class="qname">setup-key.exe</div>
+          <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</div>
+          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention">يُحفظ 30 يومًا</span></div>
+        </div>
+        <div class="qacts">
+          <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
+          <button class="btn ghost sm" data-k="quarantine.restore">استرجاع</button>
+          <button class="btn danger sm" data-k="quarantine.delete">حذف نهائي</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 3. USB ══════════ -->
+  <section class="sec">
+    <h2><svg class="i"><use href="#i-usb"/></svg><span data-k="sec.usb">3 · تنبيه USB</span></h2>
+    <p class="hint" data-k="sec.usb.hint">شريط تقدم واحد + مرحلة واحدة · RTL-aware</p>
+    <div class="usb">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <strong style="font-size:14px;display:flex;align-items:center;gap:8px"><svg class="i" style="color:var(--text2)"><use href="#i-usb"/></svg><span data-k="usb.scanning">جارٍ فحص USB_32GB…</span></strong>
+        <span style="font-size:13px;color:var(--text3)" data-k="usb.priority_done">تم فحص الملفات الخطرة</span>
+      </div>
+      <div class="bar"><i></i></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3)">
+        <span>34%</span><span data-k="usb.stage">P0 · الملفات الخطرة في الجذر</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 4. اللوحة اللونية ══════════ -->
+  <section class="sec review-only">
+    <h2 data-k="sec.color">4 · اللوحة اللونية (مقاسة WCAG)</h2>
+    <p class="hint" data-k="sec.color.hint">كل قيمة تحمل نسبة تباينها مقابل الخلفية الحالية</p>
+    <div class="swatches" id="swatches"></div>
+  </section>
+
+  <!-- ══════════ 5. الخطوط ══════════ -->
+  <section class="sec review-only">
+    <h2 data-k="sec.fonts">5 · الخطوط لكل لغة</h2>
+    <p class="hint" data-k="sec.fonts.hint">400 و600 فقط · خطوط النظام بديلًا فوريًا للآسيوية</p>
+    <div class="fonts">
+      <div class="fcard" style="font-family:'Inter',sans-serif">
+        <div class="nm">Inter · en/es/de/fr/pt-BR</div>
+        <div class="smp">Aa Bb 0123456789 — Il1 O0</div>
+        <span class="tag">bundled 0.05 MB</span>
+      </div>
+      <div class="fcard" style="font-family:'IBM Plex Sans Arabic',sans-serif">
+        <div class="nm">IBM Plex Sans Arabic · ar</div>
+        <div class="smp" dir="rtl">أودينا — أنت محمي ١٢٣٤٥</div>
+        <span class="tag">bundled 0.08 MB</span>
+      </div>
+      <div class="fcard" style="font-family:'PT Sans',sans-serif">
+        <div class="nm">PT Sans · ru</div>
+        <div class="smp">Вы защищены — Ёё Йй 0123</div>
+        <span class="tag">bundled 0.14 MB</span>
+      </div>
+      <div class="fcard" style="font-family:'Noto Sans Devanagari',sans-serif">
+        <div class="nm">Noto Sans Devanagari · hi</div>
+        <div class="smp">आप सुरक्षित हैं — क्ष त्र ज्ञ</div>
+        <span class="tag">bundled 0.10 MB</span>
+      </div>
+      <div class="fcard" style="font-family:'Microsoft YaHei UI','Noto Sans SC',sans-serif">
+        <div class="nm">YaHei (نظام) / Noto Sans SC · zh-Hans</div>
+        <div class="smp">你受到保护 — 文件数据库 0123</div>
+        <span class="tag">system <svg class="i sm" style="vertical-align:-3px"><use href="#i-arrow-r"/></svg> CDN 6.83 MB</span>
+      </div>
+      <div class="fcard" style="font-family:'Yu Gothic UI','Noto Sans JP',sans-serif">
+        <div class="nm">Yu Gothic (نظام) / Noto Sans JP · ja</div>
+        <div class="smp">保護されています — ファイル 0123</div>
+        <span class="tag">system → CDN 7.82 MB</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 6. ملاحظات ══════════ -->
+  <section class="sec review-only">
+    <h2 data-k="sec.notes">6 · ملاحظات للمراجعة</h2>
+    <div class="note">
+      <p style="margin:0 0 8px"><b data-k="notes.1t">تبديل اللغة:</b>
+        <span data-k="notes.1b">يغيّر الاتجاه والتخطيط فورًا، والأرقام تبقى لاتينية في النسب والبصمات.</span></p>
+      <p style="margin:0 0 8px"><b data-k="notes.2t">الأزرار:</b>
+        <span data-k="notes.2b">«السماح» و«المنع» بترتيب منطقي ثابت؛ RTL يقلب الموضع البصري لا الدور.</span></p>
+      <p style="margin:0 0 8px"><b data-k="notes.3t">الآسيوية:</b>
+        <span data-k="notes.3b">تُعرض هنا بخط النظام. بعد تنزيل حزمة CDN تتحول إلى Noto بلا إعادة تشغيل.</span></p>
+      <p style="margin:0 0 8px"><b data-k="notes.4t">الخطوط:</b>
+        <span data-k="notes.4b">هذا الملف يحمّل الخطوط من مجلد <code>fonts/vendor/</code> المجاور — إن لم تظهر فافتحه عبر سيرفر محلي لا بـ file://.</span></p>
+      <p style="margin:0"><b data-k="notes.5t">ما ينقص هذه المعاينة:</b>
+        <span data-k="notes.5b">الـlogotype، وأيقونة التطبيق داخل شريط المهام، وحالات الخطأ — تُراجع منفصلة (R3).</span></p>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ══════════ النصوص — مأخوذة من locales/*.ftl ══════════ */
+const T = {
+  ar: {
+    'trust.title':'أسس الثقة — دستور الواجهة','trust.sub':'كل شاشة تُقاس على هذه الأربعة. وعند التعارض: الأمان ← عدم الإزعاج ← الوضوح ← البساطة ← الجمال.','trust.1t':'الوضوح','trust.1d':'نقول ما حدث، لا ما هو التقنية. جملة واحدة. ولا «تمّ» بلا سبب.','trust.2t':'البساطة','trust.2d':'زرّان كحد أقصى. خيار واحد أساسي. صفر إعداد مطلوب.','trust.3t':'الطمأنينة','trust.3d':'بلا حدث = بلا نافذة. ≤ 3 إشعارات يوميًا. لا Modal أبدًا.','trust.4t':'معرفة العواقب','trust.4d':'عاقبة كل زر مكتوبة قبله لا بعده. والخيار الآمن هو الظاهر.',
+    'alert.confirmed.cta':'فتح صندوق العزل','word.isolated':'معزول','word.temporary':'مؤقتًا','tip.quarantine':'نقلناه إلى مخزن مشفّر — مكانه الأصلي محفوظ ويمكن استرجاعه.','tip.suspended':'أوقفناه الآن. سيعود للعمل إذا سمحت له.','quarantine.keep':'احتفظ به','quarantine.delete':'حذف نهائي','quarantine.hint':'كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا','quarantine.title':'3 · صندوق العزل — هنا فقط يوجد «حذف»','q.reason1':'تهديد مؤكد','q.reason2':'أداة كسر حماية','tips.legend':'الشرح عند الطلب:','tips.body':'مرّر المؤشر فوق الكلمة المسطّرة لترى سطرًا واحدًا · اضغطها ليفتح بحثًا شارحًا بلغتك (Google · Baidu · Yahoo Japan · Yandex).','sec.alerts':'2 · التنبيهات','sec.alerts.hint':'نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب',
+    'path.label':'المسار','path.open_folder':'فتح المجلد','path.copy':'نسخ المسار',
+    'sec.main':'1 · الشاشة الرئيسية','sec.main.hint':'≤ 8 عناصر · 3 جدران · زرّان · لا مصطلحات تقنية',
+    'state.protected':'أنت محمي','shield.sub':'3 جدران فعّالة · قاعدة التهديدات محدّثة',
+    'wall.signatures.title':'قاعدة بيانات الملفات','wall.signatures.on':'فعّال',
+    'wall.behavior.title':'الفحص السلوكي العميق','wall.behavior.off':'خامل',
+    'wall.proactive.title':'الحماية الاستباقية','wall.proactive.on':'فعّال',
+    'action.scan_now':'افحص الآن','action.pause':'إيقاف مؤقت','action.why':'لماذا؟',
+    'sec.alerts':'2 · التنبيهات الأربعة','sec.alerts.hint':'زرّان + «لماذا؟» · اللون لا ينقل المعلومة وحده',
+    'badge.confirmed':'مؤكد','badge.high':'مشتبه بشدة','badge.pua':'خطر متوسط','badge.low':'مشتبه',
+    'alert.confirmed.title':'أوقفنا تهديدًا معروفًا','alert.confirmed.body':'عُزل PhotoTool.exe — لم يُحذف.',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'برنامج يحاول الوصول إلى ملفاتك','alert.suspicious.body':'PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.',
+    'alert.pua.title':'يبدو أنها أداة كسر حماية','alert.pua.body':'setup-key.exe يتجاوز حماية ترخيص برنامج مدفوع.',
+    'alert.pua.quarantine':'انقله جانبًا','alert.pua.allowed':'اسمح به',
+    'alert.unsure.title':'هذا البرنامج غير مألوف','alert.unsure.body':'newapp.exe جديد هنا ويتصرف بغرابة.',
+    'button.restore':'استرجاع','button.remove_forever':'حذف نهائي','button.allow':'السماح','button.block':'المنع',
+    'sec.usb':'3 · تنبيه USB','sec.usb.hint':'شريط تقدم واحد + مرحلة واحدة · RTL-aware',
+    'usb.scanning':'جارٍ فحص USB_32GB…','usb.priority_done':'تم فحص الملفات الخطرة','usb.stage':'P0 · الملفات الخطرة في الجذر',
+    'sec.color':'4 · اللوحة اللونية (مقاسة WCAG)','sec.color.hint':'كل قيمة تحمل نسبة تباينها مقابل الخلفية الحالية',
+    'sec.fonts':'5 · الخطوط لكل لغة','sec.fonts.hint':'400 و600 فقط · خطوط النظام بديلًا فوريًا للآسيوية',
+    'sec.notes':'6 · ملاحظات للمراجعة',
+    'notes.1t':'تبديل اللغة:','notes.1b':'يغيّر الاتجاه والتخطيط فورًا، والأرقام تبقى لاتينية في النسب والبصمات.',
+    'notes.2t':'الأزرار:','notes.2b':'«السماح» و«المنع» بترتيب منطقي ثابت؛ RTL يقلب الموضع البصري لا الدور.',
+    'notes.3t':'الآسيوية:','notes.3b':'تُعرض هنا بخط النظام. بعد تنزيل حزمة CDN تتحول إلى Noto بلا إعادة تشغيل.',
+    'notes.4t':'الخطوط:','notes.4b':'هذا الملف يحمّل الخطوط من مجلد fonts/vendor/ المجاور — إن لم تظهر فافتحه عبر سيرفر محلي لا بـ file://.',
+    'notes.5t':'ما ينقص هذه المعاينة:','notes.5b':'الـlogotype، وأيقونة التطبيق داخل شريط المهام، وحالات الخطأ — تُراجع منفصلة (R3).'
+  },
+  en: {
+    'trust.title':'Trust foundations — the UI constitution','trust.sub':'Every screen is measured against these four. On conflict: safety → no interruption → clarity → simplicity → beauty.','trust.1t':'Clarity','trust.1d':'We say what happened, not how it works. One sentence. No “done” without a reason.','trust.2t':'Simplicity','trust.2d':'Two buttons at most. One primary action. Zero setup required.','trust.3t':'Calm','trust.3d':'No event = no window. ≤ 3 notifications a day. Never a modal.','trust.4t':'Known consequences','trust.4d':'Every button states its outcome before you press it. The safe choice is the visible one.',
+    'alert.confirmed.cta':'Open quarantine','word.isolated':'isolated','word.temporary':'temporarily','tip.quarantine':'Moved to an encrypted store — its original location is kept and it can be restored.','tip.suspended':'We stopped it now. It works again only if you allow it.','quarantine.keep':'Keep it','quarantine.delete':'Delete permanently','quarantine.hint':'everything stays until you decide · never auto-deleted','quarantine.title':'3 · Quarantine — the only place with “delete”','q.reason1':'Confirmed threat','q.reason2':'Cracking tool','tips.legend':'Explanation on demand:','tips.body':'Hover the underlined word for one line · click it to open an explaining search in your language (Google · Baidu · Yahoo Japan · Yandex).','sec.alerts':'2 · Alerts','sec.alerts.hint':'less text · no delete button at all · explanation on request',
+    'path.label':'Path','path.open_folder':'Open folder','path.copy':'Copy path',
+    'sec.main':'1 · Main screen','sec.main.hint':'≤ 8 elements · 3 walls · 2 buttons · no jargon',
+    'state.protected':'You are protected','shield.sub':'3 walls active · threat list up to date',
+    'wall.signatures.title':'File database','wall.signatures.on':'Active',
+    'wall.behavior.title':'Deep behavior scan','wall.behavior.off':'Idle',
+    'wall.proactive.title':'Proactive protection','wall.proactive.on':'Active',
+    'action.scan_now':'Scan now','action.pause':'Pause','action.why':'Why?',
+    'sec.alerts':'2 · The four alerts','sec.alerts.hint':'2 buttons + “Why?” · color never carries meaning alone',
+    'badge.confirmed':'Confirmed','badge.high':'Highly suspicious','badge.pua':'Medium risk','badge.low':'Suspicious',
+    'alert.confirmed.title':'We stopped a known threat','alert.confirmed.body':'PhotoTool.exe was isolated — not deleted.',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'A program is trying to reach your files','alert.suspicious.body':'PhotoTool.exe is changing files in your Documents. We stopped it temporarily.',
+    'alert.pua.title':'This looks like a cracking tool','alert.pua.body':'setup-key.exe bypasses licensing protection of paid software.',
+    'alert.pua.quarantine':'Move aside','alert.pua.allowed':'Allow it',
+    'alert.unsure.title':'This program is unusual','alert.unsure.body':'newapp.exe is new here and behaves unusually. Do you know it?',
+    'button.restore':'Restore','button.remove_forever':'Delete permanently','button.allow':'Allow','button.block':'Block',
+    'sec.usb':'3 · USB alert','sec.usb.hint':'one progress bar · one stage · RTL-aware',
+    'usb.scanning':'Checking USB_32GB…','usb.priority_done':'Dangerous files checked','usb.stage':'P0 · dangerous files in root',
+    'sec.color':'4 · Palette (measured WCAG)','sec.color.hint':'every value shows its contrast against the current background',
+    'sec.fonts':'5 · Fonts per language','sec.fonts.hint':'only 400 and 600 · system fonts as instant fallback',
+    'sec.notes':'6 · Review notes',
+    'notes.1t':'Language switch:','notes.1b':'changes direction and layout instantly; numbers stay Latin in ratios and hashes.',
+    'notes.2t':'Buttons:','notes.2b':'Allow/Block keep a fixed logical order; RTL flips visual position, not the role.',
+    'notes.3t':'CJK:','notes.3b':'rendered with system fonts here; after the CDN pack downloads they become Noto without restart.',
+    'notes.4t':'Fonts:','notes.4b':'this file loads fonts from the adjacent fonts/vendor/ folder — serve it over HTTP, not file://.',
+    'notes.5t':'Not covered here:','notes.5b':'logotype, tray icon and error states — reviewed separately (R3).'
+  },
+  'zh-Hans': {
+    'trust.title':'信任基础 — 界面宪法','trust.sub':'每个界面都用这四条衡量。冲突时：安全 → 不打扰 → 清晰 → 简洁 → 美观。','trust.1t':'清晰','trust.1d':'我们说发生了什么，而不是技术原理。一句话。没有理由就不说“完成”。','trust.2t':'简洁','trust.2d':'最多两个按钮。一个主要操作。无需任何设置。','trust.3t':'安心','trust.3d':'无事件就不弹窗。每天最多 3 条通知。绝不使用模态框。','trust.4t':'后果可知','trust.4d':'每个按钮在按下前就写明后果。安全的选项最显眼。',
+    'alert.confirmed.cta':'打开隔离区','word.isolated':'已隔离','word.temporary':'暂时','tip.quarantine':'已移至加密存储——原位置保留，可随时恢复。','tip.suspended':'现在已停止。只有你允许后才会恢复。','quarantine.keep':'保留','quarantine.delete':'永久删除','quarantine.hint':'一切都会保留，直到你决定 · 绝不自动删除','quarantine.title':'3 · 隔离区 —— 唯一有“删除”的地方','q.reason1':'已确认威胁','q.reason2':'破解工具','tips.legend':'按需查看说明：','tips.body':'将鼠标移到带下划线的词上查看一行说明 · 单击可用你的语言打开解释搜索（Google · 百度 · Yandex）。','sec.alerts':'2 · 提示','sec.alerts.hint':'更少文字 · 完全没有删除按钮 · 按需说明',
+    'path.label':'路径','path.open_folder':'打开文件夹','path.copy':'复制路径',
+    'sec.main':'1 · 主界面','sec.main.hint':'≤ 8 个元素 · 3 道防线 · 2 个按钮',
+    'state.protected':'你受到保护','shield.sub':'3 道防线运行中 · 威胁库已更新',
+    'wall.signatures.title':'文件特征库','wall.signatures.on':'运行中',
+    'wall.behavior.title':'深度行为检测','wall.behavior.off':'休眠',
+    'wall.proactive.title':'主动防护','wall.proactive.on':'运行中',
+    'action.scan_now':'立即扫描','action.pause':'暂停','action.why':'为什么？',
+    'sec.alerts':'2 · 四种提示','sec.alerts.hint':'两个按钮 + “为什么？” · 颜色不单独传达信息',
+    'badge.confirmed':'已确认','badge.high':'高度可疑','badge.pua':'中等风险','badge.low':'可疑',
+    'alert.confirmed.title':'我们拦截了一个已知威胁','alert.confirmed.body':'已隔离 PhotoTool.exe —— 未删除。',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'有程序正在访问你的文件','alert.suspicious.body':'PhotoTool.exe 正在修改文档中的文件——我们已暂时阻止它。',
+    'alert.pua.title':'这看起来是破解工具','alert.pua.body':'setup-key.exe 会绕过付费软件的授权保护。',
+    'alert.pua.quarantine':'移到一边','alert.pua.allowed':'允许它',
+    'alert.unsure.title':'这个程序不常见','alert.unsure.body':'newapp.exe 是新出现的，行为异常。你认识它吗？',
+    'button.restore':'恢复','button.remove_forever':'永久删除','button.allow':'允许','button.block':'阻止',
+    'sec.usb':'3 · USB 提示','sec.usb.hint':'单一进度条 · 单一阶段',
+    'usb.scanning':'正在检查 USB_32GB…','usb.priority_done':'已检查危险文件','usb.stage':'P0 · 根目录中的危险文件',
+    'sec.color':'4 · 调色板（WCAG 实测）','sec.color.hint':'每个颜色都标注其与当前背景的对比度',
+    'sec.fonts':'5 · 各语言字体','sec.fonts.hint':'仅 400 与 600 · 系统字体作为即时备选',
+    'sec.notes':'6 · 评审说明',
+    'notes.1t':'语言切换：','notes.1b':'立即改变方向与布局；比例与哈希中的数字保持拉丁数字。',
+    'notes.2t':'按钮：','notes.2b':'允许/阻止保持固定逻辑顺序；RTL 只翻转视觉位置，不改变角色。',
+    'notes.3t':'中文：','notes.3b':'此处使用系统字体；CDN 字库下载后无需重启即切换为 Noto。',
+    'notes.4t':'字体：','notes.4b':'本文件从同级 fonts/vendor/ 加载字体——请用本地服务器打开，不要用 file://。',
+    'notes.5t':'本预览未包含：','notes.5b':'文字标志、托盘图标与错误状态——另行评审（R3）。'
+  },
+  ja: {
+    'trust.title':'信頼の基盤 — UI 憲章','trust.sub':'すべての画面をこの 4 つで測ります。衝突時：安全 → 邪魔しない → 明快 → 簡潔 → 美しさ。','trust.1t':'明快','trust.1d':'技術ではなく、何が起きたかを伝えます。一文で。「完了」だけは言いません。','trust.2t':'簡潔','trust.2d':'ボタンは最大 2 つ。主要操作は 1 つ。設定は不要。','trust.3t':'安心','trust.3d':'問題がなければ窓は出しません。通知は 1 日 3 件まで。モーダルは使いません。','trust.4t':'結果がわかる','trust.4d':'各ボタンは押す前に結果を書きます。安全な選択が目立つ位置に。',
+    'alert.confirmed.cta':'隔離箱を開く','word.isolated':'隔離済み','word.temporary':'一時的に','tip.quarantine':'暗号化された保管庫へ移動しました。元の場所は保持され、復元できます。','tip.suspended':'今は停止しています。許可した場合のみ再び動作します。','quarantine.keep':'保持する','quarantine.delete':'完全に削除','quarantine.hint':'あなたが決めるまですべて残ります · 自動削除はありません','quarantine.title':'3 · 隔離箱 — 「削除」があるのはここだけ','q.reason1':'確認済みの脅威','q.reason2':'クラックツール','tips.legend':'必要なときに説明：','tips.body':'下線のある語にマウスを置くと 1 行表示 · クリックで母語の解説検索を開きます（Google · Yahoo! JAPAN · Yandex）。','sec.alerts':'2 · 通知','sec.alerts.hint':'文を短く · 削除ボタンは一切なし · 説明は必要時に',
+    'path.label':'パス','path.open_folder':'フォルダーを開く','path.copy':'パスをコピー',
+    'sec.main':'1 · メイン画面','sec.main.hint':'≤8 要素 · 3 つの壁 · ボタン 2 つ',
+    'state.protected':'保護されています','shield.sub':'3 つの壁が稼働中 · 脅威リストは最新',
+    'wall.signatures.title':'ファイルデータベース','wall.signatures.on':'有効',
+    'wall.behavior.title':'詳細な動作検査','wall.behavior.off':'停止中',
+    'wall.proactive.title':'事前保護','wall.proactive.on':'有効',
+    'action.scan_now':'今すぐスキャン','action.pause':'一時停止','action.why':'なぜ？',
+    'sec.alerts':'2 · 4 つの通知','sec.alerts.hint':'ボタン 2 つ + 「なぜ？」 · 色だけで意味を伝えない',
+    'badge.confirmed':'確認済み','badge.high':'強い疑い','badge.pua':'中リスク','badge.low':'疑わしい',
+    'alert.confirmed.title':'既知の脅威を止めました','alert.confirmed.body':'PhotoTool.exe を隔離しました — 削除はしていません。',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'プログラムがファイルにアクセスしようとしています','alert.suspicious.body':'PhotoTool.exe がドキュメント内のファイルを変更しています。一時的に止めました。',
+    'alert.pua.title':'クラックツールのようです','alert.pua.body':'setup-key.exe は有料ソフトのライセンス保護を回避します。',
+    'alert.pua.quarantine':'脇へ移動','alert.pua.allowed':'許可する',
+    'alert.unsure.title':'このプログラムは珍しいものです','alert.unsure.body':'newapp.exe は新しく、奇妙な動作をします。ご存じですか？',
+    'button.restore':'復元','button.remove_forever':'完全に削除','button.allow':'許可','button.block':'ブロック',
+    'sec.usb':'3 · USB 通知','sec.usb.hint':'進捗バー 1 本 · 段階 1 つ',
+    'usb.scanning':'USB_32GB を確認中…','usb.priority_done':'危険なファイルを確認しました','usb.stage':'P0 · ルート内の危険なファイル',
+    'sec.color':'4 · 配色（WCAG 実測）','sec.color.hint':'各色に現在の背景とのコントラスト比を表示',
+    'sec.fonts':'5 · 言語ごとのフォント','sec.fonts.hint':'400 と 600 のみ · システムフォントを即時代替に',
+    'sec.notes':'6 · レビュー用メモ',
+    'notes.1t':'言語切替：','notes.1b':'方向とレイアウトが即座に変わります。比率やハッシュの数字はラテン数字のままです。',
+    'notes.2t':'ボタン：','notes.2b':'許可/ブロックの論理順は固定。RTL は視覚位置だけを反転します。',
+    'notes.3t':'日本語：','notes.3b':'ここではシステムフォントで表示。CDN フォント取得後は再起動なしで Noto になります。',
+    'notes.4t':'フォント：','notes.4b':'同じ階層の fonts/vendor/ から読み込みます。file:// ではなくローカルサーバーで開いてください。',
+    'notes.5t':'このプレビューに無いもの：','notes.5b':'ロゴタイプ、タスクトレイのアイコン、エラー状態 — 別途レビュー（R3）。'
+  },
+  es: {
+    'trust.title':'Bases de la confianza — constitución de la interfaz','trust.sub':'Cada pantalla se mide con estas cuatro. En conflicto: seguridad → no molestar → claridad → sencillez → estética.','trust.1t':'Claridad','trust.1d':'Decimos qué pasó, no cómo funciona. Una frase. Sin «hecho» sin motivo.','trust.2t':'Sencillez','trust.2d':'Dos botones como máximo. Una acción principal. Cero configuración.','trust.3t':'Calma','trust.3d':'Sin evento, sin ventana. ≤ 3 avisos al día. Nunca un modal.','trust.4t':'Consecuencias claras','trust.4d':'Cada botón dice su resultado antes de pulsarlo. La opción segura es la visible.',
+    'alert.confirmed.cta':'Abrir cuarentena','word.isolated':'aislado','word.temporary':'temporalmente','tip.quarantine':'Se movió a un almacén cifrado — su ubicación original se conserva.','tip.suspended':'Lo detuvimos ahora. Solo vuelve a funcionar si lo permites.','quarantine.keep':'Conservarlo','quarantine.delete':'Eliminar permanentemente','quarantine.hint':'todo permanece hasta que tú decidas · nunca se borra solo','quarantine.title':'3 · Cuarentena — el único lugar con «eliminar»','q.reason1':'Amenaza confirmada','q.reason2':'Herramienta de crackeo','tips.legend':'Explicación a pedido:','tips.body':'Pasa el cursor por la palabra subrayada para una línea · haz clic para abrir una búsqueda explicativa en tu idioma (Google · Baidu · Yandex).','sec.alerts':'2 · Alertas','sec.alerts.hint':'menos texto · sin botón de eliminar · explicación a pedido',
+    'path.label':'Ruta','path.open_folder':'Abrir carpeta','path.copy':'Copiar ruta',
+    'sec.main':'1 · Pantalla principal','sec.main.hint':'≤ 8 elementos · 3 muros · 2 botones',
+    'state.protected':'Estás protegido','shield.sub':'3 muros activos · lista de amenazas al día',
+    'wall.signatures.title':'Base de datos de archivos','wall.signatures.on':'Activa',
+    'wall.behavior.title':'Análisis profundo de comportamiento','wall.behavior.off':'Inactivo',
+    'wall.proactive.title':'Protección proactiva','wall.proactive.on':'Activa',
+    'action.scan_now':'Analizar ahora','action.pause':'Pausar','action.why':'¿Por qué?',
+    'sec.alerts':'2 · Las cuatro alertas','sec.alerts.hint':'2 botones + «¿Por qué?» · el color nunca informa solo',
+    'badge.confirmed':'Confirmado','badge.high':'Muy sospechoso','badge.pua':'Riesgo medio','badge.low':'Sospechoso',
+    'alert.confirmed.title':'Detuvimos una amenaza conocida','alert.confirmed.body':'PhotoTool.exe fue aislado — no eliminado.',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'Un programa intenta acceder a tus archivos','alert.suspicious.body':'PhotoTool.exe está modificando archivos en Documentos. Lo detuvimos temporalmente.',
+    'alert.pua.title':'Parece una herramienta de crackeo','alert.pua.body':'setup-key.exe evade la protección de licencias de software de pago.',
+    'alert.pua.quarantine':'Apartar','alert.pua.allowed':'Permitirlo',
+    'alert.unsure.title':'Este programa es poco común','alert.unsure.body':'newapp.exe es nuevo aquí y se comporta de forma extraña. ¿Lo conoces?',
+    'button.restore':'Restaurar','button.remove_forever':'Eliminar permanentemente','button.allow':'Permitir','button.block':'Bloquear',
+    'sec.usb':'3 · Alerta USB','sec.usb.hint':'una barra · una etapa',
+    'usb.scanning':'Revisando USB_32GB…','usb.priority_done':'Archivos peligrosos revisados','usb.stage':'P0 · archivos peligrosos en la raíz',
+    'sec.color':'4 · Paleta (WCAG medida)','sec.color.hint':'cada valor muestra su contraste sobre el fondo actual',
+    'sec.fonts':'5 · Fuentes por idioma','sec.fonts.hint':'solo 400 y 600 · fuentes del sistema como respaldo inmediato',
+    'sec.notes':'6 · Notas de revisión',
+    'notes.1t':'Cambio de idioma:','notes.1b':'cambia dirección y diseño al instante; los números siguen en latino en ratios y hashes.',
+    'notes.2t':'Botones:','notes.2b':'Permitir/Bloquear mantienen orden lógico fijo; RTL invierte la posición visual, no el rol.',
+    'notes.3t':'CJK:','notes.3b':'aquí se usan fuentes del sistema; tras descargar el paquete CDN pasan a Noto sin reiniciar.',
+    'notes.4t':'Fuentes:','notes.4b':'este archivo carga desde fonts/vendor/ — ábrelo con un servidor local, no con file://.',
+    'notes.5t':'No incluido aquí:','notes.5b':'logotipo, icono de bandeja y estados de error — se revisan aparte (R3).'
+  },
+  ru: {
+    'trust.title':'Основы доверия — конституция интерфейса','trust.sub':'Каждый экран проверяется по этим четырём. При конфликте: безопасность → не мешать → ясность → простота → красота.','trust.1t':'Ясность','trust.1d':'Говорим, что случилось, а не как устроено. Одно предложение. Без «готово» без причины.','trust.2t':'Простота','trust.2d':'Не более двух кнопок. Одно главное действие. Настройка не нужна.','trust.3t':'Спокойствие','trust.3d':'Нет события — нет окна. ≤ 3 уведомлений в день. Никаких модальных окон.','trust.4t':'Понятные последствия','trust.4d':'Каждая кнопка сообщает результат до нажатия. Безопасный выбор — заметный.',
+    'alert.confirmed.cta':'Открыть изолятор','word.isolated':'изолирован','word.temporary':'временно','tip.quarantine':'Перемещён в зашифрованное хранилище — исходное расположение сохранено.','tip.suspended':'Мы остановили его сейчас. Он вернётся только с вашего разрешения.','quarantine.keep':'Оставить','quarantine.delete':'Удалить навсегда','quarantine.hint':'всё остаётся, пока вы не решите · автоудаления нет','quarantine.title':'3 · Изолятор — единственное место с «удалить»','q.reason1':'Подтверждённая угроза','q.reason2':'Средство взлома','tips.legend':'Объяснение по запросу:','tips.body':'Наведите на подчёркнутое слово — одна строка · нажмите, чтобы открыть поясняющий поиск на вашем языке (Google · Яндекс).','sec.alerts':'2 · Уведомления','sec.alerts.hint':'меньше текста · кнопки удаления нет · объяснение по запросу',
+    'path.label':'Путь','path.open_folder':'Открыть папку','path.copy':'Копировать путь',
+    'sec.main':'1 · Главный экран','sec.main.hint':'≤ 8 элементов · 3 стены · 2 кнопки',
+    'state.protected':'Вы защищены','shield.sub':'3 стены активны · база угроз обновлена',
+    'wall.signatures.title':'База файлов','wall.signatures.on':'Работает',
+    'wall.behavior.title':'Глубокая проверка поведения','wall.behavior.off':'Неактивна',
+    'wall.proactive.title':'Упреждающая защита','wall.proactive.on':'Включена',
+    'action.scan_now':'Проверить сейчас','action.pause':'Приостановить','action.why':'Почему?',
+    'sec.alerts':'2 · Четыре уведомления','sec.alerts.hint':'2 кнопки + «Почему?» · цвет не передаёт смысл один',
+    'badge.confirmed':'Подтверждено','badge.high':'Сильное подозрение','badge.pua':'Средний риск','badge.low':'Подозрительно',
+    'alert.confirmed.title':'Мы остановили известную угрозу','alert.confirmed.body':'PhotoTool.exe изолирован — не удалён.',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'Программа пытается получить доступ к вашим файлам','alert.suspicious.body':'PhotoTool.exe изменяет файлы в Документах. Мы временно остановили её.',
+    'alert.pua.title':'Похоже на средство взлома','alert.pua.body':'setup-key.exe обходит защиту лицензий платных программ.',
+    'alert.pua.quarantine':'Убрать в сторону','alert.pua.allowed':'Разрешить',
+    'alert.unsure.title':'Эта программа необычна','alert.unsure.body':'newapp.exe появился недавно и ведёт себя странно. Вы его знаете?',
+    'button.restore':'Восстановить','button.remove_forever':'Удалить навсегда','button.allow':'Разрешить','button.block':'Заблокировать',
+    'sec.usb':'3 · Уведомление USB','sec.usb.hint':'один индикатор · один этап',
+    'usb.scanning':'Проверка USB_32GB…','usb.priority_done':'Опасные файлы проверены','usb.stage':'P0 · опасные файлы в корне',
+    'sec.color':'4 · Палитра (WCAG измерено)','sec.color.hint':'у каждого цвета показан контраст к текущему фону',
+    'sec.fonts':'5 · Шрифты по языкам','sec.fonts.hint':'только 400 и 600 · системные шрифты как мгновенная замена',
+    'sec.notes':'6 · Заметки для проверки',
+    'notes.1t':'Смена языка:','notes.1b':'меняет направление и вёрстку сразу; числа остаются латинскими в процентах и хешах.',
+    'notes.2t':'Кнопки:','notes.2b':'Разрешить/Заблокировать сохраняют логический порядок; RTL меняет только визуальную сторону.',
+    'notes.3t':'CJK:','notes.3b':'здесь системные шрифты; после загрузки пакета с CDN станут Noto без перезапуска.',
+    'notes.4t':'Шрифты:','notes.4b':'файл берёт шрифты из соседней папки fonts/vendor/ — открывайте через локальный сервер, не file://.',
+    'notes.5t':'Чего нет в превью:','notes.5b':'логотип, значок в трее и состояния ошибок — отдельная проверка (R3).'
+  },
+  hi: {
+    'trust.title':'विश्वास की नींव — इंटरफ़ेस संविधान','trust.sub':'हर स्क्रीन इन चार पर परखी जाती है। टकराव में: सुरक्षा → बिना टोकना → स्पष्टता → सरलता → सौंदर्य।','trust.1t':'स्पष्टता','trust.1d':'हम बताते हैं क्या हुआ, न कि तकनीक कैसे चलती है। एक वाक्य। बिना कारण “हो गया” नहीं।','trust.2t':'सरलता','trust.2d':'अधिकतम दो बटन। एक मुख्य क्रिया। कोई सेटअप नहीं।','trust.3t':'सुकून','trust.3d':'घटना नहीं = विंडो नहीं। दिन में ≤ 3 सूचनाएँ। कभी मोडल नहीं।','trust.4t':'नतीजे पता हों','trust.4d':'हर बटन दबाने से पहले नतीजा लिखा हो। सुरक्षित विकल्प सामने हो।',
+    'alert.confirmed.cta':'क्वारंटीन खोलें','word.isolated':'अलग किया','word.temporary':'अस्थायी रूप से','tip.quarantine':'एन्क्रिप्टेड भंडार में ले जाया गया — मूल स्थान सुरक्षित है।','tip.suspended':'अभी रोका गया। अनुमति देने पर ही दोबारा चलेगा।','quarantine.keep':'रखें','quarantine.delete':'स्थायी रूप से हटाएँ','quarantine.hint':'आपके निर्णय तक सब रहता है · कभी अपने आप नहीं हटता','quarantine.title':'3 · क्वारंटीन — «हटाएँ» केवल यहीं','q.reason1':'पुष्ट ख़तरा','q.reason2':'क्रैकिंग टूल','tips.legend':'ज़रूरत पर व्याख्या:','tips.body':'रेखांकित शब्द पर माउस ले जाएँ — one line · क्लिक करने पर आपकी भाषा में समझाने वाली खोज खुलेगी (Google · Baidu · Yandex)।','sec.alerts':'2 · चेतावनियाँ','sec.alerts.hint':'कम पाठ · कोई हटाएँ बटन नहीं · ज़रूरत पर व्याख्या',
+    'path.label':'पथ','path.open_folder':'फ़ोल्डर खोलें','path.copy':'पथ कॉपी करें',
+    'sec.main':'1 · मुख्य स्क्रीन','sec.main.hint':'≤ 8 तत्व · 3 दीवारें · 2 बटन',
+    'state.protected':'आप सुरक्षित हैं','shield.sub':'3 दीवारें सक्रिय · ख़तरा सूची अद्यतित',
+    'wall.signatures.title':'फ़ाइल डेटाबेस','wall.signatures.on':'सक्रिय',
+    'wall.behavior.title':'गहरी व्यवहार जाँच','wall.behavior.off':'निष्क्रिय',
+    'wall.proactive.title':'पूर्वानुमानित सुरक्षा','wall.proactive.on':'सक्रिय',
+    'action.scan_now':'अभी जाँचें','action.pause':'रोकें','action.why':'क्यों?',
+    'sec.alerts':'2 · चार चेतावनियाँ','sec.alerts.hint':'2 बटन + «क्यों?» · रंग अकेले अर्थ नहीं देता',
+    'badge.confirmed':'पुष्ट','badge.high':'अत्यधिक संदिग्ध','badge.pua':'मध्यम जोखिम','badge.low':'संदिग्ध',
+    'alert.confirmed.title':'हमने एक ज्ञात ख़तरा रोका','alert.confirmed.body':'PhotoTool.exe अलग कर दिया गया — हटाया नहीं गया।',
+    'alert.confirmed.note':'',
+    'alert.suspicious.title':'एक प्रोग्राम आपकी फ़ाइलों तक पहुँचने की कोशिश कर रहा है','alert.suspicious.body':'PhotoTool.exe दस्तावेज़ों में फ़ाइलें बदल रहा है। हमने इसे अस्थायी रूप से रोका।',
+    'alert.pua.title':'यह क्रैकिंग टूल जैसा लगता है','alert.pua.body':'setup-key.exe सशुल्क सॉफ़्टवेयर की लाइसेंस सुरक्षा को बायपास करता है।',
+    'alert.pua.quarantine':'अलग रखें','alert.pua.allowed':'अनुमति दें',
+    'alert.unsure.title':'यह प्रोग्राम असामान्य है','alert.unsure.body':'newapp.exe यहाँ नया है और अजीब व्यवहार करता है। क्या आप इसे जानते हैं?',
+    'button.restore':'वापस लाएँ','button.remove_forever':'स्थायी रूप से हटाएँ','button.allow':'अनुमति दें','button.block':'रोकें',
+    'sec.usb':'3 · USB चेतावनी','sec.usb.hint':'एक प्रगति पट्टी · एक चरण',
+    'usb.scanning':'USB_32GB की जाँच हो रही है…','usb.priority_done':'ख़तरनाक फ़ाइलें जाँची गईं','usb.stage':'P0 · रूट में ख़तरनाक फ़ाइलें',
+    'sec.color':'4 · रंग पटल (WCAG मापा गया)','sec.color.hint':'हर रंग वर्तमान पृष्ठभूमि पर अपना कंट्रास्ट दिखाता है',
+    'sec.fonts':'5 · प्रति भाषा फ़ॉन्ट','sec.fonts.hint':'केवल 400 और 600 · सिस्टम फ़ॉन्ट तत्काल विकल्प',
+    'sec.notes':'6 · समीक्षा नोट्स',
+    'notes.1t':'भाषा बदलना:','notes.1b':'दिशा और लेआउट तुरंत बदलते हैं; अनुपात और हैश में अंक लैटिन रहते हैं।',
+    'notes.2t':'बटन:','notes.2b':'अनुमति/रोकें का तार्किक क्रम स्थिर रहता है; RTL केवल दृश्य स्थान बदलता है।',
+    'notes.3t':'CJK:','notes.3b':'यहाँ सिस्टम फ़ॉन्ट; CDN पैक डाउनलोड के बाद बिना रीस्टार्ट Noto बन जाते हैं।',
+    'notes.4t':'फ़ॉन्ट:','notes.4b':'यह फ़ाइल fonts/vendor/ से लोड करती है — स्थानीय सर्वर से खोलें, file:// से नहीं।',
+    'notes.5t':'इसमें शामिल नहीं:','notes.5b':'लोगोटाइप, ट्रे आइकन और त्रुटि अवस्थाएँ — अलग समीक्षा (R3)।'
+  }
+};
+const DIR = {'ar':'rtl','en':'ltr','zh-Hans':'ltr','ja':'ltr','es':'ltr','ru':'ltr','hi':'ltr'};
+
+/* ══════════ الألوان + حساب التباين ══════════ */
+const PALETTE = [
+  ['accent','--accent','الهوية / زر الفحص'],
+  ['ok','--ok','جدار فعّال'],
+  ['warn','--warn','مشتبه / إيقاف'],
+  ['danger','--danger','مؤكد فقط'],
+  ['focus','--focus','حلقة التركيز'],
+  ['text','--text','نص أساسي'],
+  ['text2','--text2','نص ثانوي'],
+  ['text3','--text3','نص ثالثي']
+];
+function lum(hex){
+  let [r,g,b] = hex.match(/\w\w/g).map(x=>parseInt(x,16)/255)
+    .map(c=>c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4));
+  return 0.2126*r+0.7152*g+0.0722*b;
+}
+function contrast(a,b){
+  const la=lum(a), lb=lum(b);
+  return ((Math.max(la,lb)+0.05)/(Math.min(la,lb)+0.05));
+}
+function hexOf(varname){
+  const v = getComputedStyle(document.documentElement).getPropertyValue(varname).trim();
+  return v.startsWith('#') ? v : '#000000';
+}
+function renderPalette(){
+  const bg = hexOf('--bg');
+  document.getElementById('swatches').innerHTML = PALETTE.map(([id,v,label])=>{
+    const c = hexOf(v);
+    const ratio = contrast(c, bg).toFixed(2);
+    const pass = ratio >= 4.5 ? ICON('i-check','sm')+' AA' : (ratio >= 3 ? ICON('i-info','sm')+' ' + (document.body.dataset.lang==='ar'?'كبير فقط':'large only') : ICON('i-x','sm'));
+    return `<div class="sw">
+      <div class="chip" style="background:${c}"></div>
+      <div class="meta"><b>${label}</b><span>${c.toUpperCase()} · ${ratio}:1 · ${pass}</span></div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════ التطبيق ══════════ */
+function applyLang(code){
+  document.body.dataset.lang = code;
+  document.documentElement.lang = code;
+  document.documentElement.dir = DIR[code];
+  const dict = T[code] || T.en;
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const k = el.dataset.k;
+    if (dict[k]) el.textContent = dict[k];
+  });
+  renderPalette();
+  refreshTips();
+  if (typeof setModeLabel==='function') setModeLabel();
+}
+document.getElementById('lang').addEventListener('change', e=>applyLang(e.target.value));
+
+const modeBtn = document.getElementById('mode');
+function setModeLabel(){
+  const ar = document.body.dataset.lang === 'ar';
+  const real = document.body.classList.contains('real');
+  modeBtn.textContent = real ? (ar?'كل الأقسام':'All sections') : (ar?'العرض الحقيقي':'Real view');
+  modeBtn.classList.toggle('on', real);
+}
+modeBtn.addEventListener('click', ()=>{ document.body.classList.toggle('real'); setModeLabel(); });
+document.getElementById('popout').addEventListener('click', ()=>{
+  window.open(location.pathname + '?v=app', '_blank', 'noopener');
+});
+document.body.classList.add('real');
+if (new URLSearchParams(location.search).get('v') === 'app') document.getElementById('mode').style.display='none';
+
+const themeBtn = document.getElementById('theme');
+themeBtn.addEventListener('click', ()=>{
+  const root = document.documentElement;
+  const dark = root.dataset.theme === 'dark';
+  root.dataset.theme = dark ? 'light' : 'dark';
+  themeBtn.textContent = dark
+    ? (document.body.dataset.lang==='ar'?'الوضع الداكن':'Dark mode')
+    : (document.body.dataset.lang==='ar'?'الوضع الفاتح':'Light mode');
+  renderPalette();
+});
+
+
+
+/* ══════════ شرح عند الطلب: tooltip + بحث بلغة المستخدم ══════════ */
+const SEARCH_ENGINE = {
+  ar:'https://www.google.com/search?q=', en:'https://www.google.com/search?q=',
+  es:'https://www.google.com/search?q=', de:'https://www.google.com/search?q=',
+  fr:'https://www.google.com/search?q=', 'pt-BR':'https://www.google.com/search?q=',
+  ru:'https://yandex.com/search/?text=', hi:'https://www.google.com/search?q=',
+  'zh-Hans':'https://www.baidu.com/s?wd=', 'zh-Hant':'https://www.google.com/search?q=',
+  ja:'https://search.yahoo.co.jp/search?p='
+};
+const EXPLAIN_Q = {
+  ar:'ما معنى ملف معزول في برامج الحماية',
+  en:'what does quarantine mean in antivirus',
+  'zh-Hans':'杀毒软件中的隔离是什么意思',
+  ja:'ウイルス対策ソフトの隔離とは',
+  es:'qué significa cuarentena en antivirus',
+  ru:'что значит карантин в антивирусе',
+  hi:'एंटीवायरस में क्वारंटीन का क्या मतलब है'
+};
+function currentLang(){ return document.body.dataset.lang || 'ar'; }
+
+/* عند تغيير اللغة: حدّث نص التلميحات (data-tip) ووصف aria */
+function refreshTips(){
+  const dict = T[currentLang()] || T.en;
+  document.querySelectorAll('[data-tipkey]').forEach(el=>{
+    el.setAttribute('data-tip', dict[el.dataset.tipkey] || '');
+  });
+}
+
+/* ملاحظة: في التطبيق الحقيقي يُفتح المتصفح الافتراضي عبر ShellExecute.
+   هنا نفتح نافذة جديدة — ونتحقق من اللغة الحالية. */
+document.addEventListener('click', (e)=>{
+  const tip = e.target.closest('[data-tipkey]');
+  if (!tip) return;
+  const lang = currentLang();
+  const engine = SEARCH_ENGINE[lang] || SEARCH_ENGINE.en;
+  const q = EXPLAIN_Q[lang] || EXPLAIN_Q.en;
+  window.open(engine + encodeURIComponent(q), '_blank', 'noopener');
+});
+
+/* ══════════ مساعد الأيقونات ══════════ */
+function ICON(id, cls){ return '<svg class="i '+(cls||'')+'"><use href="#'+id+'"/></svg>'; }
+
+/* ══════════ نسخ المسار / فتح المجلد ══════════ */
+document.addEventListener('click', async (e)=>{
+  const copyBtn = e.target.closest('[data-copy]');
+  if (copyBtn){
+    const p = copyBtn.dataset.copy;
+    const original = copyBtn.innerHTML;
+    try { await navigator.clipboard.writeText(p); copyBtn.innerHTML = ICON('i-check'); }
+    catch { copyBtn.innerHTML = ICON('i-x'); }
+    setTimeout(()=>{ copyBtn.innerHTML = original; }, 1200);
+    return;
+  }
+  const lb = e.target.closest('.linkbtn');
+  if (!lb) return;
+  const row = lb.closest('.alert').querySelector('.pval');
+  if (!row) return;
+  if (lb.dataset.k === 'path.copy'){
+    const label = lb.textContent;
+    try { await navigator.clipboard.writeText(row.textContent); lb.innerHTML = ICON('i-check') + ' ' + label; }
+    catch { lb.innerHTML = ICON('i-x') + ' ' + label; }
+    setTimeout(()=>{ lb.textContent = label; }, 1200);
+  } else {
+    /* في التطبيق الحقيقي: ShellExecute(explorer.exe /select,<path>)
+       هنا نعرض المسار فقط (المتصفح لا يستطيع فتح مجلدات) */
+    row.style.outline = '3px solid var(--focus)';
+    setTimeout(()=>{ row.style.outline = ''; }, 700);
+  }
+});
+
+applyLang('ar');
+</script>
+</body>
+</html>
