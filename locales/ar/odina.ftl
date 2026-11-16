@@ -95,7 +95,7 @@ pause.duration.30 = ٣٠ دقيقة
 pause.duration.60 = ساعة
 pause.warning = سنوقف التنبيهات حتى { $until }. ما زلنا نحميك.
 pause.confirm = تأكيد
-pause.badge = الحماية متوقفة مؤقتًا
+pause.badge = التنبيهات متوقفة مؤقتًا · الحماية تعمل
 
 ## ── الحالة والأخطاء ───────────────────────────────────────
 error.generic = حدث خطأ. لم نُغيّر شيئًا.
@@ -132,3 +132,26 @@ quarantine.cleanup_choose = حذف ما اخترته
 ## ── الاعتذار ──────────────────────────────────────────────
 error.false_positive = أخطأنا في هذا الملف — أصلحناه.
 error.locked = لم نستطع عزل الملف لأنه مفتوح الآن.
+
+## ── Turn protection off (user's explicit decision) ────────
+pause.confirm_disable = أوقف الحماية لمدة { $minutes } دقيقة
+disable.title = إيقاف الحماية
+disable.warning_title = خطر شديد
+disable.body = لن نتوقف عن التنبيه — سنتوقف عن الحماية. لن يُفحص أي ملف، ولن يُمنع أي تهديد. جهازك يصبح غير محمي تمامًا.
+disable.responsibility = القرار قرارك، والمسؤولية عليك أثناء هذه المدة.
+disable.choose = اختر المدة
+disable.duration.peak = حتى نهاية ساعة الذروة
+disable.duration.30 = ٣٠ دقيقة
+disable.duration.60 = ساعة
+disable.duration.until_reboot = حتى إعادة التشغيل
+disable.refused = لا يمكن إيقاف الحماية الآن
+disable.refused_quarantine = يوجد ملف معزول لم يُحسم بعد. راجعه أولًا.
+disable.refused_scanning = هناك فحص جارٍ الآن. انتظره أو أوقفه أولًا.
+disable.refused_active_threat = يوجد تهديد لم يُعالَج بعد. لا نُوقف الحماية وتهديدها مفتوح.
+state.unprotected = الحماية موقوفة
+state.unprotected_until = الحماية موقوفة حتى { $until }
+state.unprotected_badge = غير محمي — بقرارك
+action.turn_off = إيقاف الحماية
+action.turn_on = أعد الحماية
+disable.re_enable_note = تستطيع إعادة الحماية في أي لحظة — بلا كلمة مرور.
+disable.reminder = لديك { $minutes } دقيقة متبقية على إعادة الحماية تلقائيًا.

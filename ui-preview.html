@@ -139,6 +139,31 @@ html[data-theme="dark"] .btn.danger{color:#0B1416}
 
 
 
+
+/* ═══ مستويات الإيقاف ═══ */
+.lvlgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.lvcard{border:1px solid var(--border);border-radius:var(--radius);padding:14px;background:var(--surface)}
+.lvcard.calm{border-inline-start:3px solid var(--accent)}
+.lvcard.danger{border-inline-start:3px solid var(--danger)}
+.lvhead{display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:8px}
+.lvcard.calm .lvhead .i{color:var(--accent)}
+.lvcard.danger .lvhead .i{color:var(--danger)}
+.lvbody{font-size:12.5px;color:var(--text2);line-height:1.6}
+.lvrows{margin:10px 0}
+.lvrow{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:4px 0;
+  border-bottom:1px dashed var(--border)}
+.lvrow span{color:var(--text3)} .lvrow b{font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{font-size:12px;border:1px solid var(--border);border-radius:99px;padding:3px 10px;color:var(--text2)}
+.warnbox{background:rgba(179,38,30,.07);border:1px solid rgba(179,38,30,.35);border-radius:6px;
+  padding:10px;font-size:12.5px;line-height:1.6;margin-top:10px}
+html[data-theme="dark"] .warnbox{background:rgba(255,123,114,.09);border-color:rgba(255,123,114,.4)}
+.warnbox .wtitle{display:flex;align-items:center;gap:6px;font-weight:700;color:var(--danger);margin-bottom:6px}
+.warnbox .resp{margin-top:8px;font-weight:600;color:var(--text)}
+.mt{margin-top:12px}
+.shield.gray .label{color:var(--text2)}
+.note-inline{font-size:12px;color:var(--text3);max-width:230px;line-height:1.5}
+
 /* ═══ نظام الأيقونات (SVG · ليست إيموجي) ═══ */
 .i{width:18px;height:18px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.75;
   stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px;display:inline-block}
@@ -258,6 +283,7 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
   <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6"/><path d="M20 4l-8.5 8.5"/><path d="M18 14v4.6A1.4 1.4 0 0 1 16.6 20H5.4A1.4 1.4 0 0 1 4 18.6V7.4A1.4 1.4 0 0 1 5.4 6H10"/></symbol>
   <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
   <symbol id="i-x" viewBox="0 0 24 24"><path d="M6.5 6.5l11 11"/><path d="M17.5 6.5l-11 11"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="7" y="5" width="3.6" height="14" rx="1.4"/><rect x="13.4" y="5" width="3.6" height="14" rx="1.4"/></symbol>
   <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 21V6"/><path d="M9 9l3-3 3 3"/><rect x="10" y="17" width="4" height="4" rx="1"/><path d="M12 12.5l-4-2V8"/><circle cx="8" cy="7" r="1.6"/></symbol>
   <symbol id="i-arrow-r" viewBox="0 0 24 24"><path d="M4 12h15"/><path d="M13.5 6.5L20 12l-6.5 5.5"/></symbol>
   <symbol id="i-folder" viewBox="0 0 24 24"><path d="M3.5 7.6A1.6 1.6 0 0 1 5.1 6h4l2 2.4h6.8a1.6 1.6 0 0 1 1.6 1.6v7.4a1.6 1.6 0 0 1-1.6 1.6H5.1a1.6 1.6 0 0 1-1.6-1.6V7.6z"/></symbol>
@@ -323,6 +349,55 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
         <div class="td" data-k="trust.3d">بلا حدث = بلا نافذة. ≤ 3 إشعارات يوميًا. لا Modal أبدًا.</div></div>
       <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-scale"/></svg></div><div class="tt" data-k="trust.4t">معرفة العواقب</div>
         <div class="td" data-k="trust.4d">عاقبة كل زر مكتوبة قبله لا بعده. والخيار الآمن هو الظاهر.</div></div>
+    </div>
+  </section>
+
+  <!-- ══════════ 1c. الإيقاف: مستويان ══════════ -->
+  <section class="sec review-only">
+    <h2><svg class="i"><use href="#i-pause"/></svg><span data-k="lvl.title">الإيقاف — مستويان لا مستوى واحد</span></h2>
+    <p class="hint" data-k="lvl.hint">المستخدم يملك جهازه · نُخبره ونتركه يقرر · والمسؤولية عليه</p>
+
+    <div class="lvlgrid">
+      <div class="lvcard calm">
+        <div class="lvhead"><svg class="i"><use href="#i-calm"/></svg><b data-k="lvl1.name">إسكات التنبيهات</b></div>
+        <div class="lvbody" data-k="lvl1.body">لا نافذة، لا إشعار، لا صوت. لكن الفحص والمنع يستمران في الخلفية: أي ملف مصاب يُعزل بصمت ويُعرض عليك عند العودة.</div>
+        <div class="lvrows">
+          <div class="lvrow"><span data-k="lvl.what_stops">ما يتوقف</span><b data-k="lvl1.stops">التنبيهات فقط</b></div>
+          <div class="lvrow"><span data-k="lvl.what_continues">ما يستمر</span><b data-k="lvl1.cont">الجدران الثلاثة</b></div>
+          <div class="lvrow"><span data-k="lvl.app">التطبيق</span><b data-k="lvl1.app">يعمل · يفحص · يمنع · لا يسأل</b></div>
+        </div>
+        <div class="chips">
+          <span class="chip" data-k="lvl.d10">١٠ دقائق</span><span class="chip" data-k="lvl.d30">٣٠ دقيقة</span>
+          <span class="chip" data-k="lvl.d60">ساعة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
+        </div>
+      </div>
+
+      <div class="lvcard danger">
+        <div class="lvhead"><svg class="i"><use href="#i-stop"/></svg><b data-k="lvl2.name">إيقاف الحماية</b></div>
+        <div class="lvbody" data-k="lvl2.body">لا فحص، لا منع، لا تنبيه. الخدمة تبقى مشغّلة لكن خاملة. جهازك غير محمي تمامًا.</div>
+        <div class="warnbox">
+          <div class="wtitle"><svg class="i sm"><use href="#i-alert"/></svg><span data-k="disable.warning_title">خطر شديد</span></div>
+          <div data-k="lvl2.warn">لن نتوقف عن التنبيه — سنتوقف عن الحماية. لن يُفحص ملف ولن يُمنع تهديد.</div>
+          <div class="resp" data-k="lvl2.resp">القرار قرارك، والمسؤولية عليك أثناء هذه المدة.</div>
+        </div>
+        <div class="chips">
+          <span class="chip" data-k="lvl.d30">٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
+          <span class="chip" data-k="lvl.dpeak">حتى نهاية ساعة الذروة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
+        </div>
+        <div class="note" style="margin-top:10px" data-k="lvl.no_permanent">لا توجد مدة «دائمة». أقصى إيقاف ينتهي بإعادة التشغيل — وهذا الحدّ الوحيد الذي نفرضه.</div>
+      </div>
+    </div>
+
+    <div class="app mt">
+      <div class="shield gray">
+        <svg width="64" height="64" viewBox="0 0 24 24" class="i" style="width:64px;height:64px;stroke-width:1.4;color:var(--text3)"><use href="#i-shield"/></svg>
+        <div class="label" data-k="lvl.state_off">الحماية موقوفة</div>
+        <div class="sub" data-k="lvl.state_off_sub">حتى 14:30 · بقرارك</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" data-k="action.turn_on">أعد الحماية</button>
+        <span class="note-inline" data-k="disable.re_enable_note">تستطيع إعادتها في أي لحظة — بلا كلمة مرور.</span>
+      </div>
     </div>
   </section>
 
@@ -516,6 +591,7 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
 /* ══════════ النصوص — مأخوذة من locales/*.ftl ══════════ */
 const T = {
   ar: {
+    'lvl.title':'الإيقاف — مستويان لا مستوى واحد','lvl.hint':'المستخدم يملك جهازه · نُخبره ونتركه يقرر · والمسؤولية عليه','lvl1.name':'إسكات التنبيهات','lvl1.body':'لا نافذة، لا إشعار، لا صوت. لكن الفحص والمنع يستمران في الخلفية: أي ملف مصاب يُعزل بصمت ويُعرض عليك عند العودة.','lvl.what_stops':'ما يتوقف','lvl1.stops':'التنبيهات فقط','lvl.what_continues':'ما يستمر','lvl1.cont':'الجدران الثلاثة','lvl.app':'التطبيق','lvl1.app':'يعمل · يفحص · يمنع · لا يسأل','lvl2.name':'إيقاف الحماية','lvl2.body':'لا فحص، لا منع، لا تنبيه. الخدمة تبقى مشغّلة لكن خاملة. جهازك غير محمي تمامًا.','lvl2.warn':'لن نتوقف عن التنبيه — سنتوقف عن الحماية. لن يُفحص ملف ولن يُمنع تهديد.','lvl2.resp':'القرار قرارك، والمسؤولية عليك أثناء هذه المدة.','lvl.d10':'١٠ دقائق','lvl.d30':'٣٠ دقيقة','lvl.d60':'ساعة','lvl.dpeak':'حتى نهاية ساعة الذروة','lvl.dreboot':'حتى إعادة التشغيل','lvl.no_permanent':'لا توجد مدة «دائمة». أقصى إيقاف ينتهي بإعادة التشغيل — وهذا الحدّ الوحيد الذي نفرضه.','lvl.state_off':'الحماية موقوفة','lvl.state_off_sub':'حتى 14:30 · بقرارك',
     'trust.title':'أسس الثقة — دستور الواجهة','trust.sub':'كل شاشة تُقاس على هذه الأربعة. وعند التعارض: الأمان ← عدم الإزعاج ← الوضوح ← البساطة ← الجمال.','trust.1t':'الوضوح','trust.1d':'نقول ما حدث، لا ما هو التقنية. جملة واحدة. ولا «تمّ» بلا سبب.','trust.2t':'البساطة','trust.2d':'زرّان كحد أقصى. خيار واحد أساسي. صفر إعداد مطلوب.','trust.3t':'الطمأنينة','trust.3d':'بلا حدث = بلا نافذة. ≤ 3 إشعارات يوميًا. لا Modal أبدًا.','trust.4t':'معرفة العواقب','trust.4d':'عاقبة كل زر مكتوبة قبله لا بعده. والخيار الآمن هو الظاهر.',
     'alert.confirmed.cta':'فتح صندوق العزل','word.isolated':'معزول','word.temporary':'مؤقتًا','tip.quarantine':'نقلناه إلى مخزن مشفّر — مكانه الأصلي محفوظ ويمكن استرجاعه.','tip.suspended':'أوقفناه الآن. سيعود للعمل إذا سمحت له.','quarantine.keep':'احتفظ به','quarantine.delete':'حذف نهائي','quarantine.hint':'كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا','quarantine.title':'3 · صندوق العزل — هنا فقط يوجد «حذف»','q.reason1':'تهديد مؤكد','q.reason2':'أداة كسر حماية','tips.legend':'الشرح عند الطلب:','tips.body':'مرّر المؤشر فوق الكلمة المسطّرة لترى سطرًا واحدًا · اضغطها ليفتح بحثًا شارحًا بلغتك (Google · Baidu · Yahoo Japan · Yandex).','sec.alerts':'2 · التنبيهات','sec.alerts.hint':'نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب',
     'path.label':'المسار','path.open_folder':'فتح المجلد','path.copy':'نسخ المسار',
@@ -546,6 +622,7 @@ const T = {
     'notes.5t':'ما ينقص هذه المعاينة:','notes.5b':'الـlogotype، وأيقونة التطبيق داخل شريط المهام، وحالات الخطأ — تُراجع منفصلة (R3).'
   },
   en: {
+    'lvl.title':'Turning off — two levels, not one','lvl.hint':'You own your device · we inform and let you decide · the responsibility is yours','lvl1.name':'Silence the alerts','lvl1.body':'No window, no notification, no sound. Scanning and blocking continue in the background: any infected file is isolated silently and shown to you when you return.','lvl.what_stops':'What stops','lvl1.stops':'The alerts only','lvl.what_continues':'What continues','lvl1.cont':'All three walls','lvl.app':'The app','lvl1.app':'runs · scans · blocks · asks nothing','lvl2.name':'Turn protection off','lvl2.body':'No scanning, no blocking, no alerts. The service stays running but idle. Your device is completely unprotected.','lvl2.warn':'We do not stop alerting — we stop protecting. No file is scanned and no threat blocked.','lvl2.resp':'The decision is yours, and so is the responsibility for that period.','lvl.d10':'10 min','lvl.d30':'30 min','lvl.d60':'1 hour','lvl.dpeak':'Until peak hour ends','lvl.dreboot':'Until I restart','lvl.no_permanent':'There is no “permanent”. The longest option ends with a restart — the only limit we impose.','lvl.state_off':'Protection is off','lvl.state_off_sub':'until 14:30 · by your decision',
     'trust.title':'Trust foundations — the UI constitution','trust.sub':'Every screen is measured against these four. On conflict: safety → no interruption → clarity → simplicity → beauty.','trust.1t':'Clarity','trust.1d':'We say what happened, not how it works. One sentence. No “done” without a reason.','trust.2t':'Simplicity','trust.2d':'Two buttons at most. One primary action. Zero setup required.','trust.3t':'Calm','trust.3d':'No event = no window. ≤ 3 notifications a day. Never a modal.','trust.4t':'Known consequences','trust.4d':'Every button states its outcome before you press it. The safe choice is the visible one.',
     'alert.confirmed.cta':'Open quarantine','word.isolated':'isolated','word.temporary':'temporarily','tip.quarantine':'Moved to an encrypted store — its original location is kept and it can be restored.','tip.suspended':'We stopped it now. It works again only if you allow it.','quarantine.keep':'Keep it','quarantine.delete':'Delete permanently','quarantine.hint':'everything stays until you decide · never auto-deleted','quarantine.title':'3 · Quarantine — the only place with “delete”','q.reason1':'Confirmed threat','q.reason2':'Cracking tool','tips.legend':'Explanation on demand:','tips.body':'Hover the underlined word for one line · click it to open an explaining search in your language (Google · Baidu · Yahoo Japan · Yandex).','sec.alerts':'2 · Alerts','sec.alerts.hint':'less text · no delete button at all · explanation on request',
     'path.label':'Path','path.open_folder':'Open folder','path.copy':'Copy path',
@@ -576,6 +653,7 @@ const T = {
     'notes.5t':'Not covered here:','notes.5b':'logotype, tray icon and error states — reviewed separately (R3).'
   },
   'zh-Hans': {
+    'lvl.title':'关闭 —— 两个层级，不是一个','lvl.hint':'设备属于你 · 我们告知，由你决定 · 责任在你','lvl1.name':'静音提示','lvl1.body':'没有窗口、通知或声音。但扫描与拦截仍在后台运行：任何受感染文件会被静默隔离，并在你回来时呈现。','lvl.what_stops':'停止的部分','lvl1.stops':'仅提示','lvl.what_continues':'继续的部分','lvl1.cont':'三道防线','lvl.app':'应用状态','lvl1.app':'运行 · 扫描 · 拦截 · 不打扰','lvl2.name':'关闭保护','lvl2.body':'不扫描、不拦截、不提示。服务仍在运行但处于空闲。你的设备完全失去保护。','lvl2.warn':'我们不是停止提示 —— 我们停止保护。不会扫描任何文件，也不会拦截任何威胁。','lvl2.resp':'这是你的决定，这段时间的责任由你承担。','lvl.d10':'10 分钟','lvl.d30':'30 分钟','lvl.d60':'1 小时','lvl.dpeak':'直到高峰时段结束','lvl.dreboot':'直到重启','lvl.no_permanent':'没有“永久”。最长选项在重启时结束 —— 这是我们唯一的限制。','lvl.state_off':'保护已关闭','lvl.state_off_sub':'至 14:30 · 你的决定',
     'trust.title':'信任基础 — 界面宪法','trust.sub':'每个界面都用这四条衡量。冲突时：安全 → 不打扰 → 清晰 → 简洁 → 美观。','trust.1t':'清晰','trust.1d':'我们说发生了什么，而不是技术原理。一句话。没有理由就不说“完成”。','trust.2t':'简洁','trust.2d':'最多两个按钮。一个主要操作。无需任何设置。','trust.3t':'安心','trust.3d':'无事件就不弹窗。每天最多 3 条通知。绝不使用模态框。','trust.4t':'后果可知','trust.4d':'每个按钮在按下前就写明后果。安全的选项最显眼。',
     'alert.confirmed.cta':'打开隔离区','word.isolated':'已隔离','word.temporary':'暂时','tip.quarantine':'已移至加密存储——原位置保留，可随时恢复。','tip.suspended':'现在已停止。只有你允许后才会恢复。','quarantine.keep':'保留','quarantine.delete':'永久删除','quarantine.hint':'一切都会保留，直到你决定 · 绝不自动删除','quarantine.title':'3 · 隔离区 —— 唯一有“删除”的地方','q.reason1':'已确认威胁','q.reason2':'破解工具','tips.legend':'按需查看说明：','tips.body':'将鼠标移到带下划线的词上查看一行说明 · 单击可用你的语言打开解释搜索（Google · 百度 · Yandex）。','sec.alerts':'2 · 提示','sec.alerts.hint':'更少文字 · 完全没有删除按钮 · 按需说明',
     'path.label':'路径','path.open_folder':'打开文件夹','path.copy':'复制路径',
@@ -606,6 +684,7 @@ const T = {
     'notes.5t':'本预览未包含：','notes.5b':'文字标志、托盘图标与错误状态——另行评审（R3）。'
   },
   ja: {
+    'lvl.title':'オフにする — 1 段階ではなく 2 段階','lvl.hint':'端末はあなたのもの · 私たちは伝え、判断はあなたに · 責任もあなたに','lvl1.name':'通知を静める','lvl1.body':'ウィンドウも通知も音も出しません。ただし検査と阻止はバックグラウンドで続きます。感染ファイルは静かに隔離され、戻ったときに表示します。','lvl.what_stops':'止まるもの','lvl1.stops':'通知だけ','lvl.what_continues':'続くもの','lvl1.cont':'3 つの壁すべて','lvl.app':'アプリ','lvl1.app':'動作 · 検査 · 阻止 · 尋ねない','lvl2.name':'保護をオフにする','lvl2.body':'検査も阻止も通知も行いません。サービスは動いたまま休止します。端末は完全に無防備です。','lvl2.warn':'通知を止めるのではなく、保護を止めます。ファイルは検査されず、脅威は阻止されません。','lvl2.resp':'これはあなたの判断であり、その間の責任はあなたにあります。','lvl.d10':'10 分','lvl.d30':'30 分','lvl.d60':'1 時間','lvl.dpeak':'ピーク時間の終了まで','lvl.dreboot':'再起動まで','lvl.no_permanent':'「永久」はありません。最長でも再起動で終わります — これが唯一の制限です。','lvl.state_off':'保護はオフです','lvl.state_off_sub':'14:30 まで · あなたの判断',
     'trust.title':'信頼の基盤 — UI 憲章','trust.sub':'すべての画面をこの 4 つで測ります。衝突時：安全 → 邪魔しない → 明快 → 簡潔 → 美しさ。','trust.1t':'明快','trust.1d':'技術ではなく、何が起きたかを伝えます。一文で。「完了」だけは言いません。','trust.2t':'簡潔','trust.2d':'ボタンは最大 2 つ。主要操作は 1 つ。設定は不要。','trust.3t':'安心','trust.3d':'問題がなければ窓は出しません。通知は 1 日 3 件まで。モーダルは使いません。','trust.4t':'結果がわかる','trust.4d':'各ボタンは押す前に結果を書きます。安全な選択が目立つ位置に。',
     'alert.confirmed.cta':'隔離箱を開く','word.isolated':'隔離済み','word.temporary':'一時的に','tip.quarantine':'暗号化された保管庫へ移動しました。元の場所は保持され、復元できます。','tip.suspended':'今は停止しています。許可した場合のみ再び動作します。','quarantine.keep':'保持する','quarantine.delete':'完全に削除','quarantine.hint':'あなたが決めるまですべて残ります · 自動削除はありません','quarantine.title':'3 · 隔離箱 — 「削除」があるのはここだけ','q.reason1':'確認済みの脅威','q.reason2':'クラックツール','tips.legend':'必要なときに説明：','tips.body':'下線のある語にマウスを置くと 1 行表示 · クリックで母語の解説検索を開きます（Google · Yahoo! JAPAN · Yandex）。','sec.alerts':'2 · 通知','sec.alerts.hint':'文を短く · 削除ボタンは一切なし · 説明は必要時に',
     'path.label':'パス','path.open_folder':'フォルダーを開く','path.copy':'パスをコピー',
@@ -636,6 +715,7 @@ const T = {
     'notes.5t':'このプレビューに無いもの：','notes.5b':'ロゴタイプ、タスクトレイのアイコン、エラー状態 — 別途レビュー（R3）。'
   },
   es: {
+    'lvl.title':'Desactivar — dos niveles, no uno','lvl.hint':'El dispositivo es tuyo · informamos y tú decides · la responsabilidad es tuya','lvl1.name':'Silenciar los avisos','lvl1.body':'Sin ventanas, ni notificaciones, ni sonido. El análisis y el bloqueo continúan en segundo plano: cualquier archivo infectado se aísla en silencio y se te muestra al volver.','lvl.what_stops':'Qué se detiene','lvl1.stops':'Solo los avisos','lvl.what_continues':'Qué continúa','lvl1.cont':'Los tres muros','lvl.app':'La aplicación','lvl1.app':'funciona · analiza · bloquea · no pregunta','lvl2.name':'Desactivar la protección','lvl2.body':'Sin análisis, sin bloqueo, sin avisos. El servicio sigue activo pero inactivo. Tu equipo queda sin protección total.','lvl2.warn':'No dejamos de avisar: dejamos de proteger. No se analiza ningún archivo ni se bloquea ninguna amenaza.','lvl2.resp':'La decisión es tuya, y la responsabilidad también durante ese periodo.','lvl.d10':'10 min','lvl.d30':'30 min','lvl.d60':'1 hora','lvl.dpeak':'Hasta que acabe la hora punta','lvl.dreboot':'Hasta que reinicie','lvl.no_permanent':'No existe «permanente». La opción más larga termina con un reinicio: el único límite que imponemos.','lvl.state_off':'Protección desactivada','lvl.state_off_sub':'hasta las 14:30 · por tu decisión',
     'trust.title':'Bases de la confianza — constitución de la interfaz','trust.sub':'Cada pantalla se mide con estas cuatro. En conflicto: seguridad → no molestar → claridad → sencillez → estética.','trust.1t':'Claridad','trust.1d':'Decimos qué pasó, no cómo funciona. Una frase. Sin «hecho» sin motivo.','trust.2t':'Sencillez','trust.2d':'Dos botones como máximo. Una acción principal. Cero configuración.','trust.3t':'Calma','trust.3d':'Sin evento, sin ventana. ≤ 3 avisos al día. Nunca un modal.','trust.4t':'Consecuencias claras','trust.4d':'Cada botón dice su resultado antes de pulsarlo. La opción segura es la visible.',
     'alert.confirmed.cta':'Abrir cuarentena','word.isolated':'aislado','word.temporary':'temporalmente','tip.quarantine':'Se movió a un almacén cifrado — su ubicación original se conserva.','tip.suspended':'Lo detuvimos ahora. Solo vuelve a funcionar si lo permites.','quarantine.keep':'Conservarlo','quarantine.delete':'Eliminar permanentemente','quarantine.hint':'todo permanece hasta que tú decidas · nunca se borra solo','quarantine.title':'3 · Cuarentena — el único lugar con «eliminar»','q.reason1':'Amenaza confirmada','q.reason2':'Herramienta de crackeo','tips.legend':'Explicación a pedido:','tips.body':'Pasa el cursor por la palabra subrayada para una línea · haz clic para abrir una búsqueda explicativa en tu idioma (Google · Baidu · Yandex).','sec.alerts':'2 · Alertas','sec.alerts.hint':'menos texto · sin botón de eliminar · explicación a pedido',
     'path.label':'Ruta','path.open_folder':'Abrir carpeta','path.copy':'Copiar ruta',
@@ -666,6 +746,7 @@ const T = {
     'notes.5t':'No incluido aquí:','notes.5b':'logotipo, icono de bandeja y estados de error — se revisan aparte (R3).'
   },
   ru: {
+    'lvl.title':'Отключение — два уровня, не один','lvl.hint':'Устройство ваше · мы сообщаем, решение за вами · ответственность тоже','lvl1.name':'Заглушить уведомления','lvl1.body':'Без окон, уведомлений и звука. Но проверка и блокировка продолжаются в фоне: заражённый файл изолируется молча и будет показан по возвращении.','lvl.what_stops':'Что останавливается','lvl1.stops':'Только уведомления','lvl.what_continues':'Что продолжается','lvl1.cont':'Все три стены','lvl.app':'Приложение','lvl1.app':'работает · проверяет · блокирует · не спрашивает','lvl2.name':'Отключить защиту','lvl2.body':'Без проверки, блокировки и уведомлений. Служба работает, но простаивает. Устройство полностью без защиты.','lvl2.warn':'Мы не просто перестаём уведомлять — мы перестаём защищать. Ни один файл не проверяется и ни одна угроза не блокируется.','lvl2.resp':'Это ваше решение, и ответственность в этот период на вас.','lvl.d10':'10 минут','lvl.d30':'30 минут','lvl.d60':'1 час','lvl.dpeak':'До конца часа пик','lvl.dreboot':'До перезагрузки','lvl.no_permanent':'«Навсегда» нет. Самый долгий вариант заканчивается перезагрузкой — единственное ограничение.','lvl.state_off':'Защита отключена','lvl.state_off_sub':'до 14:30 · по вашему решению',
     'trust.title':'Основы доверия — конституция интерфейса','trust.sub':'Каждый экран проверяется по этим четырём. При конфликте: безопасность → не мешать → ясность → простота → красота.','trust.1t':'Ясность','trust.1d':'Говорим, что случилось, а не как устроено. Одно предложение. Без «готово» без причины.','trust.2t':'Простота','trust.2d':'Не более двух кнопок. Одно главное действие. Настройка не нужна.','trust.3t':'Спокойствие','trust.3d':'Нет события — нет окна. ≤ 3 уведомлений в день. Никаких модальных окон.','trust.4t':'Понятные последствия','trust.4d':'Каждая кнопка сообщает результат до нажатия. Безопасный выбор — заметный.',
     'alert.confirmed.cta':'Открыть изолятор','word.isolated':'изолирован','word.temporary':'временно','tip.quarantine':'Перемещён в зашифрованное хранилище — исходное расположение сохранено.','tip.suspended':'Мы остановили его сейчас. Он вернётся только с вашего разрешения.','quarantine.keep':'Оставить','quarantine.delete':'Удалить навсегда','quarantine.hint':'всё остаётся, пока вы не решите · автоудаления нет','quarantine.title':'3 · Изолятор — единственное место с «удалить»','q.reason1':'Подтверждённая угроза','q.reason2':'Средство взлома','tips.legend':'Объяснение по запросу:','tips.body':'Наведите на подчёркнутое слово — одна строка · нажмите, чтобы открыть поясняющий поиск на вашем языке (Google · Яндекс).','sec.alerts':'2 · Уведомления','sec.alerts.hint':'меньше текста · кнопки удаления нет · объяснение по запросу',
     'path.label':'Путь','path.open_folder':'Открыть папку','path.copy':'Копировать путь',
@@ -696,6 +777,7 @@ const T = {
     'notes.5t':'Чего нет в превью:','notes.5b':'логотип, значок в трее и состояния ошибок — отдельная проверка (R3).'
   },
   hi: {
+    'lvl.title':'बंद करना — एक नहीं, दो स्तर','lvl.hint':'डिवाइस आपका है · हम बताते हैं, निर्णय आपका · ज़िम्मेदारी भी आपकी','lvl1.name':'सूचनाएँ शांत करें','lvl1.body':'कोई विंडो, सूचना या ध्वनि नहीं। लेकिन जाँच और रोक पृष्ठभूमि में चलती रहती है: संक्रमित फ़ाइल चुपचाप अलग की जाती है और लौटने पर दिखाई जाती है।','lvl.what_stops':'क्या रुकता है','lvl1.stops':'सिर्फ़ सूचनाएँ','lvl.what_continues':'क्या चलता रहता है','lvl1.cont':'तीनों दीवारें','lvl.app':'ऐप','lvl1.app':'चलता · जाँचता · रोकता · पूछता नहीं','lvl2.name':'सुरक्षा बंद करें','lvl2.body':'न जाँच, न रोक, न सूचना। सेवा चलती रहती है पर खाली। आपका डिवाइस पूरी तरह असुरक्षित है।','lvl2.warn':'हम सूचनाएँ नहीं, सुरक्षा रोक रहे हैं। कोई फ़ाइल जाँची नहीं जाएगी और कोई ख़तरा नहीं रुकेगा।','lvl2.resp':'यह आपका निर्णय है और उस अवधि की ज़िम्मेदारी आपकी।','lvl.d10':'10 मिनट','lvl.d30':'30 मिनट','lvl.d60':'1 घंटा','lvl.dpeak':'व्यस्त घंटे के अंत तक','lvl.dreboot':'रीस्टार्ट तक','lvl.no_permanent':'“हमेशा के लिए” नहीं है। सबसे लंबा विकल्प रीस्टार्ट पर खत्म होता है — यही हमारी एकमात्र सीमा है।','lvl.state_off':'सुरक्षा बंद है','lvl.state_off_sub':'14:30 तक · आपके निर्णय से',
     'trust.title':'विश्वास की नींव — इंटरफ़ेस संविधान','trust.sub':'हर स्क्रीन इन चार पर परखी जाती है। टकराव में: सुरक्षा → बिना टोकना → स्पष्टता → सरलता → सौंदर्य।','trust.1t':'स्पष्टता','trust.1d':'हम बताते हैं क्या हुआ, न कि तकनीक कैसे चलती है। एक वाक्य। बिना कारण “हो गया” नहीं।','trust.2t':'सरलता','trust.2d':'अधिकतम दो बटन। एक मुख्य क्रिया। कोई सेटअप नहीं।','trust.3t':'सुकून','trust.3d':'घटना नहीं = विंडो नहीं। दिन में ≤ 3 सूचनाएँ। कभी मोडल नहीं।','trust.4t':'नतीजे पता हों','trust.4d':'हर बटन दबाने से पहले नतीजा लिखा हो। सुरक्षित विकल्प सामने हो।',
     'alert.confirmed.cta':'क्वारंटीन खोलें','word.isolated':'अलग किया','word.temporary':'अस्थायी रूप से','tip.quarantine':'एन्क्रिप्टेड भंडार में ले जाया गया — मूल स्थान सुरक्षित है।','tip.suspended':'अभी रोका गया। अनुमति देने पर ही दोबारा चलेगा।','quarantine.keep':'रखें','quarantine.delete':'स्थायी रूप से हटाएँ','quarantine.hint':'आपके निर्णय तक सब रहता है · कभी अपने आप नहीं हटता','quarantine.title':'3 · क्वारंटीन — «हटाएँ» केवल यहीं','q.reason1':'पुष्ट ख़तरा','q.reason2':'क्रैकिंग टूल','tips.legend':'ज़रूरत पर व्याख्या:','tips.body':'रेखांकित शब्द पर माउस ले जाएँ — one line · क्लिक करने पर आपकी भाषा में समझाने वाली खोज खुलेगी (Google · Baidu · Yandex)।','sec.alerts':'2 · चेतावनियाँ','sec.alerts.hint':'कम पाठ · कोई हटाएँ बटन नहीं · ज़रूरत पर व्याख्या',
     'path.label':'पथ','path.open_folder':'फ़ोल्डर खोलें','path.copy':'पथ कॉपी करें',

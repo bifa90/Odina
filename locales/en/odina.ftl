@@ -95,7 +95,7 @@ pause.duration.30 = 30 minutes
 pause.duration.60 = 1 hour
 pause.warning = We stop the alerts until { $until }. We are still protecting you.
 pause.confirm = Confirm
-pause.badge = Protection is paused
+pause.badge = Alerts paused · protection still on
 
 ## ── Status / errors ──────────────────────────────────────
 error.generic = Something went wrong. We did not change anything.
@@ -124,3 +124,26 @@ quarantine.cleanup_title = In quarantine for { $days } days
 quarantine.cleanup_choose = Delete the ones I selected
 error.false_positive = We got this file wrong — fixed.
 error.locked = Could not isolate it: the file is open right now.
+
+## ── Turn protection off (user's explicit decision) ────────
+pause.confirm_disable = Turn protection off for { $minutes} minutes
+disable.title = Turn protection off
+disable.warning_title = Serious risk
+disable.body = We do not just stop the alerts — we stop protecting. No file will be scanned and no threat blocked. Your device is completely unprotected.
+disable.responsibility = This is your decision, and the responsibility is yours for that period.
+disable.choose = Choose a duration
+disable.duration.peak = Until the peak hour ends
+disable.duration.30 = 30 minutes
+disable.duration.60 = 1 hour
+disable.duration.until_reboot = Until I restart
+disable.refused = Protection cannot be turned off right now
+disable.refused_quarantine = There is a quarantined file you have not decided on yet. Review it first.
+disable.refused_scanning = A scan is running. Wait for it or stop it first.
+disable.refused_active_threat = An unresolved threat is still open. We will not turn protection off while it is.
+state.unprotected = Protection is off
+state.unprotected_until = Protection off until { $until}
+state.unprotected_badge = Unprotected — by your decision
+action.turn_off = Turn protection off
+action.turn_on = Turn protection back on
+disable.re_enable_note = You can turn protection back on at any moment — no password.
+disable.reminder = { $minutes} minutes left before protection comes back automatically.
