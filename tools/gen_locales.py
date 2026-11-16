@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
+
 """Bootstrap locale files from a shared key list.
 
 Manual review is REQUIRED for every generated file (see §30.2 T-A/T-B levels).

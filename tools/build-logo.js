@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+/* SPDX-License-Identifier: MIT
+   Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS) */
 /**
  * Odina logo build — generates every shipped asset from the vector sources.
  * No external deps besides `sharp`. Run: node tools/build-logo.js
