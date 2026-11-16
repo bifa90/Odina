@@ -66,13 +66,20 @@ jobs:
           cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 | grep -E '^(error|warning)(\[|:)' | head -10 | while read -r l; do echo "::error::INST $l"; done
           echo done
 
+      - name: clippy -D skip, plain output
+        continue-on-error: true
+        run: |
+          cargo clippy --workspace --all-targets --locked 2>&1 | grep -E '^(error|warning)' | head -10 \
+            | while read -r l; do echo "::error::PLAIN $l"; done
+          echo done
+
       - name: instrument detail
         continue-on-error: true
         run: |
           cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 | grep -E '^ +--> ' | head -10 | while read -r l; do echo "::error::IAT $l"; done
           echo done
 
-      - name: publish the report through the contents API
+      - name: (unused) publish
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
