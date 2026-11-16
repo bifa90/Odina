@@ -155,3 +155,4 @@ action.turn_off = إيقاف الحماية
 action.turn_on = أعد الحماية
 disable.re_enable_note = تستطيع إعادة الحماية في أي لحظة — بلا كلمة مرور.
 disable.reminder = لديك { $minutes } دقيقة متبقية على إعادة الحماية تلقائيًا.
+pause.resume_report = أثناء الإسكات: { $count } ملفًا عُزل

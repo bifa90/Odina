@@ -116,3 +116,4 @@ action.turn_off = 关闭保护
 action.turn_on = 重新开启保护
 disable.re_enable_note = 你随时可以重新开启保护——无需密码。
 disable.reminder = 距保护自动恢复还有 { $minutes} 分钟。
+pause.resume_report = 暂停提示期间：已隔离 { $count} 个文件

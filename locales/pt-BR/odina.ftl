@@ -116,3 +116,4 @@ action.turn_off = Desligar a proteção
 action.turn_on = Religar a proteção
 disable.re_enable_note = Você pode religar a proteção a qualquer momento — sem senha.
 disable.reminder = Faltam { $minutes} minutos para a proteção voltar sozinha.
+pause.resume_report = Enquanto os avisos estavam pausados: { $count} arquivo(s) isolado(s)

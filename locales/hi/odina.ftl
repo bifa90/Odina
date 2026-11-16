@@ -116,3 +116,4 @@ action.turn_off = सुरक्षा बंद करें
 action.turn_on = सुरक्षा फिर चालू करें
 disable.re_enable_note = आप कभी भी सुरक्षा फिर चालू कर सकते हैं — बिना पासवर्ड।
 disable.reminder = { $minutes } मिनट बाद सुरक्षा अपने आप लौट आएगी।
+pause.resume_report = सूचनाएँ रुकी रहने के दौरान: { $count } फ़ाइल अलग की गई

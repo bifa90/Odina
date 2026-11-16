@@ -116,3 +116,4 @@ action.turn_off = Schutz ausschalten
 action.turn_on = Schutz wieder einschalten
 disable.re_enable_note = Du kannst den Schutz jederzeit wieder einschalten — ohne Passwort.
 disable.reminder = Noch { $minutes} Minuten, dann kommt der Schutz automatisch zurück.
+pause.resume_report = Während die Hinweise pausiert waren: { $count} Datei(en) isoliert

@@ -116,3 +116,4 @@ action.turn_off = 保護をオフにする
 action.turn_on = 保護を戻す
 disable.re_enable_note = いつでも保護を戻せます — パスワード不要。
 disable.reminder = 保護が自動で戻るまで残り { $minutes} 分。
+pause.resume_report = 通知を止めていた間に { $count} 件を隔離しました

@@ -116,3 +116,4 @@ action.turn_off = Désactiver la protection
 action.turn_on = Réactiver la protection
 disable.re_enable_note = Vous pouvez réactiver la protection à tout moment, sans mot de passe.
 disable.reminder = Encore { $minutes} minutes avant le retour automatique de la protection.
+pause.resume_report = Pendant la pause des alertes : { $count} fichier(s) isolé(s)

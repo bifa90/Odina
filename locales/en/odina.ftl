@@ -147,3 +147,4 @@ action.turn_off = Turn protection off
 action.turn_on = Turn protection back on
 disable.re_enable_note = You can turn protection back on at any moment — no password.
 disable.reminder = { $minutes} minutes left before protection comes back automatically.
+pause.resume_report = While alerts were paused: { $count} file(s) isolated

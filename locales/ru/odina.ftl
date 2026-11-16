@@ -116,3 +116,4 @@ action.turn_off = Отключить защиту
 action.turn_on = Включить защиту снова
 disable.re_enable_note = Включить защиту можно в любой момент — без пароля.
 disable.reminder = Через { $minutes} мин. защита включится автоматически.
+pause.resume_report = Пока уведомления были на паузе: изолировано { $count}
