@@ -43,13 +43,24 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: clippy
-        run: cargo clippy --workspace --all-targets --locked -- -D warnings
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings
 
       - name: build
         run: cargo build --workspace --locked
 
       - name: test
         run: cargo test --workspace --locked
+
+      # The instrumented build is a second build of the same source, and it is
+      # NOT covered by the workspace test above unless it is built on purpose.
+      # It gets built, linted and tested here so "the check build compiles" is
+      # a fact CI maintains rather than a claim made once.
+      - name: check build (instrumented)
+        run: |
+          cargo build --package odina-cli --features instrument --locked
+          cargo test --package odina-cli --features instrument --locked
 
       - name: doc
         if: matrix.os == 'ubuntu-latest'

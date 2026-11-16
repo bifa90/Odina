@@ -22,6 +22,22 @@
 //!   * nothing is blocked, isolated, or deleted. This command only looks.
 //!
 //! Run `odina selftest` to verify the engine against the standard test file.
+//!
+//! ## Two builds, one source
+//!
+//! The public build has no measurement code in it at all: `odina-report` and
+//! `odina-instrument` are optional dependencies, so a default build does not
+//! link them. The instrumented build (`--features instrument`) adds one
+//! command, `check`, which writes a local JSON file of counts and timings, and
+//! can export an `odina-report/v1` object for each file that would interrupt
+//! the user. Nothing is ever sent — the file is the user's to send or delete.
+//! See `docs/instrumented-build.md`.
+
+// Compiled only for the check build, or for this crate's own tests. In the
+// public build the module does not exist, and neither does the dependency it
+// needs.
+#[cfg(any(feature = "instrument", test))]
+mod check;
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -36,6 +52,7 @@ odina — scan one file and print the decision (gate G1)
 USAGE:
     odina scan <path> [--json] [--recursive]
     odina selftest                 # in memory: writes nothing to disk
+    odina check <path> [--out <file>]   # instrumented build only
     odina --version | --help
 
 EXIT CODES:
@@ -44,7 +61,10 @@ EXIT CODES:
     1   the command itself failed (missing file, unreadable, bad usage)
 
 A directory is scanned one level deep unless --recursive is given.
-This binary never blocks, isolates, or deletes anything. It only reads.";
+This binary never blocks, isolates, or deletes anything. It only reads.
+
+`check` exists only in the instrumented build. It scans the same way, writes
+one local JSON file of measurements, and sends nothing anywhere.";
 
 /// Everything the report needs, assembled in one place so the two output
 /// formats cannot drift apart.
@@ -75,6 +95,25 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Some("selftest") => selftest(),
+        // The refusal lives here, not inside the module, so the public build
+        // really has no `check` code: the module is not compiled at all.
+        Some("check") => {
+            #[cfg(feature = "instrument")]
+            {
+                check::command(&args[1..])
+            }
+            #[cfg(not(feature = "instrument"))]
+            {
+                eprintln!(
+                    "odina: this is the public build; it contains no measurement code.\n\
+                     \n\
+                     The check build is the same source built with --features instrument.\n\
+                     It adds local measurements and a local export of reports; it sends\n\
+                     nothing, and the file it writes is yours. See docs/instrumented-build.md."
+                );
+                ExitCode::FAILURE
+            }
+        }
         Some("scan") => {
             let json = args.iter().any(|a| a == "--json");
             let recursive = args.iter().any(|a| a == "--recursive" || a == "-r");

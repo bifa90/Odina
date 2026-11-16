@@ -89,6 +89,7 @@ NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 | **كود Rust: ما بُني وحدوده** | `docs/rust-workspace.md` |
 | **نشر الموقع** | `docs/site-deploy.md` |
 | **التوقيع المجاني (0 ريال)** | `docs/code-signing.md` — والسياسة المنشورة: `signing.html` |
+| **نسخة الفحص والتقارير (القياس المحلي)** | `docs/instrumented-build.md` |
 | رؤية الواجهة | `ui-preview.html` (يحتاج سيرفر محلي) |
 | رؤية الشعار بأحجامه | `logo-review.html` |
 | **نصوص كل شاشة** | `docs/design/screens-v1.md` |
