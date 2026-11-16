@@ -32,91 +32,33 @@ jobs:
       # GitHub turns `::error::` lines into check-run annotations, which the API
       # returns even when job logs are unreachable. The cap is 10 per step, so
       # each diagnostic gets its own step and the list is trimmed.
-      - name: fmt (first 10)
+      - name: cargo update (writes the lock on the runner only)
+        continue-on-error: true
+        run: |
+          cargo update --offline 2>&1 | tail -5 || cargo update 2>&1 | tail -5
+          git diff --stat Cargo.lock
+
+      - name: fmt (real, gives line numbers)
         continue-on-error: true
         run: |
           cargo fmt --all -- --check 2>&1 | grep -E '^Diff in' | head -10 | while read -r l; do echo "::error::FMT $l"; done
           echo done
 
-      - name: clippy (first 10)
+      - name: clippy (real)
         continue-on-error: true
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 \
-            | grep -E '^(error|warning)' | grep -v 'could not compile' | head -10 \
-            | while read -r l; do echo "::error::CLIPPY $l"; done
-          echo done
+          cargo clippy --workspace --all-targets -- -D warnings > /tmp/c.txt 2>&1 || true
+          echo "lint lines: $(grep -cE '^(error|warning)' /tmp/c.txt || true)"
+          grep -E '^(error|warning)' /tmp/c.txt | head -8 | cut -c1-190 | while read -r l; do echo "::error::C $l"; done
+          grep -E '^ *--> ' /tmp/c.txt | head -8 | while read -r l; do echo "::error::AT $l"; done
 
-      - name: clippy columns
+      - name: clippy (instrument)
         continue-on-error: true
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 \
-            | grep -E '^(error|warning)' | head -10 | cut -c1-180 \
-            | while read -r l; do echo "::error::$l"; done
-          echo done
+          cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings > /tmp/i.txt 2>&1 || true
+          echo "inst lines: $(grep -cE '^(error|warning)' /tmp/i.txt || true)"
+          grep -E '^(error|warning)' /tmp/i.txt | head -8 | cut -c1-190 | while read -r l; do echo "::error::I $l"; done
+          grep -E '^ *--> ' /tmp/i.txt | head -8 | while read -r l; do echo "::error::IAT $l"; done
 
-      - name: clippy detail
-        continue-on-error: true
-        run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 | grep -E '^ +--> ' | head -10 | while read -r l; do echo "::error::AT $l"; done
-          echo done
-
-      - name: instrument build (first 10)
-        continue-on-error: true
-        run: |
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 | grep -E '^(error|warning)(\[|:)' | head -10 | while read -r l; do echo "::error::INST $l"; done
-          echo done
-
-      - name: clippy raw tail
-        continue-on-error: true
-        run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c.txt 2>&1 || true
-          echo "lines: $(wc -l < /tmp/c.txt)"
-          tail -12 /tmp/c.txt | cut -c1-200 | while read -r l; do echo "::error::TAIL $l"; done
-
-      - name: clippy -D skip, plain output
-        continue-on-error: true
-        run: |
-          cargo clippy --workspace --all-targets --locked 2>&1 | grep -E '^(error|warning)' | head -10 \
-            | while read -r l; do echo "::error::PLAIN $l"; done
-          echo done
-
-      - name: instrument detail
-        continue-on-error: true
-        run: |
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 | grep -E '^ +--> ' | head -10 | while read -r l; do echo "::error::IAT $l"; done
-          echo done
-
-      - name: (unused) publish
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          python3 - <<'PY'
-          import base64, json, os, urllib.request
-          path = "report.txt"
-          repo = os.environ["GITHUB_REPOSITORY"]
-          branch = os.environ["GITHUB_REF_NAME"]
-          token = os.environ["GH_TOKEN"]
-          body = base64.b64encode(open(path, "rb").read()).decode()
-          api = f"https://api.github.com/repos/{repo}/contents/{path}"
-          sha = None
-          try:
-              req = urllib.request.Request(f"{api}?ref={branch}", headers={
-                  "Authorization": f"Bearer {token}", "User-Agent": "odina-ci"})
-              with urllib.request.urlopen(req) as r:
-                  sha = json.load(r).get("sha")
-          except Exception:
-              pass
-          payload = {"message": "ci: compiler report [ci-skip]", "content": body,
-                     "branch": branch}
-          if sha:
-              payload["sha"] = sha
-          req = urllib.request.Request(api, data=json.dumps(payload).encode(),
-              method="PUT", headers={"Authorization": f"Bearer {token}",
-              "User-Agent": "odina-ci", "Content-Type": "application/json"})
-          try:
-              with urllib.request.urlopen(req) as r:
-                  print(r.status, json.load(r).get("commit", {}).get("sha"))
-          except Exception as err:
-              print("publish failed:", err)
-              print(err.read().decode()[:500] if hasattr(err, "read") else "")
-          PY
+      - name: collected
+        run: echo "report complete"
