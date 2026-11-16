@@ -30,6 +30,3 @@ locales/qps/
 site/_build/
 .firebase/
 firebase.json.bak
-
-# Temporary CI report artefact (deleted with fmt-report.yml)
-fmt-report.txt
