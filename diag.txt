@@ -1,72 +1,23 @@
-=== clippy ===
     Updating crates.io index
  Downloading crates ...
-  Downloaded generic-array v0.14.7
-  Downloaded cpufeatures v0.2.17
-  Downloaded cfg-if v1.0.5
-  Downloaded block-buffer v0.10.4
   Downloaded crypto-common v0.1.7
-  Downloaded digest v0.10.7
-  Downloaded sha2 v0.10.9
   Downloaded version_check v0.9.5
+  Downloaded block-buffer v0.10.4
+  Downloaded cfg-if v1.0.5
+  Downloaded cpufeatures v0.2.17
+  Downloaded digest v0.10.7
+  Downloaded generic-array v0.14.7
+  Downloaded sha2 v0.10.9
   Downloaded typenum v1.20.1
    Compiling version_check v0.9.5
     Checking typenum v1.20.1
     Checking cfg-if v1.0.5
     Checking cpufeatures v0.2.17
    Compiling generic-array v0.14.7
-    Checking block-buffer v0.10.4
     Checking crypto-common v0.1.7
+    Checking block-buffer v0.10.4
     Checking digest v0.10.7
     Checking sha2 v0.10.9
     Checking odina-core v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-core)
     Checking odina-cli v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-cli)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.35s
-=== build ===
-   Compiling typenum v1.20.1
-   Compiling cpufeatures v0.2.17
-   Compiling cfg-if v1.0.5
-   Compiling generic-array v0.14.7
-   Compiling block-buffer v0.10.4
-   Compiling crypto-common v0.1.7
-   Compiling digest v0.10.7
-   Compiling sha2 v0.10.9
-   Compiling odina-core v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-core)
-   Compiling odina-cli v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-cli)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.18s
-=== test ===
-   Compiling odina-core v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-core)
-   Compiling odina-cli v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-cli)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.35s
-     Running unittests src/main.rs (target/debug/build/odina-cli/885406a41093fe90/out/odina-885406a41093fe90)
-
-running 3 tests
-test tests::json_escapes_quotes_and_controls ... ok
-test tests::json_escapes_windows_paths ... ok
-test tests::reason_prefers_the_strongest_true_statement ... ok
-
-test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-     Running tests/scan_dir.rs (target/debug/build/odina-cli/bc27f08e57594d4d/out/scan_dir-bc27f08e57594d4d)
-
-running 4 tests
-test selftest_matches_the_published_digest ... ok
-test json_output_is_one_array_and_parses_as_such ... ok
-test a_folder_of_ordinary_files_exits_clean ... ok
-test scans_a_folder_and_flags_the_deceptive_name ... FAILED
-
-failures:
-
----- scans_a_folder_and_flags_the_deceptive_name stdout ----
-
-thread 'scans_a_folder_and_flags_the_deceptive_name' (2569) panicked at crates/odina-cli/tests/scan_dir.rs:65:5:
-deceptive name was not measured: {"engine":"odina-core 0.1.0","cli":"0.1.0","path":"/tmp/odina-cli-test-mixed/photo.jpg.exe","size":68,"hashes":{"full":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f","head":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f","tail":"275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-
-
-failures:
-    scans_a_folder_and_flags_the_deceptive_name
-
-test result: FAILED. 3 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
-
-error: test failed, to rerun pass `-p odina-cli --test scan_dir`
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.21s

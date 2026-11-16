@@ -124,10 +124,7 @@ fn json_output_is_one_array_and_parses_as_such() {
 
 #[test]
 fn selftest_matches_the_published_digest() {
-    let out = Command::new(binary())
-        .arg("selftest")
-        .output()
-        .unwrap();
+    let out = Command::new(binary()).arg("selftest").output().unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
         stdout.contains("275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"),
