@@ -61,53 +61,12 @@ jobs:
 
 
 
-      - name: emit 0
+      - name: raw clippy, exact
         continue-on-error: true
         run: |
-          echo "::error::MARKER-A plain"
-          echo "::error::MARKER-B $(cat /tmp/chunks/000)"
-          echo "chunks=$(ls /tmp/chunks | wc -l) bytes=$(wc -c < /tmp/clippy.txt)"
-      - name: emit 1
-        run: |
-          echo "::error::MARKER-C no-continue"
-          echo "::error::MARKER-D $(cat /tmp/chunks/001)"
-
-      - name: emit 2
-        continue-on-error: true
-        run: |
-          for i in 10 11 12 13 14; do
-            f=$(printf '/tmp/chunks/%%03d' "$i")
-            if [ -f "$f" ]; then
-              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
-            fi
-          done
-
-      - name: emit 3
-        continue-on-error: true
-        run: |
-          for i in 15 16 17 18 19; do
-            f=$(printf '/tmp/chunks/%%03d' "$i")
-            if [ -f "$f" ]; then
-              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
-            fi
-          done
-
-      - name: emit 4
-        continue-on-error: true
-        run: |
-          for i in 20 21 22 23 24; do
-            f=$(printf '/tmp/chunks/%%03d' "$i")
-            if [ -f "$f" ]; then
-              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
-            fi
-          done
-
-      - name: emit 5
-        continue-on-error: true
-        run: |
-          for i in 25 26 27 28 29; do
-            f=$(printf '/tmp/chunks/%%03d' "$i")
-            if [ -f "$f" ]; then
-              echo "::error::P$(printf '%%03d' "$i") $(cat "$f")"
-            fi
-          done
+          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1
+          echo "rc1=$?"
+          tail -c 900 /tmp/c1.txt | tr '\n' '|' | sed 's/^/::error::C1 /'
+          cargo clippy -p odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1
+          echo "rc2=$?"
+          tail -c 900 /tmp/c2.txt | tr '\n' '|' | sed 's/^/::error::C2 /'
