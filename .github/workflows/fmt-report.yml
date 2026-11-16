@@ -29,21 +29,14 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: fmt diff, per file
+      - name: fmt diff, first lines per file
         continue-on-error: true
         run: |
           cargo fmt --all
           git diff --no-color > /tmp/d.txt || true
           for f in $(git diff --name-only); do
-            git diff --no-color -- "$f" | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' > /tmp/one.txt || true
-            n=$(wc -l < /tmp/one.txt)
-            echo "::error::F=$f lines=$n"
-          done
-          # 4 chunks of 20 lines: enough for report.rs is not guaranteed, so
-          # print a per-file digest instead — first and last changed line.
-          for f in $(git diff --name-only); do
-            first=$(git diff --no-color -- "$f" | grep -E '^[+-][^+-]' | head -1 | cut -c1-120)
-            echo "::error::FIRST $f :: $first"
+            git diff --no-color -- "$f" | grep -E '^[+-][^+-]' | head -6 | tr '\n' '~' | cut -c1-260 \
+              | sed "s/^/::error::L $f :: /"
           done
 
       - name: write back through the contents API
