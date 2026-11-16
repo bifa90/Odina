@@ -87,6 +87,7 @@ NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 | **نشر الموقع** | `docs/site-deploy.md` |
 | رؤية الواجهة | `ui-preview.html` (يحتاج سيرفر محلي) |
 | رؤية الشعار بأحجامه | `logo-review.html` |
+| **نصوص كل شاشة** | `docs/design/screens-v1.md` |
 
 ### الوثائق الملزمة (`docs/spec/`)
 

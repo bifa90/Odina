@@ -20,7 +20,7 @@ wall.signatures.title = File database
 wall.signatures.on = Active
 wall.signatures.off = Inactive
 wall.behavior.title = Deep behavior scan
-wall.behavior.on = Listening
+wall.behavior.on = Active
 wall.behavior.off = Idle
 wall.proactive.title = Proactive protection
 wall.proactive.on = Active
@@ -48,8 +48,7 @@ scan.clean_result = Nothing harmful was found.
 
 ## ── Alerts — CONFIRMED (never auto-dismiss) ───────────────
 alert.confirmed.title = We stopped a known threat
-alert.confirmed.body = { $file } is a confirmed threat and has been quarantined.
-alert.confirmed.note = It was moved aside, not deleted. You can restore it.
+alert.confirmed.body = { $file } is a confirmed threat and has been isolated — not deleted.
 
 ## ── Alerts — HIGHLY SUSPICIOUS ───────────────────────────
 alert.suspicious.title = A program is trying to reach your files
@@ -59,12 +58,12 @@ alert.suspicious.note = We stopped it temporarily.
 
 ## ── Alerts — SUSPICIOUS ───────────────────────────────────
 alert.unsure.title = This program is unusual
-alert.unsure.body = { $file } is new here and behaves unusually. Do you know it?
+alert.unsure.body = { $file } is new here and behaving oddly.
 
 ## ── Alerts — PUA / CRACK (medium risk) ────────────────────
 alert.pua.title = This looks like a cracking tool
-alert.pua.body = { $file } bypasses licensing protection of paid software. You decide what runs on your device.
-alert.pua.allowed = Allow anyway
+alert.pua.body = { $file } bypasses licensing protection of paid software.
+alert.pua.allowed = Allow it
 alert.pua.quarantine = Move aside
 
 ## ── Alert buttons (exactly 2 + "why?") ────────────────────
@@ -90,13 +89,12 @@ quarantine.restore_note = The original location is kept.
 quarantine.retention = Kept for { $days } days
 
 ## ── Pause ─────────────────────────────────────────────────
-pause.title = Pause protection
+pause.title = Pause
 pause.duration.10 = 10 minutes
 pause.duration.30 = 30 minutes
 pause.duration.60 = 1 hour
-pause.duration.until_reboot = Until restart
-pause.warning = You will not be protected until { $until }.
-pause.confirm = Pause anyway
+pause.warning = We stop the alerts until { $until }. We are still protecting you.
+pause.confirm = Confirm
 pause.badge = Protection is paused
 
 ## ── Status / errors ──────────────────────────────────────
@@ -108,3 +106,21 @@ error.offline = No update yet. Protection still works.
 update.available = Update available
 update.ask = Check for updates and download them?
 update.db_age_warning = Your threat list is { $days } days old.
+
+## ── Path ──────────────────────────────────────────────
+path.label = Path
+path.copy = Copy path
+path.open_folder = Open folder
+trust.title = Trust foundations
+word.isolated = isolated
+word.temporary = temporarily
+tip.quarantine = Moved to an encrypted store — its original location is kept and it can be restored.
+tip.suspended = We stopped it now. It works again only if you allow it.
+quarantine.hint = Everything stays until you decide · never auto-deleted
+quarantine.keep = Keep it
+quarantine.delete = Delete permanently
+quarantine.delete_note = Cannot be undone. No other copy.
+quarantine.cleanup_title = In quarantine for { $days } days
+quarantine.cleanup_choose = Delete the ones I selected
+error.false_positive = We got this file wrong — fixed.
+error.locked = Could not isolate it: the file is open right now.

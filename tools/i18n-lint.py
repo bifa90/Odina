@@ -126,7 +126,10 @@ def main() -> int:
         print(f"i18n-lint: {locale_root} not found", file=sys.stderr)
         return 2
 
-    files = sorted(locale_root.glob("*/odina.ftl"))
+    # locales/qps is a generated CI artefact (tools/pseudo-localize.py) and is
+    # deliberately stale between runs — linting it would report false errors.
+    files = sorted(p for p in locale_root.glob("*/odina.ftl")
+                   if p.parent.name != "qps")
     if not files:
         print("i18n-lint: no locales/*/odina.ftl found", file=sys.stderr)
         return 2

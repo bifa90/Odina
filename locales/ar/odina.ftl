@@ -20,7 +20,7 @@ wall.signatures.title = قاعدة بيانات الملفات
 wall.signatures.on = فعّال
 wall.signatures.off = متوقف
 wall.behavior.title = الفحص السلوكي العميق
-wall.behavior.on = يسمع
+wall.behavior.on = فعّال
 wall.behavior.off = خامل
 wall.proactive.title = الحماية الاستباقية
 wall.proactive.on = فعّال
@@ -48,8 +48,7 @@ scan.clean_result = لم يُعثر على شيء ضار.
 
 ## ── التنبيهات — مؤكد (لا يختفي تلقائيًا) ──────────────────
 alert.confirmed.title = أوقفنا تهديدًا معروفًا
-alert.confirmed.body = { $file } تهديد مؤكد وتم عزله.
-alert.confirmed.note = نُقل جانبًا ولم يُحذف. يمكنك استرجاعه.
+alert.confirmed.body = { $file } تهديد مؤكد وتم عزله — لم يُحذف.
 
 ## ── التنبيهات — مشتبه بشدة ────────────────────────────────
 alert.suspicious.title = برنامج يحاول الوصول إلى ملفاتك
@@ -59,12 +58,12 @@ alert.suspicious.note = أوقفناه مؤقتًا.
 
 ## ── التنبيهات — مشتبه ─────────────────────────────────────
 alert.unsure.title = هذا البرنامج غير مألوف
-alert.unsure.body = { $file } جديد هنا ويتصرف بغرابة. هل تعرفه؟
+alert.unsure.body = { $file } جديد هنا ويتصرف بغرابة.
 
 ## ── التنبيهات — أداة تخريب (خطر متوسط) ────────────────────
 alert.pua.title = يبدو أنها أداة كسر حماية
-alert.pua.body = { $file } تتجاوز حماية ترخيص برنامج مدفوع. أنت من يقرر ما يعمل على جهازك.
-alert.pua.allowed = اسمح به رغم ذلك
+alert.pua.body = { $file } يتجاوز حماية ترخيص برنامج مدفوع.
+alert.pua.allowed = اسمح به
 alert.pua.quarantine = انقله جانبًا
 
 ## ── أزرار التنبيه (زرّان فقط + «لماذا؟») ──────────────────
@@ -90,13 +89,12 @@ quarantine.restore_note = المسار الأصلي محفوظ.
 quarantine.retention = يُحفظ { $days } يومًا
 
 ## ── الإيقاف المؤقت ───────────────────────────────────────
-pause.title = إيقاف الحماية مؤقتًا
+pause.title = إيقاف مؤقت
 pause.duration.10 = ١٠ دقائق
 pause.duration.30 = ٣٠ دقيقة
 pause.duration.60 = ساعة
-pause.duration.until_reboot = حتى إعادة التشغيل
-pause.warning = ستصبح غير محمي حتى { $until }.
-pause.confirm = أوقف رغم ذلك
+pause.warning = سنوقف التنبيهات حتى { $until }. ما زلنا نحميك.
+pause.confirm = تأكيد
 pause.badge = الحماية متوقفة مؤقتًا
 
 ## ── الحالة والأخطاء ───────────────────────────────────────
@@ -108,3 +106,29 @@ error.offline = لا تحديث بعد. الحماية تعمل.
 update.available = يتوفر تحديث
 update.ask = هل نفحص التحديثات وننزّلها؟
 update.db_age_warning = قاعدة التهديدات عمرها { $days } يومًا.
+
+## ── المسار (يُعرض دائمًا LTR معزول) ───────────────────────
+path.label = المسار
+path.copy = نسخ المسار
+path.open_folder = فتح المجلد
+
+## ── أيقونات وأسس الثقة ────────────────────────────────────
+trust.title = أسس الثقة
+word.isolated = معزول
+word.temporary = مؤقتًا
+
+## ── الشرح عند الطلب ───────────────────────────────────────
+tip.quarantine = نقلناه إلى مخزن مشفّر — مكانه الأصلي محفوظ ويمكن استرجاعه.
+tip.suspended = أوقفناه الآن. سيعود للعمل إذا سمحت له.
+
+## ── العزل — الأزرار (هنا فقط يوجد «حذف») ─────────────────
+quarantine.hint = كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا
+quarantine.keep = احتفظ به
+quarantine.delete = حذف نهائي
+quarantine.delete_note = لا يمكن التراجع. لا نسخة أخرى.
+quarantine.cleanup_title = منذ { $days } يومًا وهذه الملفات في العزل
+quarantine.cleanup_choose = حذف ما اخترته
+
+## ── الاعتذار ──────────────────────────────────────────────
+error.false_positive = أخطأنا في هذا الملف — أصلحناه.
+error.locked = لم نستطع عزل الملف لأنه مفتوح الآن.
