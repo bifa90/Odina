@@ -1,0 +1,1517 @@
+{
+  "schema": "odina-fontpack/v1",
+  "language": "ja",
+  "family": "Noto Sans JP",
+  "upstream": "https://www.npmjs.com/package/@fontsource/noto-sans-jp",
+  "license": "OFL-1.1",
+  "format": "woff2",
+  "weights": [
+    400,
+    600
+  ],
+  "file_count": 250,
+  "total_bytes": 8195468,
+  "generated": "2026-11-15",
+  "files": [
+    {
+      "file": "noto-sans-jp-0-400-normal.woff2",
+      "weight": 400,
+      "bytes": 44312,
+      "sha256": "b28c7f43043c6686f5f498ccc167670812c249a21a6fd70b3adcd8ecda2ff311"
+    },
+    {
+      "file": "noto-sans-jp-1-400-normal.woff2",
+      "weight": 400,
+      "bytes": 37704,
+      "sha256": "837ded988a55bf2c4e76bdf3958fb33a6bf85a78ba04bd0be5a67b252c358237"
+    },
+    {
+      "file": "noto-sans-jp-10-400-normal.woff2",
+      "weight": 400,
+      "bytes": 41684,
+      "sha256": "c4bd75ea8e4888148129bc808a4d0f943b936dc2f8bd7e1875bec4463f904777"
+    },
+    {
+      "file": "noto-sans-jp-100-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12576,
+      "sha256": "3460d323d683f1954cf9145a552b1b3d6c5ed3a2132f6e95c21d01ca6028cbf0"
+    },
+    {
+      "file": "noto-sans-jp-101-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10188,
+      "sha256": "9db76ddf93eedd6f255439370a440afc255481b09eaa058861e7d52ed51113a1"
+    },
+    {
+      "file": "noto-sans-jp-102-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11484,
+      "sha256": "3967b0de3657a2683cc0f5958f3589c4ebec135bfbe9a689eb8a720299f9b2ad"
+    },
+    {
+      "file": "noto-sans-jp-103-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10360,
+      "sha256": "6c542839b651bd68434f2f0c39f1349853e8d400878229a4ead9d23e6c37d0bb"
+    },
+    {
+      "file": "noto-sans-jp-104-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11008,
+      "sha256": "8cfbfa0434729a3065e3af0e80b62fb4f7a08e3b6cd5cf56a269783348e7c287"
+    },
+    {
+      "file": "noto-sans-jp-105-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10488,
+      "sha256": "7bfeb66f30841eeb0e3329741d630d438a56a34070322985dd3e3259a4738f62"
+    },
+    {
+      "file": "noto-sans-jp-106-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12964,
+      "sha256": "784399e6ba1ce539ca9fb881c04ffcc5defe3099ef79f40bce6b7bab99839ff1"
+    },
+    {
+      "file": "noto-sans-jp-107-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10336,
+      "sha256": "fdd6d497cd5daffe78d1cfb9ccca61184bd37944be853747f4092c376364f85e"
+    },
+    {
+      "file": "noto-sans-jp-108-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11872,
+      "sha256": "6411ed23cde2a4dea38faf883a5ed29bc6303d9894af57a128710498f162c5c9"
+    },
+    {
+      "file": "noto-sans-jp-109-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9236,
+      "sha256": "c38c37bed4fec082c3823a843523c8ca4a72cf9cca5ba4cdc783998e767f9fe4"
+    },
+    {
+      "file": "noto-sans-jp-11-400-normal.woff2",
+      "weight": 400,
+      "bytes": 40592,
+      "sha256": "702e916fdf7e9fff4d172f1852f60122bf0941c02cf472b66feb8419dc053827"
+    },
+    {
+      "file": "noto-sans-jp-110-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9924,
+      "sha256": "4dcfa620d0b4b365b2ee99ebf3e46260e04029d569d9ef2aeb191f9599177248"
+    },
+    {
+      "file": "noto-sans-jp-111-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10572,
+      "sha256": "787ed643535bac82e0af19ff6797f6816eef643676a68a114ad889f195617ca0"
+    },
+    {
+      "file": "noto-sans-jp-112-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9656,
+      "sha256": "aa01c699c5dd6079bc84dd768ad3e9fb27d44b388c375e04e9ec5f6820b84817"
+    },
+    {
+      "file": "noto-sans-jp-113-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9152,
+      "sha256": "3e42ccc6dd4d96ee344a6ca39902765a8b18fbfa7235217d38fbcd39b6e1075c"
+    },
+    {
+      "file": "noto-sans-jp-114-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9240,
+      "sha256": "8195877e0e5b85a1809876176bb35ab56f214ef1f3711a0a9233a7de43e481be"
+    },
+    {
+      "file": "noto-sans-jp-115-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10840,
+      "sha256": "8a0609a5a7f8a41d8b4927087379a54572b37523ed71602d7c90c2717ba7741e"
+    },
+    {
+      "file": "noto-sans-jp-116-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9764,
+      "sha256": "2df3496e029ad6bc626153e3e0f5e3cd417b0c45fca357ba6cb7120c9e720fb0"
+    },
+    {
+      "file": "noto-sans-jp-117-400-normal.woff2",
+      "weight": 400,
+      "bytes": 7452,
+      "sha256": "9f2f236f680125154ce6250a11799a4e7d28d91231fc2f56b1e4cc5b764b8e3a"
+    },
+    {
+      "file": "noto-sans-jp-118-400-normal.woff2",
+      "weight": 400,
+      "bytes": 9860,
+      "sha256": "a27fa4a7751185d53f560e7981c84b2a50ed812e3be370e17518dcf02abb0537"
+    },
+    {
+      "file": "noto-sans-jp-119-400-normal.woff2",
+      "weight": 400,
+      "bytes": 42684,
+      "sha256": "2258b057683e7040e5149a9469077fd8ed47e73ca656f84fc3c4f9bc86976a1e"
+    },
+    {
+      "file": "noto-sans-jp-12-400-normal.woff2",
+      "weight": 400,
+      "bytes": 37284,
+      "sha256": "0b6f583aac63b188ea57d76adc29ba5c7d2f480d354d3d895a9d71bb937e8899"
+    },
+    {
+      "file": "noto-sans-jp-13-400-normal.woff2",
+      "weight": 400,
+      "bytes": 40352,
+      "sha256": "7df329fd535cdbf5a9148d745c5b88ba42581345d2ee7ca23675d82134660218"
+    },
+    {
+      "file": "noto-sans-jp-14-400-normal.woff2",
+      "weight": 400,
+      "bytes": 39840,
+      "sha256": "7dd7bb52b38ac364fde91b85ecc20e7a4ecf038abb44bf5c50b282bd782a6e88"
+    },
+    {
+      "file": "noto-sans-jp-15-400-normal.woff2",
+      "weight": 400,
+      "bytes": 44036,
+      "sha256": "5e568d6b957c55aa6c1d9cf07a748d83cb82429102468c00d7cabb5b5d18045f"
+    },
+    {
+      "file": "noto-sans-jp-16-400-normal.woff2",
+      "weight": 400,
+      "bytes": 38200,
+      "sha256": "23cc3b44b18114c4b08683c0d6f2ff85b4671ab073772c4e9cdac1a139fbbea6"
+    },
+    {
+      "file": "noto-sans-jp-17-400-normal.woff2",
+      "weight": 400,
+      "bytes": 45104,
+      "sha256": "f4479f59959988751e67980f8ef0ca511db876d48a51c5584fbcae081e7d6b59"
+    },
+    {
+      "file": "noto-sans-jp-18-400-normal.woff2",
+      "weight": 400,
+      "bytes": 42804,
+      "sha256": "d014a2ddcf9be02841fa6fd685895f25f0e8d9f6f113f8ff44483d0e116632f8"
+    },
+    {
+      "file": "noto-sans-jp-19-400-normal.woff2",
+      "weight": 400,
+      "bytes": 47644,
+      "sha256": "0441744615f87c1f2a277b29b9c564b92b88da86e7ad76e7834443ff20750126"
+    },
+    {
+      "file": "noto-sans-jp-2-400-normal.woff2",
+      "weight": 400,
+      "bytes": 16992,
+      "sha256": "0a75ea6cb9db08e95224576e062036c44064cb6291cfc9255d4ea39c9ff5d72b"
+    },
+    {
+      "file": "noto-sans-jp-20-400-normal.woff2",
+      "weight": 400,
+      "bytes": 34404,
+      "sha256": "673bd1c691e316cc79da6ff7e9ffa193fb5df82012492e7b040858a13257303b"
+    },
+    {
+      "file": "noto-sans-jp-21-400-normal.woff2",
+      "weight": 400,
+      "bytes": 39608,
+      "sha256": "8150a9edb0a2b998479cd4165062314bbd3be64fe198c2e810014e4cd770fba4"
+    },
+    {
+      "file": "noto-sans-jp-22-400-normal.woff2",
+      "weight": 400,
+      "bytes": 42204,
+      "sha256": "0881667a749c10f54db091cd37b038c1a7cd4e1cfd277cb040994856639dca41"
+    },
+    {
+      "file": "noto-sans-jp-23-400-normal.woff2",
+      "weight": 400,
+      "bytes": 42244,
+      "sha256": "972b6d245638608295b70e8522ef8644025550888d138a1749a05ffb1a0d5c8a"
+    },
+    {
+      "file": "noto-sans-jp-24-400-normal.woff2",
+      "weight": 400,
+      "bytes": 45912,
+      "sha256": "10612ce19d09aaa64accd96ef6a7fe7e1567b5ae74c763d975a3ee739e2ead9f"
+    },
+    {
+      "file": "noto-sans-jp-25-400-normal.woff2",
+      "weight": 400,
+      "bytes": 43400,
+      "sha256": "7e72ad1d91588f34dbe06b51b817a51817be4e66ef6e5f66d4c268d4a0803ba7"
+    },
+    {
+      "file": "noto-sans-jp-26-400-normal.woff2",
+      "weight": 400,
+      "bytes": 37048,
+      "sha256": "07a40d970c950349db7d8a6d72891c7d06ff2a3510621518aaa292dad69a6c1c"
+    },
+    {
+      "file": "noto-sans-jp-27-400-normal.woff2",
+      "weight": 400,
+      "bytes": 35164,
+      "sha256": "0d327269ed14b4a7e5bfba31c1dd1d0f3488ee42f6e4e1217bb1249e53fd4188"
+    },
+    {
+      "file": "noto-sans-jp-28-400-normal.woff2",
+      "weight": 400,
+      "bytes": 38448,
+      "sha256": "c56622801b2e7629b655c48854f8dbd57ebe4605d13b9f5847bfa15251bb2266"
+    },
+    {
+      "file": "noto-sans-jp-29-400-normal.woff2",
+      "weight": 400,
+      "bytes": 42480,
+      "sha256": "61bf0e12f7962e6232fea9a1e7814893c32f35c5f29202d94dc20fc19588e7b8"
+    },
+    {
+      "file": "noto-sans-jp-3-400-normal.woff2",
+      "weight": 400,
+      "bytes": 23376,
+      "sha256": "7c4a32cf98b16f33bbde96d22fca47dc6054de0cc4aa0f559dc583182bfc80ff"
+    },
+    {
+      "file": "noto-sans-jp-30-400-normal.woff2",
+      "weight": 400,
+      "bytes": 43796,
+      "sha256": "8800589264c7bb579564c6f071d82c8ffb75d92bfa4709da1889038137cc0f09"
+    },
+    {
+      "file": "noto-sans-jp-31-400-normal.woff2",
+      "weight": 400,
+      "bytes": 47376,
+      "sha256": "2b0c139f6524eabb02e4d237bb823a5c3a380f3f8df067e04798128c9999ea4b"
+    },
+    {
+      "file": "noto-sans-jp-32-400-normal.woff2",
+      "weight": 400,
+      "bytes": 40464,
+      "sha256": "3d1bf66d17d92d50ebe4c577cc1e39cd5064b30d2b0efe3b17edb819994384a6"
+    },
+    {
+      "file": "noto-sans-jp-33-400-normal.woff2",
+      "weight": 400,
+      "bytes": 35432,
+      "sha256": "69216773f2a9155e6b1f940dfe4ebf7bed2b4fdc6f29044e4b045e02f0718d66"
+    },
+    {
+      "file": "noto-sans-jp-34-400-normal.woff2",
+      "weight": 400,
+      "bytes": 46312,
+      "sha256": "a0ab35445d92b87cb1d4e13bb2ababd84af07dcfdcac057fc6d6eecf5165f04a"
+    },
+    {
+      "file": "noto-sans-jp-35-400-normal.woff2",
+      "weight": 400,
+      "bytes": 38460,
+      "sha256": "bcd448784a2b6981efd9df6d30b5b55a6ba5ac2ffe388eb8e9f4650ede6dee0f"
+    },
+    {
+      "file": "noto-sans-jp-36-400-normal.woff2",
+      "weight": 400,
+      "bytes": 34804,
+      "sha256": "1a4531819b84be4c2086db6b76a8d05c89c845575c2c01b73cd363d3e688d58c"
+    },
+    {
+      "file": "noto-sans-jp-37-400-normal.woff2",
+      "weight": 400,
+      "bytes": 40164,
+      "sha256": "af0b33aea8f1c691a316a4c67319243a1e112234e351fad1ec8c3857289dd66d"
+    },
+    {
+      "file": "noto-sans-jp-38-400-normal.woff2",
+      "weight": 400,
+      "bytes": 37264,
+      "sha256": "7e5dbcf12d59a8379b689fb32733fdc237f96e0e503917d9a6d19bcf857a7ac2"
+    },
+    {
+      "file": "noto-sans-jp-39-400-normal.woff2",
+      "weight": 400,
+      "bytes": 39840,
+      "sha256": "8a2481e175e39f1c4958acfa11846520b5c5317bdc55233adf8e84f46d9b53ad"
+    },
+    {
+      "file": "noto-sans-jp-4-400-normal.woff2",
+      "weight": 400,
+      "bytes": 40432,
+      "sha256": "55e99fa53e19bcd902babd40936f7dbaedd0f0afdd9c5f4089367cd02f1411e6"
+    },
+    {
+      "file": "noto-sans-jp-40-400-normal.woff2",
+      "weight": 400,
+      "bytes": 34628,
+      "sha256": "8496b953719958bda3b52f00a06eaf6dd32262de688877fd7c4f1ec0818cc44e"
+    },
+    {
+      "file": "noto-sans-jp-41-400-normal.woff2",
+      "weight": 400,
+      "bytes": 41880,
+      "sha256": "1e99f9bb58d041919247fdea493d4f7291e8e338c8d8b4bf8ee40629b0561489"
+    },
+    {
+      "file": "noto-sans-jp-42-400-normal.woff2",
+      "weight": 400,
+      "bytes": 34832,
+      "sha256": "3a518c143215fc54f0cdfb4e432b63838adc4a8306b3f9ea8cea8f9893541200"
+    },
+    {
+      "file": "noto-sans-jp-43-400-normal.woff2",
+      "weight": 400,
+      "bytes": 38460,
+      "sha256": "35224911aba6cdf70c40e570a48de9d0684db85db421d2508fcbc1e2a942e783"
+    },
+    {
+      "file": "noto-sans-jp-44-400-normal.woff2",
+      "weight": 400,
+      "bytes": 39632,
+      "sha256": "ac4559510a7fe0b8a2b1bd81540e92072a050af39697e6e596e27f73a788e5a3"
+    },
+    {
+      "file": "noto-sans-jp-45-400-normal.woff2",
+      "weight": 400,
+      "bytes": 36788,
+      "sha256": "bf9a8239b5082222e460d156540ba15adda2ea256f8e2d99599901888730d789"
+    },
+    {
+      "file": "noto-sans-jp-46-400-normal.woff2",
+      "weight": 400,
+      "bytes": 31908,
+      "sha256": "d328791790448dcf1a4c38a0e15d210f64fcd4279843dafc43cc68a9ef84ac4d"
+    },
+    {
+      "file": "noto-sans-jp-47-400-normal.woff2",
+      "weight": 400,
+      "bytes": 37416,
+      "sha256": "6dce29e9a16f7bd9b57b27fbc75aad0fdc2c909df19a49466ef4fe3306994f0c"
+    },
+    {
+      "file": "noto-sans-jp-48-400-normal.woff2",
+      "weight": 400,
+      "bytes": 39004,
+      "sha256": "37d3395192227381d7f069ebc73f34e92b887819b1abd267bc976ba64ec52aac"
+    },
+    {
+      "file": "noto-sans-jp-49-400-normal.woff2",
+      "weight": 400,
+      "bytes": 32732,
+      "sha256": "c620a71e51543fb5c1329034b96e1c229faaa2161fb00ef23bb9ac91bc0c090d"
+    },
+    {
+      "file": "noto-sans-jp-5-400-normal.woff2",
+      "weight": 400,
+      "bytes": 48040,
+      "sha256": "c5c3cdc29df8842f6711dcfe83d9f69bb8d482ee3dd1d28869c3989fb5f62fb2"
+    },
+    {
+      "file": "noto-sans-jp-50-400-normal.woff2",
+      "weight": 400,
+      "bytes": 32456,
+      "sha256": "1dd7d730d6be1dffa9cb7eae4036d96b2c70b4991426b890551265027f85834e"
+    },
+    {
+      "file": "noto-sans-jp-51-400-normal.woff2",
+      "weight": 400,
+      "bytes": 30552,
+      "sha256": "5b613a8883dfed3c5ca9fe5e6916e2bd65570978627d3deeb8b45fdc27849e25"
+    },
+    {
+      "file": "noto-sans-jp-52-400-normal.woff2",
+      "weight": 400,
+      "bytes": 38012,
+      "sha256": "c5a65808d6dd2d73786fb1dfb1ad0884b309312daa2090839c3ee3230556aad4"
+    },
+    {
+      "file": "noto-sans-jp-53-400-normal.woff2",
+      "weight": 400,
+      "bytes": 20056,
+      "sha256": "7650e8f9fac4314e19859bc64f69d19d8379c6f0685dfcda9780528e55d1568f"
+    },
+    {
+      "file": "noto-sans-jp-54-400-normal.woff2",
+      "weight": 400,
+      "bytes": 16772,
+      "sha256": "896942657c79c88ae830a9d49813d88bcbe82e18c03584d9b851d3005a67ba6c"
+    },
+    {
+      "file": "noto-sans-jp-55-400-normal.woff2",
+      "weight": 400,
+      "bytes": 22984,
+      "sha256": "1ea797cf0aebdb4b3c412eeca4d7087fc3472112dc8d63340655b94ca6a36ab7"
+    },
+    {
+      "file": "noto-sans-jp-56-400-normal.woff2",
+      "weight": 400,
+      "bytes": 22656,
+      "sha256": "d7b7dcb8b3f92d4d074b9bb02907c1a2552629678abebac0f485fbbb467529fc"
+    },
+    {
+      "file": "noto-sans-jp-57-400-normal.woff2",
+      "weight": 400,
+      "bytes": 6504,
+      "sha256": "ff04eb189644d0a84b1b0683bb3777c7bd5974b0c02c1d512c567ce4d1decf2e"
+    },
+    {
+      "file": "noto-sans-jp-58-400-normal.woff2",
+      "weight": 400,
+      "bytes": 13588,
+      "sha256": "48ef191a30bb378e04557813b4f7be683fb2f684d8de0097114e31f8d334eeda"
+    },
+    {
+      "file": "noto-sans-jp-59-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10260,
+      "sha256": "88fff7bfdba1e85a3a693bfb8e9c285efa0624b2ca4925d70b6436bcd4fb68bc"
+    },
+    {
+      "file": "noto-sans-jp-6-400-normal.woff2",
+      "weight": 400,
+      "bytes": 49040,
+      "sha256": "c4969305f77be0bb1a127328280e2a306651cfa38d7fbb22a0ada2cb05d79adb"
+    },
+    {
+      "file": "noto-sans-jp-60-400-normal.woff2",
+      "weight": 400,
+      "bytes": 13800,
+      "sha256": "7d48ac137b1af12d1e1f2995c53c79b3980dc14b4ebf25acbfa4d52afbe62f42"
+    },
+    {
+      "file": "noto-sans-jp-61-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12108,
+      "sha256": "4b4c1c33f599f86e0f4ed4ca3e76422aa54f579ece814f245a39d487cfa9d29c"
+    },
+    {
+      "file": "noto-sans-jp-62-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11908,
+      "sha256": "f6b4415f0deef99d2f87db5de26de843b2e23fa82de51b4d76bcaba706ed2184"
+    },
+    {
+      "file": "noto-sans-jp-63-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11852,
+      "sha256": "f0ac359a8c09dee436e4b75a8364aa662698179f1135957cd1a4bf28a6b9cdf8"
+    },
+    {
+      "file": "noto-sans-jp-64-400-normal.woff2",
+      "weight": 400,
+      "bytes": 14944,
+      "sha256": "378f04bd89e4649032e70b5b833690c2586460b73a88beb601f381fd50a7432b"
+    },
+    {
+      "file": "noto-sans-jp-65-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12220,
+      "sha256": "8c951fb773b476e65df6e5612e7f93ee9decfdb64faeeb9325f6d77f0875c922"
+    },
+    {
+      "file": "noto-sans-jp-66-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11628,
+      "sha256": "dcb13e4d128c6408db7014755593183b48e6e54ac986eca0cd9f8e6aea669b64"
+    },
+    {
+      "file": "noto-sans-jp-67-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11016,
+      "sha256": "447ec8d62f281cab34ba08259873a2bdbb4857e6c98e1edbc19cc7e8a6b0d8ce"
+    },
+    {
+      "file": "noto-sans-jp-68-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12844,
+      "sha256": "43e879b099455d7039030dee5f202b54933a0b107b5ed9927333aa9b411b3e12"
+    },
+    {
+      "file": "noto-sans-jp-69-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11496,
+      "sha256": "a995606ce47f508566d6ada83d0b020ec214b098a9f60c7e54980f26e086df56"
+    },
+    {
+      "file": "noto-sans-jp-7-400-normal.woff2",
+      "weight": 400,
+      "bytes": 46676,
+      "sha256": "fc77d7bd1fcf2eab094e039475c5f38a4cbb3ff5e28ebf157c2b6cfeec7b4f4f"
+    },
+    {
+      "file": "noto-sans-jp-70-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11936,
+      "sha256": "cf8258970b0ed7c89edc86a3c188f6ce651cca9bca571186ffd4767be3095a73"
+    },
+    {
+      "file": "noto-sans-jp-71-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12288,
+      "sha256": "c4959fd7c6574d195a4eb5c743f8f79fd6fafaf44efda6810b086f71f9ae9924"
+    },
+    {
+      "file": "noto-sans-jp-72-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12580,
+      "sha256": "f5db0341ec1f2aa27ee130529f55b5e792f014b9e0c56f8825a379307915641c"
+    },
+    {
+      "file": "noto-sans-jp-73-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12000,
+      "sha256": "6c4f2fe564648161843573707f5622f7d877ad135dcab6e5a67645eb49e0adf9"
+    },
+    {
+      "file": "noto-sans-jp-74-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11436,
+      "sha256": "c60e336bad3fa8f00a88ff6dfdca7110e3d8ed9cfe76fa737c666e738f4242a5"
+    },
+    {
+      "file": "noto-sans-jp-75-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12044,
+      "sha256": "be21eb3ccef5681ba475fc28eafefa99ea6a12310af81ee2810743f92545ef9b"
+    },
+    {
+      "file": "noto-sans-jp-76-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11368,
+      "sha256": "c0f2b3c1d470d4813820533c25312d8ab0e3d01f3a0f12abaab0bc75c9dbbc92"
+    },
+    {
+      "file": "noto-sans-jp-77-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10932,
+      "sha256": "12266beee6fb40d26fc8ad48b71653400a29597237fff9e04bcb797c719ce63e"
+    },
+    {
+      "file": "noto-sans-jp-78-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12740,
+      "sha256": "5112bdd067c6afa7caf8621817b5b2d593079a5fa5680785ff7202034eeacf8d"
+    },
+    {
+      "file": "noto-sans-jp-79-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12204,
+      "sha256": "a586b6aa5f9cb77ad7940f043245587372740e793e0ee4fa7656c5408065acab"
+    },
+    {
+      "file": "noto-sans-jp-8-400-normal.woff2",
+      "weight": 400,
+      "bytes": 43048,
+      "sha256": "3fa2d7486f9637f3a74cb9b1f5fcf3070bf9793f1b5af340c71d08f51f518f8c"
+    },
+    {
+      "file": "noto-sans-jp-80-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11324,
+      "sha256": "c159fce91afbd3c8fdb4893fac02e69562fc68a3c49f442bb397124de8a8e0e4"
+    },
+    {
+      "file": "noto-sans-jp-81-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11060,
+      "sha256": "33be4704c9f4648fffa05b0a61095e2642b32916e42631d1ca3aac962eca8500"
+    },
+    {
+      "file": "noto-sans-jp-82-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11940,
+      "sha256": "7ea35416deeb1391c6a7437b21bc3733d6a14ac07e1e8e68c92776db25568585"
+    },
+    {
+      "file": "noto-sans-jp-83-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11748,
+      "sha256": "6cfc88de6956240feb7ec340101a7651f8482ff05b241d01aada9b14d9a3b05d"
+    },
+    {
+      "file": "noto-sans-jp-84-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11684,
+      "sha256": "f0e712e33a343936b5cd4c52599fe5d83066c79033f35a74304ae531ef021668"
+    },
+    {
+      "file": "noto-sans-jp-85-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10656,
+      "sha256": "c128798359824787dd9401101a0e19290d2215b9c17f68489974d3be380c81ff"
+    },
+    {
+      "file": "noto-sans-jp-86-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10716,
+      "sha256": "4782e84d62a5e7ed2ec2dc3d2309496145ba96aa60ef9e932c485f7e52c0627a"
+    },
+    {
+      "file": "noto-sans-jp-87-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12152,
+      "sha256": "e82e7c9a89ac343b41d44eca5e0d976d29270d332430b3841212f4c337767e78"
+    },
+    {
+      "file": "noto-sans-jp-88-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11048,
+      "sha256": "1f5f6e712a30435395e31b2bd4ee298356ec4cae05a3f61220010324a8d52f71"
+    },
+    {
+      "file": "noto-sans-jp-89-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11176,
+      "sha256": "50989831e89b084e64e4e7bc51d8d151c72d9b2b8f87cd63beab20a66546f833"
+    },
+    {
+      "file": "noto-sans-jp-9-400-normal.woff2",
+      "weight": 400,
+      "bytes": 42112,
+      "sha256": "bba21c9ba6533aa34ad4d1665570f96108cdaf090c69b50a04a484cf5d912436"
+    },
+    {
+      "file": "noto-sans-jp-90-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12176,
+      "sha256": "bbe3a3d270fb2e5f520ccf39102f3236beca81802120ca2118d028161e007d67"
+    },
+    {
+      "file": "noto-sans-jp-91-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12172,
+      "sha256": "5be220fca035779a25613e590632d8455d9e945939c6d1c2c836d2c64c4ebac9"
+    },
+    {
+      "file": "noto-sans-jp-92-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11548,
+      "sha256": "6de249db62e3467ac4a2feafb1867c3fa38cb7276fd1c82e12dc8f94afd6650d"
+    },
+    {
+      "file": "noto-sans-jp-93-400-normal.woff2",
+      "weight": 400,
+      "bytes": 10852,
+      "sha256": "7e218369d366d7f26aefec3c347fd5c6458cc5a4370b20d6569f8623f52e1581"
+    },
+    {
+      "file": "noto-sans-jp-94-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12224,
+      "sha256": "35165d0ea122c2488f2534a5bd72a9e779eefbde3ef9b4e070946f307ecef30d"
+    },
+    {
+      "file": "noto-sans-jp-95-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11316,
+      "sha256": "e7550eb85369092a6c82c314545f07564ceb9c3778625e3f1a611d1944b52fb5"
+    },
+    {
+      "file": "noto-sans-jp-96-400-normal.woff2",
+      "weight": 400,
+      "bytes": 12116,
+      "sha256": "1d056c6b88bf349adb29ee86242d3d4da96d18e1f5453005fb5d73982f46d3b4"
+    },
+    {
+      "file": "noto-sans-jp-97-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11080,
+      "sha256": "08ba3fa7846618f218144303b640164c07de763a991211a01810ca1a83d5a559"
+    },
+    {
+      "file": "noto-sans-jp-98-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11536,
+      "sha256": "a63d29bd643987647b58649f14525b6085b90b58daf52f0dd046002dc4559484"
+    },
+    {
+      "file": "noto-sans-jp-99-400-normal.woff2",
+      "weight": 400,
+      "bytes": 11820,
+      "sha256": "778cd44b3a722574752a064d9c9fe489a9c6340be370697bada9576275146cec"
+    },
+    {
+      "file": "noto-sans-jp-cyrillic-400-normal.woff2",
+      "weight": 400,
+      "bytes": 5304,
+      "sha256": "77c9eeb9dd31f63901f8a014593649a976e6c4f8afdcd5b69567eb37a11ce5c0"
+    },
+    {
+      "file": "noto-sans-jp-japanese-400-normal.woff2",
+      "weight": 400,
+      "bytes": 1132964,
+      "sha256": "5ae4b6b5f176a590babe96d6bb62ee8805f4ddf15877738eda807db1fa20f136"
+    },
+    {
+      "file": "noto-sans-jp-latin-400-normal.woff2",
+      "weight": 400,
+      "bytes": 13072,
+      "sha256": "c3ca2d64070bf809fad5aec44a65f65ea88082e1a13faab4ef903f46a8c6f024"
+    },
+    {
+      "file": "noto-sans-jp-latin-ext-400-normal.woff2",
+      "weight": 400,
+      "bytes": 4460,
+      "sha256": "5aafbe3b69144fd30ce8debc3b82a82c67ff49de014e2949998ef9642798ddde"
+    },
+    {
+      "file": "noto-sans-jp-vietnamese-400-normal.woff2",
+      "weight": 400,
+      "bytes": 4688,
+      "sha256": "92661db21cf734f8f3b95671d974b827c64117a5709367f6968c377fce6bff37"
+    },
+    {
+      "file": "noto-sans-jp-0-600-normal.woff2",
+      "weight": 600,
+      "bytes": 45196,
+      "sha256": "ded61134b175a27b9c298320cd255b1b845703c18adf62371f4a63ce1b39cc59"
+    },
+    {
+      "file": "noto-sans-jp-1-600-normal.woff2",
+      "weight": 600,
+      "bytes": 38264,
+      "sha256": "b44f0a54fc7506c302b290aac7d74e54f827d106453ef7b159146dc6ea69ee1e"
+    },
+    {
+      "file": "noto-sans-jp-10-600-normal.woff2",
+      "weight": 600,
+      "bytes": 42456,
+      "sha256": "008cff8322ff260908236d3e1de7561d2db8332b5ba2e85dcb4ee3f6e8ce6f9f"
+    },
+    {
+      "file": "noto-sans-jp-100-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12808,
+      "sha256": "4360b34c69e2ccbe5e8657715e6bc55bac32c7728ac56a2ca7ee352849753101"
+    },
+    {
+      "file": "noto-sans-jp-101-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10284,
+      "sha256": "aec40dc5510ce1a1b7d6c9fa26ac86101fbcf88a1612cf1d46838899d8403b06"
+    },
+    {
+      "file": "noto-sans-jp-102-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11624,
+      "sha256": "571224013644ef41c841ed001139d88acdb25d7450e6f087e735c54e46a19474"
+    },
+    {
+      "file": "noto-sans-jp-103-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10384,
+      "sha256": "bf0d41a2ef389455cf1af233fb679099f6871c45cba4adf85c8bffae5d7a8047"
+    },
+    {
+      "file": "noto-sans-jp-104-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11172,
+      "sha256": "4199d5db81318304e1ce5c07054b14f43a75639bfbc21b05bb0fe00132a9d8da"
+    },
+    {
+      "file": "noto-sans-jp-105-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10700,
+      "sha256": "77486f5d5e65455f656a7e938de9f236ff885343c6b201258589e4fdce11cde0"
+    },
+    {
+      "file": "noto-sans-jp-106-600-normal.woff2",
+      "weight": 600,
+      "bytes": 13196,
+      "sha256": "1a3614e0d489aee7de58dfcba3458c38b4565fb72b1512ee73c6770b64f6ce7d"
+    },
+    {
+      "file": "noto-sans-jp-107-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10416,
+      "sha256": "29def3da8103d591a55cfdaaae42d988a0841765aabbc3b6fed12e053eefc0cd"
+    },
+    {
+      "file": "noto-sans-jp-108-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11984,
+      "sha256": "566c2fcc6a39c5cf300c899b7b71d13e05ab1b3997faf7e5f9c7196e3a269143"
+    },
+    {
+      "file": "noto-sans-jp-109-600-normal.woff2",
+      "weight": 600,
+      "bytes": 9364,
+      "sha256": "3a9923df1894b5cad54ac41244dc5d05283768149c73cd0ee8e5e0a1b7724c09"
+    },
+    {
+      "file": "noto-sans-jp-11-600-normal.woff2",
+      "weight": 600,
+      "bytes": 41288,
+      "sha256": "96bfc2ce5b0db49ea5f64f6de6919ab38c4fcfeb7217d601eb3d368863fbfc4c"
+    },
+    {
+      "file": "noto-sans-jp-110-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10068,
+      "sha256": "40591497e510ca01b435c867265837cac4108e85eca5990bb866c7b589897368"
+    },
+    {
+      "file": "noto-sans-jp-111-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10652,
+      "sha256": "801333053b85ec169e321acc41cccbd7756b9111a51fceb0058171934969cf98"
+    },
+    {
+      "file": "noto-sans-jp-112-600-normal.woff2",
+      "weight": 600,
+      "bytes": 9740,
+      "sha256": "cb0cb154407738e9a22b8f3bb62cc30eb3fb3900f74f03cad37a597dde90feef"
+    },
+    {
+      "file": "noto-sans-jp-113-600-normal.woff2",
+      "weight": 600,
+      "bytes": 9224,
+      "sha256": "26b90be3d28a3837cdd98fd5b332ff547a4228003383f8b7bcf2165733e5d107"
+    },
+    {
+      "file": "noto-sans-jp-114-600-normal.woff2",
+      "weight": 600,
+      "bytes": 9340,
+      "sha256": "63fee1641754238ee8c25e45e6a6eb291a14a81f7fcfa5229aea921987289863"
+    },
+    {
+      "file": "noto-sans-jp-115-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11028,
+      "sha256": "faa75a88462d8faa2dd2212c67306da3e034fd1097a20ce82ed157878a23a56b"
+    },
+    {
+      "file": "noto-sans-jp-116-600-normal.woff2",
+      "weight": 600,
+      "bytes": 9864,
+      "sha256": "cb60fe986f07757d3f72e78fbd2f88b235a8f8d8d6cafbaee91cdd6b74b9b0dd"
+    },
+    {
+      "file": "noto-sans-jp-117-600-normal.woff2",
+      "weight": 600,
+      "bytes": 7496,
+      "sha256": "8204b8934460eb07b622e858c038096cec780425bae7757bc7cca5702c7b6d36"
+    },
+    {
+      "file": "noto-sans-jp-118-600-normal.woff2",
+      "weight": 600,
+      "bytes": 9904,
+      "sha256": "f4afb94b5e719cb91cf43bbc53d2ae42feabdba9654834eacf4d900fd16b6233"
+    },
+    {
+      "file": "noto-sans-jp-119-600-normal.woff2",
+      "weight": 600,
+      "bytes": 42700,
+      "sha256": "7fc9ade89eadcc008c7479f51f012b4a075214ece5872099df7b4d7659db0b0a"
+    },
+    {
+      "file": "noto-sans-jp-12-600-normal.woff2",
+      "weight": 600,
+      "bytes": 37844,
+      "sha256": "cff70092f626994a0729ebc33f81c75f2b10be6f28332b27405ce7263e169a90"
+    },
+    {
+      "file": "noto-sans-jp-13-600-normal.woff2",
+      "weight": 600,
+      "bytes": 41048,
+      "sha256": "0e1db7113f84961e925f49cb08f72742568441c25dfe2e4e86e307839f7bb673"
+    },
+    {
+      "file": "noto-sans-jp-14-600-normal.woff2",
+      "weight": 600,
+      "bytes": 40416,
+      "sha256": "c05950fd5b4753fa2cc9f7c9ad0922e4a71829a568890c5f5d07760c6007e49e"
+    },
+    {
+      "file": "noto-sans-jp-15-600-normal.woff2",
+      "weight": 600,
+      "bytes": 44732,
+      "sha256": "236fcc86071e0168eca5f6eb94b5fa3b7c69f06435b3739608d0a88c9e72f9be"
+    },
+    {
+      "file": "noto-sans-jp-16-600-normal.woff2",
+      "weight": 600,
+      "bytes": 38620,
+      "sha256": "a1e1efda6101176e65a1906303328d29dddbd60ca1f6cd4f79df9f1e6ab69e9c"
+    },
+    {
+      "file": "noto-sans-jp-17-600-normal.woff2",
+      "weight": 600,
+      "bytes": 45852,
+      "sha256": "5a0a675640979a86bcf36a1e097c7623058de28ba0782c42b921f9613403cecb"
+    },
+    {
+      "file": "noto-sans-jp-18-600-normal.woff2",
+      "weight": 600,
+      "bytes": 43432,
+      "sha256": "56ff431ad9835e6d1ed5d3ecee2ba1428074dad8bc7bc5533ea5262b44ce8d3c"
+    },
+    {
+      "file": "noto-sans-jp-19-600-normal.woff2",
+      "weight": 600,
+      "bytes": 48596,
+      "sha256": "94c98159cf746593ded6bec90ca8685b58248cfd9bd3ce25fc281ca265e45aa3"
+    },
+    {
+      "file": "noto-sans-jp-2-600-normal.woff2",
+      "weight": 600,
+      "bytes": 17096,
+      "sha256": "fa52b6cd833fa0962c3091ae6288ac835dee7aa9b0bea60acfbdcf35e39a0984"
+    },
+    {
+      "file": "noto-sans-jp-20-600-normal.woff2",
+      "weight": 600,
+      "bytes": 35068,
+      "sha256": "bd1c0af3862415bec0059cc49f51ae3d1edf79452421c63cfb00fd9899b7ff55"
+    },
+    {
+      "file": "noto-sans-jp-21-600-normal.woff2",
+      "weight": 600,
+      "bytes": 40060,
+      "sha256": "7881ef33e914b1a6d0621eab9705287ef02a3d04dfb5879044064f81ea9f3dc7"
+    },
+    {
+      "file": "noto-sans-jp-22-600-normal.woff2",
+      "weight": 600,
+      "bytes": 42788,
+      "sha256": "a8c02f7bf1b827150530f6db66749443823971aa95a56885be3696a28c00bdb0"
+    },
+    {
+      "file": "noto-sans-jp-23-600-normal.woff2",
+      "weight": 600,
+      "bytes": 43032,
+      "sha256": "3a56251d84dcf01c54b9bd6177e5f7fcc53e26a5c2d73baf2d92258d55b93216"
+    },
+    {
+      "file": "noto-sans-jp-24-600-normal.woff2",
+      "weight": 600,
+      "bytes": 46776,
+      "sha256": "b9335e47e528995c0e0cc34e0b8b2e54c510491a59987f6a8745e654b737e17b"
+    },
+    {
+      "file": "noto-sans-jp-25-600-normal.woff2",
+      "weight": 600,
+      "bytes": 44032,
+      "sha256": "6b3376f6fde958e23a69aef126967a3029ba5b8244f7a2ebca7b6eda6b8302d5"
+    },
+    {
+      "file": "noto-sans-jp-26-600-normal.woff2",
+      "weight": 600,
+      "bytes": 37612,
+      "sha256": "fb290a31c8d0d49271bdb972cf606460d564f94aa0185312a08ec594460fd42e"
+    },
+    {
+      "file": "noto-sans-jp-27-600-normal.woff2",
+      "weight": 600,
+      "bytes": 35716,
+      "sha256": "3f8f1656ddca14656f0df86995db6155a19e28fa58a013c19dbdf3b824b1e0a2"
+    },
+    {
+      "file": "noto-sans-jp-28-600-normal.woff2",
+      "weight": 600,
+      "bytes": 39240,
+      "sha256": "84a7be9e276a3036d5e9b77ec028b62ee0c9213230e2360a54bbfee08c82619f"
+    },
+    {
+      "file": "noto-sans-jp-29-600-normal.woff2",
+      "weight": 600,
+      "bytes": 43240,
+      "sha256": "ee41d6e9bdeba5623a58ae6db95555d7f991787fb3140b1e0ecc079e40e5cf0e"
+    },
+    {
+      "file": "noto-sans-jp-3-600-normal.woff2",
+      "weight": 600,
+      "bytes": 23568,
+      "sha256": "5df2af91667d55f026f75e44959aaf1264380fae71af121dad3361fae7f6be0a"
+    },
+    {
+      "file": "noto-sans-jp-30-600-normal.woff2",
+      "weight": 600,
+      "bytes": 44492,
+      "sha256": "f98a5070fe6a035f2f252efa7114a205c381b32780617df6b600f30867e77f82"
+    },
+    {
+      "file": "noto-sans-jp-31-600-normal.woff2",
+      "weight": 600,
+      "bytes": 48208,
+      "sha256": "6cf802d0018a31734cc2e32eef9c0743cbbcb253bfbf2fd2af2640a8f3337ccb"
+    },
+    {
+      "file": "noto-sans-jp-32-600-normal.woff2",
+      "weight": 600,
+      "bytes": 41464,
+      "sha256": "75d16a439a74ff0967c98bc27422b8ba34972181609f784ddc34e302c549e019"
+    },
+    {
+      "file": "noto-sans-jp-33-600-normal.woff2",
+      "weight": 600,
+      "bytes": 36032,
+      "sha256": "e503f0494a270b918756a7dd86709786fc7d10a8dc8f2acdd18e2d84a1c9d26c"
+    },
+    {
+      "file": "noto-sans-jp-34-600-normal.woff2",
+      "weight": 600,
+      "bytes": 47116,
+      "sha256": "c6ced4b80b21fd0d5885955e72e75601e2c332638764dd577e0dc3cb130c5824"
+    },
+    {
+      "file": "noto-sans-jp-35-600-normal.woff2",
+      "weight": 600,
+      "bytes": 39148,
+      "sha256": "a8bb9a493ee82a5afb45f9692c59981d44a477e80e53fe8c2846043c6bb43388"
+    },
+    {
+      "file": "noto-sans-jp-36-600-normal.woff2",
+      "weight": 600,
+      "bytes": 35260,
+      "sha256": "c04120a005a987d7fc3756edf1cb8276c08b0a3a709e18fcbc88f2acd319ccea"
+    },
+    {
+      "file": "noto-sans-jp-37-600-normal.woff2",
+      "weight": 600,
+      "bytes": 40748,
+      "sha256": "0af11ecbdf3ec5af9f7e6f8dd801e637a0afb2bd3b9ad9dee68549e8e2e7cc20"
+    },
+    {
+      "file": "noto-sans-jp-38-600-normal.woff2",
+      "weight": 600,
+      "bytes": 37716,
+      "sha256": "d505c2c82b7068b2c8485452a35a896740b413b712ae68223b54f0782b70ff0d"
+    },
+    {
+      "file": "noto-sans-jp-39-600-normal.woff2",
+      "weight": 600,
+      "bytes": 40572,
+      "sha256": "138f8f590933241f3e412b65e558e3d8b04f3782dbd0bf7aef69ec332e2b9921"
+    },
+    {
+      "file": "noto-sans-jp-4-600-normal.woff2",
+      "weight": 600,
+      "bytes": 41180,
+      "sha256": "e6c61ac53d48a4c6a4cf9330201e1ac6dd1e1ff98a95bd6e30eefcb140367f31"
+    },
+    {
+      "file": "noto-sans-jp-40-600-normal.woff2",
+      "weight": 600,
+      "bytes": 35112,
+      "sha256": "bb6d4e129547c3fa94c0abc8c0c08e22ebe061b2468921e6357c6eba7fabd551"
+    },
+    {
+      "file": "noto-sans-jp-41-600-normal.woff2",
+      "weight": 600,
+      "bytes": 42344,
+      "sha256": "ce3fec918b42d5000d3f5367421b8fb88a4a38a1f4ff37a418af4861b2fd2a95"
+    },
+    {
+      "file": "noto-sans-jp-42-600-normal.woff2",
+      "weight": 600,
+      "bytes": 35492,
+      "sha256": "99b5df513741418f2d8ba4e8dbb6e515eeef079db4d498afb5ff96cc962d8989"
+    },
+    {
+      "file": "noto-sans-jp-43-600-normal.woff2",
+      "weight": 600,
+      "bytes": 39076,
+      "sha256": "c8e9ecc27459f5a6d899a1775fb168a17851d88240db6ead8ec119e115b756f0"
+    },
+    {
+      "file": "noto-sans-jp-44-600-normal.woff2",
+      "weight": 600,
+      "bytes": 40272,
+      "sha256": "85877902a82bfbc51ad64a15c628bcc66d5b30fb86a18c100d81675248cef7e8"
+    },
+    {
+      "file": "noto-sans-jp-45-600-normal.woff2",
+      "weight": 600,
+      "bytes": 37308,
+      "sha256": "09a53798bcd37c40ef40d94d322b8cde24530620d081bfe63f45280c11e4f7a3"
+    },
+    {
+      "file": "noto-sans-jp-46-600-normal.woff2",
+      "weight": 600,
+      "bytes": 32324,
+      "sha256": "17432a2a082ecf27246352db9d9e050e8c19ad8e56667630e0ef9397f040866a"
+    },
+    {
+      "file": "noto-sans-jp-47-600-normal.woff2",
+      "weight": 600,
+      "bytes": 37884,
+      "sha256": "d7911b1a5521452a28702944627cd1ef5e55f567f4eba9c62a16d1f7b54ccab6"
+    },
+    {
+      "file": "noto-sans-jp-48-600-normal.woff2",
+      "weight": 600,
+      "bytes": 39564,
+      "sha256": "7ac699ae0a76c13df2d682ddbabc3e72db376f9baddac5b2eabcb7a3c591ae69"
+    },
+    {
+      "file": "noto-sans-jp-49-600-normal.woff2",
+      "weight": 600,
+      "bytes": 33088,
+      "sha256": "910a7ba411f26c5d856fbf4b4873bedc0c96379db120189fad708b200ec76b55"
+    },
+    {
+      "file": "noto-sans-jp-5-600-normal.woff2",
+      "weight": 600,
+      "bytes": 48644,
+      "sha256": "dae85ada57ed6110384b3de2043ad1c34ea94045d64e73d50efe1d5d3bb73e80"
+    },
+    {
+      "file": "noto-sans-jp-50-600-normal.woff2",
+      "weight": 600,
+      "bytes": 32948,
+      "sha256": "967d8c598e16289a3c49ecb68b04b946b44fe9be998a51880519e8226fed17ca"
+    },
+    {
+      "file": "noto-sans-jp-51-600-normal.woff2",
+      "weight": 600,
+      "bytes": 30888,
+      "sha256": "e56329057112ac960c23e5c97dc1e3cee11a6e4ccd4765ca761b261071e899bb"
+    },
+    {
+      "file": "noto-sans-jp-52-600-normal.woff2",
+      "weight": 600,
+      "bytes": 36716,
+      "sha256": "9685f5e9e2ef2d51bb88cd57f5b2c38a0d968ba86842a8d3968ef39746109268"
+    },
+    {
+      "file": "noto-sans-jp-53-600-normal.woff2",
+      "weight": 600,
+      "bytes": 20320,
+      "sha256": "83c4c40f98712b2b404533f4aa0e4b38a7189ee20ded4e0454f6e1a595f3d875"
+    },
+    {
+      "file": "noto-sans-jp-54-600-normal.woff2",
+      "weight": 600,
+      "bytes": 16880,
+      "sha256": "c5dc38b9c68cdaa41057af3d00d318ffe360c6ef5e5f1ffdcc1739f51cc412d3"
+    },
+    {
+      "file": "noto-sans-jp-55-600-normal.woff2",
+      "weight": 600,
+      "bytes": 23196,
+      "sha256": "f8303729cc50a62260608f69f5cf3c62ae93a30252fff39fcc01f586db056054"
+    },
+    {
+      "file": "noto-sans-jp-56-600-normal.woff2",
+      "weight": 600,
+      "bytes": 22908,
+      "sha256": "027321d2b30af1754195295546872cfddaae3d525797f17293722411a691cbb7"
+    },
+    {
+      "file": "noto-sans-jp-57-600-normal.woff2",
+      "weight": 600,
+      "bytes": 6584,
+      "sha256": "09da880c411878be399e2297d1a8043937576ead4e09593b3066abbde9f5aabf"
+    },
+    {
+      "file": "noto-sans-jp-58-600-normal.woff2",
+      "weight": 600,
+      "bytes": 13788,
+      "sha256": "88cdb7516bd4bd332f4ef72408aa76715a610f1661dc7a58d3d65f3951c9fc7e"
+    },
+    {
+      "file": "noto-sans-jp-59-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10324,
+      "sha256": "6b1965eb21110de3c831982824cfac2bb39718a4186a2737e04bcfab53e1c4da"
+    },
+    {
+      "file": "noto-sans-jp-6-600-normal.woff2",
+      "weight": 600,
+      "bytes": 49900,
+      "sha256": "8f9a342d564b76db2ee45e9b593f34d882a5869049c9fb572e91cf3c033997c0"
+    },
+    {
+      "file": "noto-sans-jp-60-600-normal.woff2",
+      "weight": 600,
+      "bytes": 14076,
+      "sha256": "7f80f0156239fb61fe1a5b0b63387723e410cc153245ec011ede8d846f5a0d6f"
+    },
+    {
+      "file": "noto-sans-jp-61-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12304,
+      "sha256": "7a6d140294d73722b26963f413408b9b9bab4d8380d5fd766bc21e330b665194"
+    },
+    {
+      "file": "noto-sans-jp-62-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12156,
+      "sha256": "a6189b1445aa4268c844abe4ee09d4b4f3b5cdbbbb5e2c279fe88befbf3cff02"
+    },
+    {
+      "file": "noto-sans-jp-63-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12008,
+      "sha256": "5da6f06ff37021cb53de993bf84d816782e18f5199e123072524a93d10ab69da"
+    },
+    {
+      "file": "noto-sans-jp-64-600-normal.woff2",
+      "weight": 600,
+      "bytes": 15200,
+      "sha256": "3a2fa0cf49e8a15669a41be8d937e58ce0150097ae33c3802388ef69f3ecc160"
+    },
+    {
+      "file": "noto-sans-jp-65-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12376,
+      "sha256": "1f115b51b76830ef1646ed8ac7a82f679b0e718a91a5fe010c76ab76748532a2"
+    },
+    {
+      "file": "noto-sans-jp-66-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11688,
+      "sha256": "f298b71c017cce0d4246ca259f94df5a8bbbd84b5e9536cf7dd5769683f00a3c"
+    },
+    {
+      "file": "noto-sans-jp-67-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11156,
+      "sha256": "1d43f4a72875f58acbb0e3ab9b1f69a4c84897d40b8183aebeb459b866b8fc25"
+    },
+    {
+      "file": "noto-sans-jp-68-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12988,
+      "sha256": "acae27697b31ac67d92e062fd07aee6505ab54bddacbdc787ed5a202272c6e02"
+    },
+    {
+      "file": "noto-sans-jp-69-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11672,
+      "sha256": "f46bc6bbaaf14edfe604171e09bad24174d3a3a4e96f69ebbaebbecbe5d7cc92"
+    },
+    {
+      "file": "noto-sans-jp-7-600-normal.woff2",
+      "weight": 600,
+      "bytes": 47516,
+      "sha256": "849e16b856a1dbe2771b43fa55a33534c4306637e711d20b192e8b554ca242c6"
+    },
+    {
+      "file": "noto-sans-jp-70-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12096,
+      "sha256": "10eb101a0d7fc846ac4fa022d56db9a6c2e3ddb7a678553e3f1ec08a21077c13"
+    },
+    {
+      "file": "noto-sans-jp-71-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12420,
+      "sha256": "d9c09137f1306b172a4c2b89722adba69c619a502303cd859f194eef3591942e"
+    },
+    {
+      "file": "noto-sans-jp-72-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12744,
+      "sha256": "05739c508a5ba9230293056deca0a14adda38115fefc06672ca11bc5e79b080b"
+    },
+    {
+      "file": "noto-sans-jp-73-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12188,
+      "sha256": "dd5f844abcf9e024d2b783623e1994c6b3e389a5e06f27b535db7e2abae18cfd"
+    },
+    {
+      "file": "noto-sans-jp-74-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11564,
+      "sha256": "7c44298d49452018e58ce732dde50bc5a4088784ab0aa15b23412731281d968c"
+    },
+    {
+      "file": "noto-sans-jp-75-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12176,
+      "sha256": "caa9209a659d1d087e33f317fa92ff50a408bdba1ed30dc569b612138c3c7e65"
+    },
+    {
+      "file": "noto-sans-jp-76-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11532,
+      "sha256": "d68514e4811fbc44280dacb6cb166e118b6fb1c3a25dbe209652de6020bd1316"
+    },
+    {
+      "file": "noto-sans-jp-77-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11064,
+      "sha256": "8d18c71fc8882ca521898df1812d61e64fddfa96f58b24de83b207bd0627052e"
+    },
+    {
+      "file": "noto-sans-jp-78-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12912,
+      "sha256": "6af94d8a2cc6d579e0827f439a27c46acd6a100aab9e74ec9d911cfabfbb0c30"
+    },
+    {
+      "file": "noto-sans-jp-79-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12376,
+      "sha256": "975e0e8e3965d43df24e74d1b5c9365d08eecfcef7e0053b3a59dc32a4d68e25"
+    },
+    {
+      "file": "noto-sans-jp-8-600-normal.woff2",
+      "weight": 600,
+      "bytes": 43528,
+      "sha256": "53edd63bc357deec572ee6380e984d90cd337ae6cc0518fa48b8ab86c1fa76fb"
+    },
+    {
+      "file": "noto-sans-jp-80-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11452,
+      "sha256": "8c317e4bc781b8fb65f487b7f2f9b4eaf6e4a527b4f54e9652c11112caac7e48"
+    },
+    {
+      "file": "noto-sans-jp-81-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11208,
+      "sha256": "89695df9bf73f8cf35b1a5cc6c64aa894c153d58badab6f21c446e9bc96fa4f2"
+    },
+    {
+      "file": "noto-sans-jp-82-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12076,
+      "sha256": "671433986106e1a8442d17ceb9d4eed371f1d3fe8f64044e1db1089f2e2eeb15"
+    },
+    {
+      "file": "noto-sans-jp-83-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11876,
+      "sha256": "285e8fe8c2c833292afd7a5322e28b3c6e5a4627ffd7508880745601ffe923fd"
+    },
+    {
+      "file": "noto-sans-jp-84-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11828,
+      "sha256": "bbb5ad7080493faf737638d199ad6a48ce4b2c76ebb900b9e7a268b12eaaac1d"
+    },
+    {
+      "file": "noto-sans-jp-85-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10820,
+      "sha256": "3d50cb2ad15db5cf6160be76a3aff01e90c93f29471ed71d35d2c4f4db16d861"
+    },
+    {
+      "file": "noto-sans-jp-86-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10776,
+      "sha256": "bd4b7fb399d251916ba506bb51db23cf3e2f9d66d8e007f1fe7c067aa35fec3d"
+    },
+    {
+      "file": "noto-sans-jp-87-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12376,
+      "sha256": "e163fd7960c6c8821af78355a8d3f83e6143e3c706ad345d24ed6fa12c225820"
+    },
+    {
+      "file": "noto-sans-jp-88-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11152,
+      "sha256": "efa93180d653f7338ab706060a76a55ac9cede9239b1a5ef56e8fc216044a1c2"
+    },
+    {
+      "file": "noto-sans-jp-89-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11268,
+      "sha256": "533f9d3b22c9958d1157c876d0f672eec19701d3f047c9824e066376ba682478"
+    },
+    {
+      "file": "noto-sans-jp-9-600-normal.woff2",
+      "weight": 600,
+      "bytes": 42652,
+      "sha256": "2e7f0501b1f896d3bd88dbd90ea2b0f6b532600deef25c2fe64f4607a39c04d0"
+    },
+    {
+      "file": "noto-sans-jp-90-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12300,
+      "sha256": "0ba8c3d02b0a66b092b3f69c0147eb4bb30a8f1bd8447073980843de702f94fe"
+    },
+    {
+      "file": "noto-sans-jp-91-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12300,
+      "sha256": "b9a3e4d07591d2352b4f7d86d6607f0a3a6d7bcf7283a051ea12c53849874605"
+    },
+    {
+      "file": "noto-sans-jp-92-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11736,
+      "sha256": "757fc2395f3ba92fc7925df1fb67c4f25b333be74c146288a5be4122c94c801e"
+    },
+    {
+      "file": "noto-sans-jp-93-600-normal.woff2",
+      "weight": 600,
+      "bytes": 10952,
+      "sha256": "11f9820e2b0078be2c5aea3099fe5a1f1f47145809152bcd026ea9ecbd69aaf3"
+    },
+    {
+      "file": "noto-sans-jp-94-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12416,
+      "sha256": "fbbe2801c2954e7351cf5108fc3bc20007a23d6d4e9ba4dd6b1252af4518edf8"
+    },
+    {
+      "file": "noto-sans-jp-95-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11440,
+      "sha256": "9c0840ac6f6b5d8bfbef4f4cb9196073733e9e0b2bb696ea578b76bd0e2dba01"
+    },
+    {
+      "file": "noto-sans-jp-96-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12284,
+      "sha256": "df714a0288db5c9b90866871f65fc03c51c0284ca543dd5ec81cf2dbc7614004"
+    },
+    {
+      "file": "noto-sans-jp-97-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11204,
+      "sha256": "43fa9627577a868b51ae48272cb67e5dc8df821cd65bf9a97a9b4b6bd1b279e2"
+    },
+    {
+      "file": "noto-sans-jp-98-600-normal.woff2",
+      "weight": 600,
+      "bytes": 11656,
+      "sha256": "2d9de32206af8519d338a7ac4c6a88c82b28276a9948c935a99cbc0b845e23ed"
+    },
+    {
+      "file": "noto-sans-jp-99-600-normal.woff2",
+      "weight": 600,
+      "bytes": 12028,
+      "sha256": "f6537e9ad2db232cdd8e307fa0b0b52d57f7c1f5f12365b004af5b9bff83c1b6"
+    },
+    {
+      "file": "noto-sans-jp-cyrillic-600-normal.woff2",
+      "weight": 600,
+      "bytes": 5336,
+      "sha256": "dc18c76358d89ab6a325fe3ccd026315cb036496ace443c2089003ff193d8280"
+    },
+    {
+      "file": "noto-sans-jp-japanese-600-normal.woff2",
+      "weight": 600,
+      "bytes": 1149708,
+      "sha256": "9996dd635f2d2879a3a1cbd6cf7c5b5689f7091377b7f934e0e176a457b600ef"
+    },
+    {
+      "file": "noto-sans-jp-latin-600-normal.woff2",
+      "weight": 600,
+      "bytes": 13132,
+      "sha256": "5a4bbb3c0a6797932705471fee113dbaa528122ae447c6c73900f5391d999625"
+    },
+    {
+      "file": "noto-sans-jp-latin-ext-600-normal.woff2",
+      "weight": 600,
+      "bytes": 4500,
+      "sha256": "9089fc988721c1505a33f901c3e3bb4e75c35182e32d95f463a51cb9f9e374d1"
+    },
+    {
+      "file": "noto-sans-jp-vietnamese-600-normal.woff2",
+      "weight": 600,
+      "bytes": 4788,
+      "sha256": "ea356f074adf4a0d2cfdd98b9d78d25c8937937e1b84a511c5ea1fad078060a1"
+    }
+  ]
+}
