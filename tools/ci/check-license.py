@@ -32,12 +32,14 @@ CHECKED = {
     ".py", ".rs", ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx",
     ".c", ".h", ".cpp", ".hpp", ".cs", ".go", ".java", ".kt",
     ".sh", ".ps1", ".toml", ".yml", ".yaml",
+    ".html", ".htm",
 }
 
 # Directories never scanned.
 SKIP_DIRS = {
     ".git", "node_modules", "target", "dist", "build", "out",
     "fonts", "assets", "locales", "__pycache__", ".venv", "venv",
+    "_build",
 }
 
 SPDX_RE = re.compile(r"SPDX-License-Identifier:\s*([A-Za-z0-9.\-+]+)")
@@ -130,7 +132,15 @@ def main() -> int:
             marker = f"{prefix}SPDX-License-Identifier: {exp}\n"
             note = f"{prefix}Copyright (c) 2026 bifa90 — Odina\n"
             lines = text.splitlines(keepends=True)
-            insert_at = 1 if lines and lines[0].startswith("#!") else 0
+            if p.suffix.lower() in {".html", ".htm"}:
+                marker = f"<!-- SPDX-License-Identifier: {exp} -->\n"
+                note = "<!-- Copyright (c) 2026 bifa90 — Odina -->\n"
+                # Keep <!DOCTYPE html> first: a comment before it is legal
+                # but puts old parsers into quirks mode.
+                first = lines[0].lstrip().lower() if lines else ""
+                insert_at = 1 if first.startswith("<!doctype") else 0
+            else:
+                insert_at = 1 if lines and lines[0].startswith("#!") else 0
             lines.insert(insert_at, note)
             lines.insert(insert_at, marker)
             p.write_text("".join(lines), encoding="utf-8")
