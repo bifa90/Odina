@@ -299,10 +299,7 @@ impl PerfReport {
 
         if let Some(m) = scan_peak {
             if let Some(pct) = m.cpu_percent_of(idle) {
-                self.push(Measurement::measured(
-                    Gate::CpuScanAvgPercent,
-                    round2(pct),
-                ));
+                self.push(Measurement::measured(Gate::CpuScanAvgPercent, round2(pct)));
             } else {
                 self.push(Measurement::unmeasured(
                     Gate::CpuScanAvgPercent,
@@ -334,8 +331,14 @@ impl PerfReport {
             Gate::UsbWakeMs,
             "needs USB hot-trigger (C1)",
         ));
-        self.push(Measurement::unmeasured(Gate::P0Ms, "needs a verdict path (C1)"));
-        self.push(Measurement::unmeasured(Gate::P1Ms, "needs a verdict path (C1)"));
+        self.push(Measurement::unmeasured(
+            Gate::P0Ms,
+            "needs a verdict path (C1)",
+        ));
+        self.push(Measurement::unmeasured(
+            Gate::P1Ms,
+            "needs a verdict path (C1)",
+        ));
         self.push(Measurement::unmeasured(
             Gate::AmsiMs,
             "needs the AMSI provider (C5)",
@@ -405,9 +408,7 @@ impl PerfReport {
                     out.push_str(&format!(",\"value\":{v}"));
                     out.push_str(&format!(",\"unit\":{}", q(m.gate.unit())));
                     match m.gate.threshold() {
-                        Some(Threshold::AtMost(t)) => {
-                            out.push_str(&format!(",\"at_most\":{t}"))
-                        }
+                        Some(Threshold::AtMost(t)) => out.push_str(&format!(",\"at_most\":{t}")),
                         Some(Threshold::Below(t)) => out.push_str(&format!(",\"below\":{t}")),
                         None => {}
                     }
@@ -479,11 +480,26 @@ mod tests {
     fn the_boundary_rule_matches_the_spec() {
         // "≤ 50" includes 50; "< 50" does not. Getting this backwards is the
         // difference between a pass and a fail at exactly one value.
-        assert_eq!(Measurement::measured(Gate::RamUsbMb, 50.0).status, Status::Pass);
-        assert_eq!(Measurement::measured(Gate::UsbWakeMs, 50.0).status, Status::Fail);
-        assert_eq!(Measurement::measured(Gate::IdleIoOpsPerMin, 0.0).status, Status::Pass);
-        assert_eq!(Measurement::measured(Gate::IdleIoOpsPerMin, 1.0).status, Status::Fail);
-        assert_eq!(Measurement::measured(Gate::RamIdleMb, 20.5).status, Status::Fail);
+        assert_eq!(
+            Measurement::measured(Gate::RamUsbMb, 50.0).status,
+            Status::Pass
+        );
+        assert_eq!(
+            Measurement::measured(Gate::UsbWakeMs, 50.0).status,
+            Status::Fail
+        );
+        assert_eq!(
+            Measurement::measured(Gate::IdleIoOpsPerMin, 0.0).status,
+            Status::Pass
+        );
+        assert_eq!(
+            Measurement::measured(Gate::IdleIoOpsPerMin, 1.0).status,
+            Status::Fail
+        );
+        assert_eq!(
+            Measurement::measured(Gate::RamIdleMb, 20.5).status,
+            Status::Fail
+        );
     }
 
     #[test]

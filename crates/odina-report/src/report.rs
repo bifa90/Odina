@@ -114,7 +114,9 @@ pub const UI_LANGS: [&str; 10] = [
 ];
 
 fn is_hex64(s: &str) -> bool {
-    s.len() == 64 && s.bytes().all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
+    s.len() == 64
+        && s.bytes()
+            .all(|b| b.is_ascii_hexdigit() && !b.is_ascii_uppercase())
 }
 
 /// The sixteen fields, in schema order.
@@ -293,11 +295,7 @@ impl Report {
             out.push_str(&format!(",\"behavior_score\":{v:.2}"));
         }
         if !self.behaviors.is_empty() {
-            let codes: Vec<String> = self
-                .behaviors
-                .iter()
-                .map(|b| json_str(b.code()))
-                .collect();
+            let codes: Vec<String> = self.behaviors.iter().map(|b| json_str(b.code())).collect();
             out.push_str(&format!(",\"behaviors\":[{}]", codes.join(",")));
         }
         if let Some(v) = &self.family {
@@ -392,7 +390,10 @@ mod tests {
         r.behaviors = vec![Behavior::TempExec, Behavior::NetAttempt];
         r.family = Some("generic.dropper".to_string());
         r.ui_lang = Some("ar".to_string());
-        r.with_name_and_path("invoice.pdf.exe", r"C:\Users\Ahmed\Downloads\invoice.pdf.exe")
+        r.with_name_and_path(
+            "invoice.pdf.exe",
+            r"C:\Users\Ahmed\Downloads\invoice.pdf.exe",
+        )
     }
 
     #[test]
@@ -460,9 +461,20 @@ mod tests {
     fn there_is_no_timestamp_no_user_no_machine_id_and_no_path() {
         let json = full_report().to_json_checked().unwrap();
         for forbidden in [
-            "\"ts\"", "\"time\"", "\"timestamp\"", "\"user\"", "\"username\"",
-            "\"host\"", "\"hwid\"", "\"ip\"", "\"guid\"", "\"mac\"", "\"path\":",
-            "Ahmed", "invoice", "Downloads",
+            "\"ts\"",
+            "\"time\"",
+            "\"timestamp\"",
+            "\"user\"",
+            "\"username\"",
+            "\"host\"",
+            "\"hwid\"",
+            "\"ip\"",
+            "\"guid\"",
+            "\"mac\"",
+            "\"path\":",
+            "Ahmed",
+            "invoice",
+            "Downloads",
         ] {
             assert!(
                 !json.contains(forbidden),

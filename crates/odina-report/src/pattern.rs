@@ -389,7 +389,10 @@ mod tests {
 
     #[test]
     fn punctuation_runs_collapse_to_one_token() {
-        assert_eq!(name_pattern("a___b.exe"), "[word]{1,3}[char][word]{1,3}.exe");
+        assert_eq!(
+            name_pattern("a___b.exe"),
+            "[word]{1,3}[char][word]{1,3}.exe"
+        );
         assert_eq!(name_pattern("a_b.exe"), name_pattern("a___b.exe"));
     }
 
