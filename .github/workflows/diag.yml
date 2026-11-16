@@ -1,10 +1,9 @@
 # Copyright (c) 2026 bifa90 — Odina
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Temporary: the sandbox cannot read Actions logs, so the runner writes the
-# output into the repo where it can be read. Deleted once the build is green.
-#
-# This workflow deliberately does NOT fail: its job is to record what broke.
-# rust.yml remains the gate that must go red when something is wrong.
+# output into the repo where it can be read. Deleted before this branch ends.
+# This workflow deliberately does NOT fail: it records what broke, while
+# rust.yml remains the gate that must go red.
 
 name: diag
 
@@ -19,7 +18,11 @@ permissions:
 
 jobs:
   diag:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -41,8 +44,8 @@ jobs:
             cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 || true
             echo
             echo "=== test (locked, no fail fast) ==="
-            cargo test --workspace --locked --no-fail-fast -- --nocapture 2>&1 || true
-          } > diag.txt 2>&1
+            cargo test --workspace --locked --no-fail-fast 2>&1 || true
+          } > "diag-${{ matrix.os }}.txt" 2>&1
 
       - name: commit
         shell: bash
@@ -50,7 +53,6 @@ jobs:
           git config user.name "odina-bot"
           git config user.email "bifa90@users.noreply.github.com"
           git add -A
-          git commit -m "chore: test diagnostics (CI)" || exit 0
+          git commit -m "chore: diagnostics (${{ matrix.os }})" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}" || true
           git push
-
-# re-run marker: 12:18:06
