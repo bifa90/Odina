@@ -41,7 +41,17 @@ jobs:
       - name: clippy (first 10)
         continue-on-error: true
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 | grep -E '^(error|warning)(\[|:)' | head -10 | while read -r l; do echo "::error::CLIPPY $l"; done
+          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 \
+            | grep -E '^(error|warning)' | grep -v 'could not compile' | head -10 \
+            | while read -r l; do echo "::error::CLIPPY $l"; done
+          echo done
+
+      - name: clippy columns
+        continue-on-error: true
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 \
+            | grep -E '^(error|warning)' | head -10 | cut -c1-180 \
+            | while read -r l; do echo "::error::$l"; done
           echo done
 
       - name: clippy detail
