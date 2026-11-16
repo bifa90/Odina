@@ -33,6 +33,6 @@ jobs:
         run: |
           git config user.name "odina-bot"
           git config user.email "bifa90@users.noreply.github.com"
-          git add diag.txt
+          git add -A
           git commit -m "chore: test diagnostics (CI)" || exit 0
           git push
