@@ -496,7 +496,8 @@ fn selftest() -> ExitCode {
         ExitCode::SUCCESS
     } else {
         println!(
-            "الاختبار الذاتي: فشل — size_ok={size_ok} full_ok={full_ok} head_ok={head_ok} tail_ok={tail_ok}"
+            "الاختبار الذاتي: فشل — \
+             size_ok={size_ok} full_ok={full_ok} head_ok={head_ok} tail_ok={tail_ok}"
         );
         ExitCode::FAILURE
     }

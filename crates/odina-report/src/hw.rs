@@ -148,14 +148,18 @@ mod tests {
         assert!(Hardware::cpu_model_is_safe(
             "Intel(R) Core(TM) i5-8250U CPU @ 1.60GHz"
         ));
-        assert!(Hardware::cpu_model_is_safe("AMD Ryzen 5 3600 6-Core Processor"));
+        assert!(Hardware::cpu_model_is_safe(
+            "AMD Ryzen 5 3600 6-Core Processor"
+        ));
         assert!(Hardware::cpu_model_is_safe("Apple M1"));
     }
 
     #[test]
     fn a_serial_number_is_not_a_cpu_model() {
         assert!(!Hardware::cpu_model_is_safe("Intel i5, Serial 8C4F2A1B"));
-        assert!(!Hardware::cpu_model_is_safe("CPU UUID 550e8400-e29b-41d4-a716-446655440000"));
+        assert!(!Hardware::cpu_model_is_safe(
+            "CPU UUID 550e8400-e29b-41d4-a716-446655440000"
+        ));
         assert!(!Hardware::cpu_model_is_safe("Box Asset Tag 12345"));
     }
 

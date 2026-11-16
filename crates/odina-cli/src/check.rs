@@ -22,9 +22,7 @@
 use std::path::{Path, PathBuf};
 
 use odina_core::hashing::{hash_reader, FileHashes};
-use odina_core::scoring::{
-    score_with_known_bad, Evidence, Indicator, Score, Thresholds, Verdict,
-};
+use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds, Verdict};
 use odina_report::report::{Report, REPORT_SCHEMA};
 use odina_report::{measure, pattern, pe};
 
