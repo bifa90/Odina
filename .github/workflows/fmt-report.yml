@@ -29,64 +29,12 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: fmt diff in one annotation
-        continue-on-error: true
+      - name: format, verify, and publish as an artifact
         run: |
           cargo fmt --all
-          git diff --no-color > /tmp/d.txt || true
-          python3 - <<'PY'
-          data = open('/tmp/d.txt', encoding='utf-8').read()
-          compact = '\n'.join(l for l in data.splitlines()
-                              if l.startswith(('diff --git', '@@', '+', '-'))
-                              and not l.startswith(('+++', '---')))
-          print('::error::DIFFSTART')
-          print(compact[:60000].replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
-          PY
-
-
-
-          repo = os.environ["GITHUB_REPOSITORY"]
-          branch = os.environ["GITHUB_REF_NAME"]
-          token = os.environ["GH_TOKEN"]
-          api = f"https://api.github.com/repos/{repo}/contents/"
-
-          def headers():
-              return {"Authorization": f"Bearer {token}",
-                      "User-Agent": "odina-ci",
-                      "Accept": "application/vnd.github+json"}
-
-          changed = subprocess.run(["git", "diff", "--name-only"],
-                                   capture_output=True, text=True).stdout.split()
-          files = list(changed) + ["clippy-report.txt"]
-          for path in files:
-              try:
-                  with open(path, "rb") as fh:
-                      content = base64.b64encode(fh.read()).decode()
-              except OSError as err:
-                  print("skip", path, err)
-                  continue
-              sha = None
-              try:
-                  req = urllib.request.Request(api + path + f"?ref={branch}", headers=headers())
-                  with urllib.request.urlopen(req) as resp:
-                      sha = json.load(resp).get("sha")
-              except Exception:
-                  pass
-              payload = {"message": f"chore(ci): {path} [ci-skip]",
-                         "content": content, "branch": branch}
-              if sha:
-                  payload["sha"] = sha
-              req = urllib.request.Request(api + path, method="PUT",
-                                           data=json.dumps(payload).encode(),
-                                           headers={**headers(),
-                                                    "Content-Type": "application/json"})
-              try:
-                  with urllib.request.urlopen(req) as resp:
-                      print("ok", path, resp.status)
-              except Exception as err:
-                  body = err.read().decode()[:300] if hasattr(err, "read") else str(err)
-                  msg = "PUSHFAIL " + path + " " + body.replace("\n", " ")
-                  print(msg)
-                  os.system("echo \"::error::%s\"" % msg.replace('"', "'")[:250])
-          PYEOF
-          python3 /tmp/push.py
+          git diff --stat
+          cargo clippy --workspace --all-targets -- -D warnings > /tmp/c.txt 2>&1 || true
+          cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings > /tmp/i.txt 2>&1 || true
+          grep -E '^(error|warning)' /tmp/c.txt /tmp/i.txt | head -20 > summary.txt || true
+          # Fail the step if clippy is unhappy, so the job status means something.
+          ! grep -qE '^(error)' /tmp/c.txt /tmp/i.txt
