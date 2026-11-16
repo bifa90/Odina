@@ -40,23 +40,24 @@ fn scans_a_folder_and_flags_the_deceptive_name() {
     // it alone: name (8%) plus path (8%) is 10.4% at best, which is silence by
     // design — see cap S1. This asserts the measurement, which is the part
     // that must not regress.
+    //
+    // Scan the one file rather than splitting the folder array on `},`: the
+    // old split stopped at the end of the nested `hashes` object, so the
+    // indicator fields were never in the chunk and the assertion could not
+    // pass. One file produces one object, which is what this test means.
     let json = Command::new(binary())
         .args(["scan", "--json"])
-        .arg(&dir)
+        .arg(dir.join("photo.jpg.exe"))
         .output()
         .unwrap();
     let payload = String::from_utf8_lossy(&json.stdout);
-    let deceptive = payload
-        .split("},")
-        .find(|chunk| chunk.contains("photo.jpg.exe"))
-        .expect("the deceptive file must appear in the JSON");
     assert!(
-        deceptive.contains("\"indicators\":{\"name\":0.4"),
-        "deceptive name was not measured: {deceptive}"
+        payload.contains("\"indicators\":{\"name\":0.4500"),
+        "deceptive name was not measured: {payload}"
     );
     assert!(
-        deceptive.contains("\"interrupts\":false"),
-        "name alone must not interrupt: {deceptive}"
+        payload.contains("\"interrupts\":false"),
+        "name alone must not interrupt: {payload}"
     );
 
     // A folder of files nobody would call a threat must exit clean.
