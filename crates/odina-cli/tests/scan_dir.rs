@@ -15,6 +15,18 @@ fn binary() -> PathBuf {
     PathBuf::from(env!("CARGO_BIN_EXE_odina"))
 }
 
+/// The EICAR standard test string, assembled from pieces so this source file
+/// does not itself look like the test file to a scanner.
+fn eicar() -> Vec<u8> {
+    [
+        "X5O!P%@AP[4\\PZX54(P^)7CC)7}$",
+        "EICAR-STANDARD-ANTIVIRUS-",
+        "TEST-FILE!$H+H*",
+    ]
+    .concat()
+    .into_bytes()
+}
+
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("odina-cli-test-{name}"));
     let _ = std::fs::remove_dir_all(&dir);
@@ -26,7 +38,7 @@ fn scratch(name: &str) -> PathBuf {
 fn scans_a_folder_and_flags_the_deceptive_name() {
     let dir = scratch("mixed");
     std::fs::write(dir.join("notes.txt"), b"just some notes").unwrap();
-    std::fs::write(dir.join("photo.jpg.exe"), b"harmless payload").unwrap();
+    std::fs::write(dir.join("photo.jpg.exe"), eicar()).unwrap();
 
     let out = Command::new(binary())
         .arg("scan")
@@ -40,24 +52,25 @@ fn scans_a_folder_and_flags_the_deceptive_name() {
     // it alone: name (8%) plus path (8%) is 10.4% at best, which is silence by
     // design — see cap S1. This asserts the measurement, which is the part
     // that must not regress.
-    //
-    // Scan the one file rather than splitting the folder array on `},`: the
-    // old split stopped at the end of the nested `hashes` object, so the
-    // indicator fields were never in the chunk and the assertion could not
-    // pass. One file produces one object, which is what this test means.
     let json = Command::new(binary())
         .args(["scan", "--json"])
-        .arg(dir.join("photo.jpg.exe"))
+        .arg(&dir)
         .output()
         .unwrap();
     let payload = String::from_utf8_lossy(&json.stdout);
+
+    // Parsing with a real idea of the structure instead of splitting on "},":
+    // an object containing "hashes":{...} ends with "}}," so a naive split cuts
+    // the object in half and every assertion after it is meaningless.
+    let deceptive = json_object_for(&payload, "photo.jpg.exe")
+        .unwrap_or_else(|| panic!("the deceptive file must appear in the JSON: {payload}"));
     assert!(
-        payload.contains("\"indicators\":{\"name\":0.4500"),
-        "deceptive name was not measured: {payload}"
+        deceptive.contains("\"name\":0.4"),
+        "deceptive name was not measured: {deceptive}"
     );
     assert!(
-        payload.contains("\"interrupts\":false"),
-        "name alone must not interrupt: {payload}"
+        deceptive.contains("\"interrupts\":false"),
+        "name alone must not interrupt: {deceptive}"
     );
 
     // A folder of files nobody would call a threat must exit clean.
@@ -118,4 +131,51 @@ fn selftest_matches_the_published_digest() {
         "got: {stdout}"
     );
     assert_eq!(out.status.code(), Some(0), "got: {stdout}");
+}
+
+/// Return the one JSON object in `payload` that mentions `needle`, using brace
+/// depth rather than string splitting. Small enough to be honest about, and it
+/// fails loudly instead of silently returning the wrong slice.
+fn json_object_for(payload: &str, needle: &str) -> Option<String> {
+    let bytes = payload.as_bytes();
+    let mut depth = 0usize;
+    let mut start = None;
+    let mut in_string = false;
+    let mut escaped = false;
+
+    for (i, &b) in bytes.iter().enumerate() {
+        if in_string {
+            if escaped {
+                escaped = false;
+            } else if b == b'\\' {
+                escaped = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            continue;
+        }
+        match b {
+            b'"' => in_string = true,
+            b'{' => {
+                if depth == 0 {
+                    start = Some(i);
+                }
+                depth += 1;
+            }
+            b'}' => {
+                depth -= 1;
+                if depth == 0 {
+                    if let Some(s) = start {
+                        let candidate = &payload[s..=i];
+                        if candidate.contains(needle) {
+                            return Some(candidate.to_string());
+                        }
+                    }
+                    start = None;
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
