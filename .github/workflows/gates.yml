@@ -1,0 +1,75 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The gates that protect everything written after them. Each one exists
+# because a rule in docs/spec/ is worthless if nothing enforces it.
+#
+#   license   LICENSING.md §4     every source file carries its SPDX tag
+#   icons     design-system §8.5  no emoji as UI icons
+#   contrast  design-system §2    measured WCAG ratios, both themes
+#   i18n      localization §3.9   key parity, variables, layout growth
+#   pseudo    localization §3.9.5 +40% stress locale still builds
+#   fonts     docs/cdn-fonts.md   manifest hashes match the vendored files
+#   docs      this file           internal links resolve
+
+name: gates
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gates-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: ${{ matrix.gate }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: license
+        if: matrix.gate == 'license'
+        run: python3 tools/ci/check-license.py
+
+      - name: icons
+        if: matrix.gate == 'icons'
+        run: python3 tools/ci/check-no-emoji.py
+
+      - name: contrast
+        if: matrix.gate == 'contrast'
+        run: python3 tools/ci/check-contrast.py
+
+      - name: i18n
+        if: matrix.gate == 'i18n'
+        run: python3 tools/i18n-lint.py
+
+      - name: pseudo
+        if: matrix.gate == 'pseudo'
+        run: |
+          python3 tools/pseudo-localize.py --check
+          python3 tools/pseudo-localize.py
+          test -s locales/qps/odina.ftl
+
+      - name: fonts
+        if: matrix.gate == 'fonts'
+        run: python3 tools/ci/check-fonts.py
+
+      - name: docs
+        if: matrix.gate == 'docs'
+        run: python3 tools/ci/check-docs.py

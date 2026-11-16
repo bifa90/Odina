@@ -68,7 +68,7 @@ docs/          الموجّه الكامل (v15) · الخطوط · التعري
 fonts/         خطوط مضمّنة + حزم CDN، مع sha256 لكل ملف
 locales/       ملفات Fluent للغات العشر
 assets/logo/   الهوية البصرية (SVG · PNG · ICO)
-tools/         سكربتات البناء (MIT)
+tools/         سكربتات البناء (MIT) · tools/ci/ بوابات الجودة
 ui-preview.html  معاينة الواجهة — 7 لغات، ملف واحد
 LICENSING.md   كيف يندمج AGPL مع MIT
 NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
@@ -82,6 +82,7 @@ NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 | **قواعد الحماية والتنفيذ** | `docs/spec/` — ست وثائق ملزمة |
 | رفع الخطوط على موقعك | `docs/cdn-fonts.md` |
 | فهم الترخيص | `LICENSING.md` |
+| **البوابات و CI** | `docs/ci.md` |
 | رؤية الواجهة | `ui-preview.html` (يحتاج سيرفر محلي) |
 | رؤية الشعار بأحجامه | `logo-review.html` |
 

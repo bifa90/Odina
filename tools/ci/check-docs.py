@@ -1,0 +1,156 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
+"""Docs gate — internal references must resolve.
+
+The plan has grown across seventeen prompt revisions and six specs. The
+failure mode is not a broken build, it is a reader following a reference
+into a file that was renamed three revisions ago. This gate follows every
+in-repo path mentioned in backticks and every relative markdown link.
+
+Checks:
+  * `path/to/file.ext` in backticks -> must exist (files only, no dirs)
+  * [text](relative/path.md)         -> must exist
+  * a reference to a prompt version   -> must be the current one
+
+Ignored on purpose: URLs, anchors, glob-ish patterns (`*.ftl`), and
+placeholder fragments (`<lang>`, `...`, `n`).
+
+Usage:
+    python3 tools/ci/check-docs.py [--root .] [--quiet]
+
+Exit codes: 0 = ok, 1 = broken reference, 2 = nothing to scan.
+"""
+
+from __future__ import annotations
+
+import argparse
+import re
+import sys
+from pathlib import Path
+
+# Only these extensions are treated as "a file that should exist today".
+# Anything else in backticks is either a planned artefact (signatures.db),
+# a package name or a mime type — not our business here.
+CHECK_EXT = {".md", ".py", ".js", ".mjs", ".rs", ".json", ".svg",
+             ".ftl", ".toml", ".yml", ".yaml", ".html", ".txt", ".sh"}
+CODE_SPAN = re.compile(r"`([^`\n]+)`")
+MD_LINK = re.compile(r"\[[^\]]*\]\((?!https?:|#|mailto:)([^)\s]+)\)")
+PROMPT_REF = re.compile(r"odina-agent-prompt-v(\d+)\.md")
+
+# Paths that are mentioned as part of the plan but intentionally absent.
+ALLOW_MISSING = {
+    "Cargo.toml", "tauri.conf.json", "package.json",
+    "src/main.rs", "src/lib.rs",
+}
+
+SKIP_DIRS = {".git", "node_modules", "target", "dist", "build", "out",
+             "__pycache__", ".venv"}
+
+
+def in_code_fence(lines: list[str]) -> list[bool]:
+    """Mark lines that sit inside a ``` fence — those are illustrative."""
+    out: list[bool] = []
+    inside = False
+    for line in lines:
+        if line.lstrip().startswith("```"):
+            out.append(True)
+            inside = not inside
+            continue
+        out.append(inside)
+    return out
+
+
+def looks_like_path(token: str) -> bool:
+    if not token or " " in token and "/" not in token:
+        return False
+    if token.startswith(("http", "#", "mailto:", "data:")):
+        return False
+    if any(ch in token for ch in "<>*{}|$"):
+        return False
+    if "|" in token:
+        return False
+    suffix = Path(token).suffix.lower()
+    return suffix in CHECK_EXT
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--root", default=".")
+    ap.add_argument("--quiet", action="store_true")
+    args = ap.parse_args()
+
+    root = Path(args.root).resolve()
+    docs = [p for p in root.rglob("*.md")
+            if not any(part in SKIP_DIRS for part in p.relative_to(root).parts)]
+    if not docs:
+        print("docs gate: no markdown found", file=sys.stderr)
+        return 2
+
+    # Basenames present anywhere in the repo: a doc may cite `foo-v1.md`
+    # while the file lives in docs/spec/ — that is a valid reference.
+    known_names: set[str] = set()
+    for p in root.rglob("*"):
+        if p.is_file() and not any(part in SKIP_DIRS
+                                   for part in p.relative_to(root).parts):
+            known_names.add(p.name)
+
+    broken: list[tuple[str, int, str]] = []
+    prompt_versions: set[int] = set()
+    checked = 0
+
+    for doc in docs:
+        rel = doc.relative_to(root).as_posix()
+        text = doc.read_text(encoding="utf-8")
+        raw_lines = text.splitlines()
+        fenced = in_code_fence(raw_lines)
+        for lineno, line in enumerate(raw_lines, 1):
+            if fenced[lineno - 1]:
+                continue
+            for token in CODE_SPAN.findall(line):
+                token = token.strip()
+                m = PROMPT_REF.search(token)
+                if m:
+                    prompt_versions.add(int(m.group(1)))
+                if not looks_like_path(token):
+                    continue
+                if token in ALLOW_MISSING:
+                    continue
+                target = root / token.lstrip("./")
+                checked += 1
+                if not target.exists() and Path(token).name not in known_names:
+                    broken.append((rel, lineno, token))
+            for target in MD_LINK.findall(line):
+                target = target.split("#", 1)[0].strip()
+                if not target or target.startswith(".."):
+                    pass
+                if not target:
+                    continue
+                resolved = (doc.parent / target).resolve()
+                checked += 1
+                if not resolved.exists():
+                    broken.append((rel, lineno, target))
+
+    # exactly one prompt version should be referenced
+    if len(prompt_versions) > 1:
+        broken.append(("(repo)", 0,
+                       f"multiple prompt versions referenced: "
+                       f"{sorted(prompt_versions)}"))
+
+    if broken:
+        print(f"docs gate: {len(broken)} broken reference(s) "
+              f"in {checked} checked", file=sys.stderr)
+        for rel, lineno, token in broken[:40]:
+            where = f"{rel}:{lineno}" if lineno else rel
+            print(f"  {where}: {token}", file=sys.stderr)
+        if len(broken) > 40:
+            print(f"  … and {len(broken) - 40} more", file=sys.stderr)
+        return 1
+
+    if not args.quiet:
+        print(f"docs gate: {len(docs)} file(s) · {checked} reference(s) resolve")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
