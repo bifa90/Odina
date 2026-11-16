@@ -13,6 +13,12 @@ name: fmt-fix
 
 on:
   workflow_dispatch:
+  # `workflow_dispatch` alone cannot be started for a workflow that exists
+  # only on a side branch, so the job also wakes up when this file itself is
+  # touched — which is exactly what a one-off maintenance run looks like.
+  push:
+    paths:
+      - '.github/workflows/fmt-fix.yml'
 
 permissions:
   contents: write
