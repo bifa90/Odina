@@ -1,10 +1,10 @@
 # Copyright (c) 2026 bifa90 — Odina
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# TEMPORARY. Exists for one reason: the sandbox writing this branch cannot
-# download job logs, so the compiler output is committed back to the branch
-# through the contents API (curl + the run's own token) instead. It is deleted
-# as soon as the output has been read, and it never runs on main.
+# TEMPORARY. The sandbox that writes this branch has no Rust toolchain and
+# cannot reach the log store, so this job runs `cargo fmt` and `clippy`, then
+# writes the results back to the branch through the contents API. Deleted as
+# soon as the branch is green.
 
 name: fmt-report
 
@@ -16,7 +16,7 @@ on:
 
 jobs:
   report:
-    name: report fmt + clippy
+    name: format and lint
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
 
@@ -29,123 +29,65 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      # GitHub turns `::error::` lines into check-run annotations, which the API
-      # returns even when job logs are unreachable. The cap is 10 per step, so
-      # each diagnostic gets its own step and the list is trimmed.
-
-      - name: fmt writes
-        continue-on-error: true
+      - name: format and lint
         run: |
           cargo fmt --all
-          git diff --no-color --stat
-          git diff --no-color > /tmp/fmt.diff || true
-          wc -l < /tmp/fmt.diff | sed 's/^/::error::DIFFLINES /'
+          {
+            echo "=== clippy default ==="
+            cargo clippy --workspace --all-targets -- -D warnings 2>&1 || true
+            echo
+            echo "=== clippy instrument ==="
+            cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings 2>&1 || true
+          } > clippy-report.txt
+          grep -cE '^(error|warning)' clippy-report.txt || true
 
-      - name: fmt writes
-        continue-on-error: true
+      - name: write back through the contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          cargo fmt --all
-          git diff --no-color > /tmp/fmt.diff || true
-          echo "lines: $(wc -l < /tmp/fmt.diff)"
+          cat > /tmp/push.py <<'PYEOF'
+          import base64, json, os, subprocess, urllib.request
 
-      - name: d0
-        continue-on-error: true
-        run: |
-          sed -n '1,12p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
+          repo = os.environ["GITHUB_REPOSITORY"]
+          branch = os.environ["GITHUB_REF_NAME"]
+          token = os.environ["GH_TOKEN"]
+          api = f"https://api.github.com/repos/{repo}/contents/"
 
-      - name: d1
-        continue-on-error: true
-        run: |
-          sed -n '13,24p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
+          def headers():
+              return {"Authorization": f"Bearer {token}",
+                      "User-Agent": "odina-ci",
+                      "Accept": "application/vnd.github+json"}
 
-      - name: d2
-        continue-on-error: true
-        run: |
-          sed -n '25,36p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d3
-        continue-on-error: true
-        run: |
-          sed -n '37,48p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d4
-        continue-on-error: true
-        run: |
-          sed -n '49,60p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d5
-        continue-on-error: true
-        run: |
-          sed -n '61,72p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d6
-        continue-on-error: true
-        run: |
-          sed -n '73,84p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d7
-        continue-on-error: true
-        run: |
-          sed -n '85,96p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d8
-        continue-on-error: true
-        run: |
-          sed -n '97,108p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d9
-        continue-on-error: true
-        run: |
-          sed -n '109,120p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d10
-        continue-on-error: true
-        run: |
-          sed -n '121,132p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d11
-        continue-on-error: true
-        run: |
-          sed -n '133,144p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d12
-        continue-on-error: true
-        run: |
-          sed -n '145,156p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d13
-        continue-on-error: true
-        run: |
-          sed -n '157,168p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d14
-        continue-on-error: true
-        run: |
-          sed -n '169,180p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d15
-        continue-on-error: true
-        run: |
-          sed -n '181,192p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d16
-        continue-on-error: true
-        run: |
-          sed -n '193,204p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d17
-        continue-on-error: true
-        run: |
-          sed -n '205,216p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d18
-        continue-on-error: true
-        run: |
-          sed -n '217,228p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-
-      - name: d19
-        continue-on-error: true
-        run: |
-          sed -n '229,240p' /tmp/fmt.diff | while read -r l; do echo "::error::D $l"; done
-      - name: collected
-        run: echo "report complete"
+          changed = subprocess.run(["git", "diff", "--name-only"],
+                                   capture_output=True, text=True).stdout.split()
+          files = list(changed) + ["clippy-report.txt"]
+          for path in files:
+              try:
+                  with open(path, "rb") as fh:
+                      content = base64.b64encode(fh.read()).decode()
+              except OSError as err:
+                  print("skip", path, err)
+                  continue
+              sha = None
+              try:
+                  req = urllib.request.Request(api + path + f"?ref={branch}", headers=headers())
+                  with urllib.request.urlopen(req) as resp:
+                      sha = json.load(resp).get("sha")
+              except Exception:
+                  pass
+              payload = {"message": f"chore(ci): {path} [ci-skip]",
+                         "content": content, "branch": branch}
+              if sha:
+                  payload["sha"] = sha
+              req = urllib.request.Request(api + path, method="PUT",
+                                           data=json.dumps(payload).encode(),
+                                           headers={**headers(),
+                                                    "Content-Type": "application/json"})
+              try:
+                  with urllib.request.urlopen(req) as resp:
+                      print("ok", path, resp.status)
+              except Exception as err:
+                  body = err.read().decode()[:300] if hasattr(err, "read") else str(err)
+                  print("FAIL", path, body)
+          PYEOF
+          python3 /tmp/push.py

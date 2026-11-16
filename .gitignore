@@ -30,3 +30,5 @@ locales/qps/
 site/_build/
 .firebase/
 firebase.json.bak
+
+clippy-report.txt
