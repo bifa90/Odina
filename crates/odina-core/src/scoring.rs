@@ -332,8 +332,14 @@ mod tests {
 
     #[test]
     fn weights_sum_to_exactly_one_hundred() {
-        let sum: u32 = Indicator::ALL.iter().map(|i| i.weight_percent() as u32).sum();
-        assert_eq!(sum, 100, "the spec promises 100%; a change must redistribute");
+        let sum: u32 = Indicator::ALL
+            .iter()
+            .map(|i| i.weight_percent() as u32)
+            .sum();
+        assert_eq!(
+            sum, 100,
+            "the spec promises 100%; a change must redistribute"
+        );
     }
 
     #[test]
@@ -431,7 +437,11 @@ mod tests {
 
     #[test]
     fn veto_beats_everything() {
-        let s = score(&all_maxed(), &Thresholds::default(), Some(Veto::AllowListed));
+        let s = score(
+            &all_maxed(),
+            &Thresholds::default(),
+            Some(Veto::AllowListed),
+        );
         assert_eq!(s.value, 0.0);
         assert_eq!(s.verdict, Verdict::Clean);
         assert_eq!(s.veto, Some(Veto::AllowListed));

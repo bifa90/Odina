@@ -136,7 +136,10 @@ mod tests {
     fn empty_input_is_stable() {
         let h = hash_bytes(b"");
         assert_eq!(h.size, 0);
-        assert_eq!(h.head, h.tail, "empty file: head and tail are the same bytes");
+        assert_eq!(
+            h.head, h.tail,
+            "empty file: head and tail are the same bytes"
+        );
         assert_eq!(
             h.head,
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
