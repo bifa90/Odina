@@ -78,7 +78,10 @@ fn main() -> ExitCode {
         Some("scan") => {
             let json = args.iter().any(|a| a == "--json");
             let recursive = args.iter().any(|a| a == "--recursive" || a == "-r");
-            let Some(target) = args.iter().skip(1).find(|a| !a.starts_with("--") && *a != "-r")
+            let Some(target) = args
+                .iter()
+                .skip(1)
+                .find(|a| !a.starts_with("--") && *a != "-r")
             else {
                 eprintln!("odina: scan needs a path\n\n{USAGE}");
                 return ExitCode::FAILURE;

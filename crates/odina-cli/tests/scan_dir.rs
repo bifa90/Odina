@@ -8,13 +8,11 @@ use std::path::PathBuf;
 use std::process::Command;
 
 fn binary() -> PathBuf {
-    // The test binary lives in target/<profile>/deps/, the CLI one level up.
-    let mut path = std::env::current_exe().expect("test exe");
-    path.pop();
-    if path.ends_with("deps") {
-        path.pop();
-    }
-    path.join(format!("odina{}", std::env::consts::EXE_SUFFIX))
+    // Cargo sets this for integration tests and it is the documented way to
+    // find the binary under test. Reconstructing the path from current_exe()
+    // works until the target layout changes, and then it fails on a runner
+    // and not on your machine — which is exactly what happened once.
+    PathBuf::from(env!("CARGO_BIN_EXE_odina"))
 }
 
 /// The EICAR standard test string, assembled from pieces so this source file
@@ -42,7 +40,11 @@ fn scans_a_folder_and_flags_the_deceptive_name() {
     std::fs::write(dir.join("notes.txt"), b"just some notes").unwrap();
     std::fs::write(dir.join("photo.jpg.exe"), eicar()).unwrap();
 
-    let out = Command::new(binary()).arg("scan").arg(&dir).output().unwrap();
+    let out = Command::new(binary())
+        .arg("scan")
+        .arg(&dir)
+        .output()
+        .unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(stdout.contains("الملفات: 2"), "expected 2 files:\n{stdout}");
 
@@ -82,7 +84,11 @@ fn a_folder_of_ordinary_files_exits_clean() {
         std::fs::write(dir.join(name), b"harmless content").unwrap();
     }
 
-    let out = Command::new(binary()).arg("scan").arg(&dir).output().unwrap();
+    let out = Command::new(binary())
+        .arg("scan")
+        .arg(&dir)
+        .output()
+        .unwrap();
     assert_eq!(
         out.status.code(),
         Some(0),
@@ -105,7 +111,10 @@ fn json_output_is_one_array_and_parses_as_such() {
         .unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
     let trimmed = stdout.trim();
-    assert!(trimmed.starts_with('[') && trimmed.ends_with(']'), "got: {trimmed}");
+    assert!(
+        trimmed.starts_with('[') && trimmed.ends_with(']'),
+        "got: {trimmed}"
+    );
     assert!(trimmed.contains("\"verdict\""), "got: {trimmed}");
 
     let _ = std::fs::remove_dir_all(&dir);
@@ -113,7 +122,10 @@ fn json_output_is_one_array_and_parses_as_such() {
 
 #[test]
 fn selftest_matches_the_published_digest() {
-    let out = Command::new(binary()).arg("selftest").output().unwrap();
+    let out = Command::new(binary())
+        .arg("selftest")
+        .output()
+        .unwrap();
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(
         stdout.contains("275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f"),
