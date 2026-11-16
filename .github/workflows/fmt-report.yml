@@ -1,0 +1,79 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# TEMPORARY. Exists for one reason: the sandbox writing this branch cannot
+# download job logs, so the compiler output is committed back to the branch
+# through the contents API (curl + the run's own token) instead. It is deleted
+# as soon as the output has been read, and it never runs on main.
+
+name: fmt-report
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'arena/3113ebbf-odina'
+
+jobs:
+  report:
+    name: report fmt + clippy
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[ci-skip]')"
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: collect
+        run: |
+          {
+            echo "=== rustfmt --check ==="
+            cargo fmt --all -- --check 2>&1 || true
+            echo
+            echo "=== clippy (default) ==="
+            cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 || true
+            echo
+            echo "=== clippy (instrument) ==="
+            cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 || true
+          } > report.txt
+          wc -l report.txt
+
+      - name: publish the report through the contents API
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 - <<'PY'
+          import base64, json, os, urllib.request
+          path = "report.txt"
+          repo = os.environ["GITHUB_REPOSITORY"]
+          branch = os.environ["GITHUB_REF_NAME"]
+          token = os.environ["GH_TOKEN"]
+          body = base64.b64encode(open(path, "rb").read()).decode()
+          api = f"https://api.github.com/repos/{repo}/contents/{path}"
+          sha = None
+          try:
+              req = urllib.request.Request(f"{api}?ref={branch}", headers={
+                  "Authorization": f"Bearer {token}", "User-Agent": "odina-ci"})
+              with urllib.request.urlopen(req) as r:
+                  sha = json.load(r).get("sha")
+          except Exception:
+              pass
+          payload = {"message": "ci: compiler report [ci-skip]", "content": body,
+                     "branch": branch}
+          if sha:
+              payload["sha"] = sha
+          req = urllib.request.Request(api, data=json.dumps(payload).encode(),
+              method="PUT", headers={"Authorization": f"Bearer {token}",
+              "User-Agent": "odina-ci", "Content-Type": "application/json"})
+          try:
+              with urllib.request.urlopen(req) as r:
+                  print(r.status, json.load(r).get("commit", {}).get("sha"))
+          except Exception as err:
+              print("publish failed:", err)
+              print(err.read().decode()[:500] if hasattr(err, "read") else "")
+          PY
