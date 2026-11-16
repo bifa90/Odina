@@ -78,10 +78,23 @@ NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 
 | إن أردت | اقرأ |
 |---------|------|
-| فهم المشروع كاملًا | `docs/odina-agent-prompt-v16.md` |
+| فهم المشروع كاملًا | `docs/odina-agent-prompt-v17.md` |
+| **قواعد الحماية والتنفيذ** | `docs/spec/` — ست وثائق ملزمة |
 | رفع الخطوط على موقعك | `docs/cdn-fonts.md` |
 | فهم الترخيص | `LICENSING.md` |
 | رؤية الواجهة | `ui-preview.html` (يحتاج سيرفر محلي) |
+| رؤية الشعار بأحجامه | `logo-review.html` |
+
+### الوثائق الملزمة (`docs/spec/`)
+
+| الوثيقة | تحكم |
+|---------|------|
+| `protection-policy-v1.md` | الجدران الثلاثة · Pause · التصنيف · وثيقة نفي |
+| `scoring-spec-v1.md` | 10 أوزان · سقوف · Veto · عتبات · منطقة تدرّج |
+| `report-schema-v1.md` | 16 حقلًا · أنماط بدل أسماء · قائمة سوداء |
+| `usb-security-spec-v1.md` | Hot-Trigger · Device Trust · P0–P3 · القواعد الثماني |
+| `localization-spec-v1.md` | 10 لغات · الخطوط · RTL · pseudo-l10n |
+| `design-system-v1.md` | رموز مُقاسة · أزرار · وصول · RTL |
 
 ---
 
