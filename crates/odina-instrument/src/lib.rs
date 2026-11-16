@@ -23,6 +23,6 @@ pub mod meter;
 pub mod perf;
 
 pub use meter::{cpu_time, io_ops, rss_kb, Meter};
-pub use perf::{Gate, Measurement, Metrics, PerfReport, ScanStats, PERF_SCHEMA};
+pub use perf::{Gate, Measurement, PerfReport, ScanStats, PERF_SCHEMA};
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
