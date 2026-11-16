@@ -34,7 +34,7 @@ const USAGE: &str = "\
 odina — scan one file and print the decision (gate G1)
 
 USAGE:
-    odina scan <path> [--json]
+    odina scan <path> [--json] [--recursive]
     odina selftest
     odina --version | --help
 
@@ -43,6 +43,7 @@ EXIT CODES:
     2   suspicious or above — the app would interrupt the user
     1   the command itself failed (missing file, unreadable, bad usage)
 
+A directory is scanned one level deep unless --recursive is given.
 This binary never blocks, isolates, or deletes anything. It only reads.";
 
 /// Everything the report needs, assembled in one place so the two output
@@ -76,11 +77,19 @@ fn main() -> ExitCode {
         Some("selftest") => selftest(),
         Some("scan") => {
             let json = args.iter().any(|a| a == "--json");
-            let Some(target) = args.iter().skip(1).find(|a| !a.starts_with("--")) else {
+            let recursive = args.iter().any(|a| a == "--recursive" || a == "-r");
+            let Some(target) = args.iter().skip(1).find(|a| !a.starts_with("--") && *a != "-r")
+            else {
                 eprintln!("odina: scan needs a path\n\n{USAGE}");
                 return ExitCode::FAILURE;
             };
-            match scan(Path::new(target)) {
+            let path = Path::new(target);
+
+            if path.is_dir() {
+                return scan_dir(path, json, recursive);
+            }
+
+            match scan(path) {
                 Ok(report) => {
                     if json {
                         println!("{}", report_to_json(&report));
@@ -104,6 +113,98 @@ fn main() -> ExitCode {
             ExitCode::FAILURE
         }
     }
+}
+
+/// Scan every file in a directory. This is what makes the command useful
+/// rather than a demo: pointing it at `~/Downloads` answers the question the
+/// user actually has.
+///
+/// One unreadable file does not abort the run — it is counted and named at the
+/// end. A scanner that dies on a locked file is a scanner the user stops
+/// trusting.
+fn scan_dir(dir: &Path, json: bool, recursive: bool) -> ExitCode {
+    let entries = match collect_files(dir, recursive) {
+        Ok(list) => list,
+        Err(err) => {
+            eprintln!("odina: {}: {err}", dir.display());
+            return ExitCode::FAILURE;
+        }
+    };
+
+    let mut reports = Vec::new();
+    let mut unreadable: Vec<(PathBuf, String)> = Vec::new();
+
+    for path in entries {
+        match scan(&path) {
+            Ok(report) => reports.push(report),
+            Err(err) => unreadable.push((path, err.to_string())),
+        }
+    }
+
+    let interrupting = reports.iter().filter(|r| r.score.interrupts()).count();
+
+    if json {
+        let mut out = String::from("[");
+        for (i, r) in reports.iter().enumerate() {
+            if i > 0 {
+                out.push(',');
+            }
+            out.push_str(&report_to_json(r));
+        }
+        out.push(']');
+        println!("{out}");
+    } else {
+        println!("المجلد: {}", dir.display());
+        println!("الملفات: {}", reports.len());
+        println!();
+        for r in &reports {
+            let (ar, _) = verdict_label(&r.score);
+            println!("  {:<14} {:.2}  {}", ar, r.score.value, r.path.display());
+        }
+        println!();
+        for (path, err) in &unreadable {
+            println!("  تعذّرت قراءته: {} ({err})", path.display());
+        }
+        println!(
+            "الخلاصة: {} ملفًا · {} يستدعي تنبيهًا · {} تعذّرت قراءته",
+            reports.len(),
+            interrupting,
+            unreadable.len()
+        );
+        println!("قاعدة البصمات: غير موجودة بعد — لم يُقارن أي ملف بأي قاعدة");
+        println!("هذه الأداة تقرأ فقط: لا تمنع، ولا تعزل، ولا تحذف.");
+    }
+
+    if interrupting > 0 {
+        ExitCode::from(2)
+    } else if !unreadable.is_empty() && reports.is_empty() {
+        ExitCode::FAILURE
+    } else {
+        ExitCode::SUCCESS
+    }
+}
+
+fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
+    let mut files = Vec::new();
+    let mut stack = vec![dir.to_path_buf()];
+    while let Some(current) = stack.pop() {
+        let mut entries: Vec<_> = std::fs::read_dir(&current)?
+            .filter_map(|e| e.ok())
+            .map(|e| e.path())
+            .collect();
+        entries.sort();
+        for path in entries {
+            if path.is_dir() {
+                if recursive {
+                    stack.push(path);
+                }
+            } else {
+                files.push(path);
+            }
+        }
+    }
+    files.sort();
+    Ok(files)
 }
 
 fn scan(path: &Path) -> std::io::Result<Report> {
