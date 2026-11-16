@@ -1,0 +1,36 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Manual only, on purpose. This is not one of the seven gates in gates.yml:
+# it needs a Windows runner and a built PE, it takes minutes, and it proves
+# one narrow thing — that a signature survives from build to verification.
+#
+# The certificate it makes is throwaway and is deleted before the job ends.
+# It never makes a file trusted and never touches the release pipeline.
+
+name: signing-selftest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: sign + verify (self-signed)
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: build the CLI
+        run: cargo build --package odina-cli --release --locked
+
+      - name: sign, verify, and prove tampering is detected
+        shell: pwsh
+        run: ./tools/ci/test-signing.ps1 -File target/release/odina.exe

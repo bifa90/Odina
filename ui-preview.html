@@ -56,6 +56,8 @@ html[dir="rtl"] body{line-height:1.55}
 .brand{display:flex;align-items:center;gap:10px;font-weight:600;letter-spacing:.2px}
 .brand svg{display:block}
 .spacer{flex:1}
+.policy-link{font-size:13px;color:var(--text2);text-decoration:none;border-bottom:1px solid var(--border)}
+.policy-link:hover{color:var(--accent);border-bottom-color:var(--accent)}
 select,button{font-family:inherit;font-size:14px}
 select{padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border);
   background:var(--surface2);color:var(--text);cursor:pointer}
@@ -251,6 +253,7 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
     <span>Odina</span>
   </div>
   <div class="spacer"></div>
+  <a class="policy-link" href="signing.html">سياسة التوقيع · Code signing</a>
   <label style="font-size:13px;color:var(--text3)" for="lang">اللغة</label>
   <select id="lang" aria-label="Language">
     <option value="ar">العربية (ar)</option>

@@ -9,6 +9,7 @@
   },
   "include": [
     "ui-preview.html",
+    "signing.html",
     "logo-review.html",
     "assets/logo/svg/*.svg",
     "assets/logo/png/*/*.png",
