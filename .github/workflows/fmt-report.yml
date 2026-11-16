@@ -29,22 +29,21 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: fmt diff, first lines per file
+      - name: fmt diff in one annotation
         continue-on-error: true
         run: |
           cargo fmt --all
           git diff --no-color > /tmp/d.txt || true
-          for f in $(git diff --name-only); do
-            git diff --no-color -- "$f" | grep -E '^[+-][^+-]' | head -6 | tr '\n' '~' | cut -c1-260 \
-              | sed "s/^/::error::L $f :: /"
-          done
+          python3 - <<'PY'
+          data = open('/tmp/d.txt', encoding='utf-8').read()
+          compact = '\n'.join(l for l in data.splitlines()
+                              if l.startswith(('diff --git', '@@', '+', '-'))
+                              and not l.startswith(('+++', '---')))
+          print('::error::DIFFSTART')
+          print(compact[:60000].replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
 
-      - name: write back through the contents API
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          cat > /tmp/push.py <<'PYEOF'
-          import base64, json, os, subprocess, urllib.request
+
 
           repo = os.environ["GITHUB_REPOSITORY"]
           branch = os.environ["GITHUB_REF_NAME"]
