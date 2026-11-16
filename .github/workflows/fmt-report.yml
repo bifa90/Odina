@@ -31,18 +31,15 @@ jobs:
 
       - name: collect
         run: |
-          {
-            echo "=== rustfmt --check ==="
-            cargo fmt --all -- --check 2>&1 || true
-            echo
-            echo "=== clippy (default) ==="
-            cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 || true
-            echo
-            echo "=== clippy (instrument) ==="
-            cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 || true
-          } > report.txt
-          wc -l report.txt
-          head -c 3000 report.txt
+          # Emit each line as a check-run annotation: annotations are readable
+          # through the API even when job logs are not.
+          cargo fmt --all -- --check 2>&1 | sed 's/^/FMT /' || true
+          cargo clippy --workspace --all-targets --locked -- -D warnings 2>&1 | sed 's/^/CLIPPY /' || true
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings 2>&1 | sed 's/^/INST /' || true
+
+      - name: fail so the runtime records the lines above
+        run: |
+          echo "collected"; exit 1
 
       - name: publish the report through the contents API
         env:
