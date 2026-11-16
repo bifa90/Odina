@@ -97,6 +97,16 @@ pub enum Veto {
     /// forgotten. If the machine is later hit by an excluded file, the log
     /// says so plainly — and does not blame the user.
     UserException,
+    /// V5 — **the other direction**: the file's SHA-256 is in the known-bad
+    /// database. A byte-exact match is not evidence to weigh, it is the
+    /// answer. Score becomes 1.0 and the verdict is Confirmed.
+    ///
+    /// This veto exists because writing the weights exposed a hole in them:
+    /// a known-bad file whose name and path are unremarkable scores 15
+    /// (header) + 8 (tail) + 10 (size) = **33%**, i.e. "monitor", i.e.
+    /// **silence**. The caps in §4 push scores *down*, and nothing pushed a
+    /// known sample *up*. V5 is that push.
+    KnownBad,
 }
 
 /// The four verdicts the UI knows about. Below [`Verdict::Monitor`] the user is
@@ -300,6 +310,31 @@ pub fn score(evidence: &Evidence, thresholds: &Thresholds, veto: Option<Veto>) -
     }
 }
 
+/// Score with the known-bad database consulted last, as it must be: an
+/// allow-list veto (V1–V4) may clear a file, but a byte-exact match against a
+/// known-bad sample always wins over a heuristic allow-list, because a signed
+/// allow-list is a list of hashes and a hash is not a matter of opinion.
+///
+/// Conflicting lists are a configuration bug, not a judgement call — this
+/// function resolves it in the safe direction and the caller is expected to
+/// log it.
+pub fn score_with_known_bad(
+    evidence: &Evidence,
+    thresholds: &Thresholds,
+    veto: Option<Veto>,
+    known_bad: bool,
+) -> Score {
+    if known_bad {
+        return Score {
+            value: 1.0,
+            verdict: Verdict::Confirmed,
+            veto: Some(Veto::KnownBad),
+            caps: Vec::new(),
+        };
+    }
+    score(evidence, thresholds, veto)
+}
+
 /// Map a score to its verdict, honouring the 0.75–0.85 caution band from
 /// §6.1: inside the band the stricter behaviour wins, so an error falls toward
 /// protection rather than toward letting something run.
@@ -493,6 +528,44 @@ mod tests {
         e.set(Indicator::Size, -3.0);
         assert_eq!(e.get(Indicator::Fuzzy), 1.0);
         assert_eq!(e.get(Indicator::Size), 0.0);
+    }
+
+    #[test]
+    fn a_known_bad_hash_is_a_verdict_not_a_weight() {
+        // The hole this test was written to close: an unremarkable name and
+        // path over bytes that exactly match a known-bad sample.
+        let mut e = Evidence::new();
+        e.set(Indicator::HeaderHash, 1.0);
+        e.set(Indicator::TailHash, 1.0);
+        e.set(Indicator::Size, 1.0);
+        let weighted = score(&e, &Thresholds::default(), None);
+        assert!((weighted.value - 0.33).abs() < 1e-6, "got {}", weighted.value);
+        assert!(!weighted.interrupts(), "this is the silent hole");
+
+        let s = score_with_known_bad(&e, &Thresholds::default(), None, true);
+        assert_eq!(s.value, 1.0);
+        assert_eq!(s.verdict, Verdict::Confirmed);
+        assert_eq!(s.veto, Some(Veto::KnownBad));
+        assert!(s.interrupts());
+        assert_eq!(s.verdict.timeout_action(), "quarantine");
+    }
+
+    #[test]
+    fn known_bad_beats_a_heuristic_allow_list() {
+        let s = score_with_known_bad(
+            &all_maxed(),
+            &Thresholds::default(),
+            Some(Veto::UserException),
+            true,
+        );
+        assert_eq!(s.verdict, Verdict::Confirmed, "a hash is not an opinion");
+    }
+
+    #[test]
+    fn known_bad_false_changes_nothing() {
+        let s = score_with_known_bad(&Evidence::new(), &Thresholds::default(), None, false);
+        assert_eq!(s.value, 0.0);
+        assert_eq!(s.verdict, Verdict::Clean);
     }
 
     #[test]

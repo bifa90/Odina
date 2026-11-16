@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+
+[package]
+name = "odina-cli"
+description = "Scan one file and print the decision. This is gate G1."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "odina"
+path = "src/main.rs"
+
+[dependencies]
+odina-core = { path = "../odina-core" }

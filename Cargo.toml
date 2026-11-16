@@ -10,7 +10,7 @@
 
 [workspace]
 resolver = "2"
-members = ["crates/odina-core"]
+members = ["crates/odina-core", "crates/odina-cli"]
 
 [workspace.package]
 version = "0.1.0"

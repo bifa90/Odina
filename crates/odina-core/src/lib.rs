@@ -13,11 +13,14 @@
 //! spawn threads. Callers hand it bytes; it hands back verdicts.
 
 pub mod hashing;
+pub mod heuristics;
 pub mod scoring;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};
+pub use heuristics::{guess_path_flags, name_shape, path_score, NameShape, PathFlags};
 pub use scoring::{
-    banded_verdict, score, Cap, Evidence, Indicator, Score, Thresholds, Verdict, Veto,
+    banded_verdict, score, score_with_known_bad, Cap, Evidence, Indicator, Score, Thresholds,
+    Verdict, Veto,
 };
 
 /// The crate version, so a report can name the exact engine that produced it.
