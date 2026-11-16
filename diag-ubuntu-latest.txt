@@ -1,0 +1,126 @@
+=== versions ===
+rustc 1.100.0 (0ef1bc386 2026-11-09)
+binary: rustc
+commit-hash: 0ef1bc386059596dada8fb65b50425aab2ea637a
+commit-date: 2026-11-09
+host: x86_64-unknown-linux-gnu
+release: 1.100.0
+LLVM version: 23.1.5
+cargo 1.100.0 (3acc79c0c 2026-11-05)
+
+=== fmt ===
+
+=== clippy (locked) ===
+[1m[92m    Updating[0m crates.io index
+[1m[92m Downloading[0m crates ...
+[1m[92m  Downloaded[0m crypto-common v0.1.7
+[1m[92m  Downloaded[0m digest v0.10.7
+[1m[92m  Downloaded[0m cpufeatures v0.2.17
+[1m[92m  Downloaded[0m cfg-if v1.0.5
+[1m[92m  Downloaded[0m block-buffer v0.10.4
+[1m[92m  Downloaded[0m generic-array v0.14.7
+[1m[92m  Downloaded[0m sha2 v0.10.9
+[1m[92m  Downloaded[0m version_check v0.9.5
+[1m[92m  Downloaded[0m typenum v1.20.1
+[1m[92m   Compiling[0m version_check v0.9.5
+[1m[92m    Checking[0m typenum v1.20.1
+[1m[92m    Checking[0m cfg-if v1.0.5
+[1m[92m    Checking[0m cpufeatures v0.2.17
+[1m[92m   Compiling[0m generic-array v0.14.7
+[1m[92m    Checking[0m block-buffer v0.10.4
+[1m[92m    Checking[0m crypto-common v0.1.7
+[1m[92m    Checking[0m digest v0.10.7
+[1m[92m    Checking[0m sha2 v0.10.9
+[1m[92m    Checking[0m odina-core v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-core)
+[1m[92m    Checking[0m odina-cli v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-cli)
+[1m[92m    Finished[0m `dev` profile [unoptimized + debuginfo] target(s) in 1.31s
+
+=== test (locked, no fail fast) ===
+[1m[92m   Compiling[0m typenum v1.20.1
+[1m[92m   Compiling[0m cpufeatures v0.2.17
+[1m[92m   Compiling[0m cfg-if v1.0.5
+[1m[92m   Compiling[0m generic-array v0.14.7
+[1m[92m   Compiling[0m crypto-common v0.1.7
+[1m[92m   Compiling[0m block-buffer v0.10.4
+[1m[92m   Compiling[0m digest v0.10.7
+[1m[92m   Compiling[0m sha2 v0.10.9
+[1m[92m   Compiling[0m odina-core v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-core)
+[1m[92m   Compiling[0m odina-cli v0.1.0 (/home/runner/work/Odina/Odina/crates/odina-cli)
+[1m[92m    Finished[0m `test` profile [unoptimized + debuginfo] target(s) in 1.36s
+[1m[92m     Running[0m unittests src/main.rs (target/debug/build/odina-cli/885406a41093fe90/out/odina-885406a41093fe90)
+
+running 3 tests
+test tests::json_escapes_quotes_and_controls ... ok
+test tests::json_escapes_windows_paths ... ok
+test tests::reason_prefers_the_strongest_true_statement ... ok
+
+test result: ok. 3 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+[1m[92m     Running[0m tests/scan_dir.rs (target/debug/build/odina-cli/bc27f08e57594d4d/out/scan_dir-bc27f08e57594d4d)
+
+running 4 tests
+test selftest_matches_the_published_digest ... ok
+test json_output_is_one_array_and_parses_as_such ... ok
+test a_folder_of_ordinary_files_exits_clean ... ok
+test scans_a_folder_and_flags_the_deceptive_name ... ok
+
+test result: ok. 4 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+[1m[92m     Running[0m unittests src/lib.rs (target/debug/build/odina-core/835b3605aeae42da/out/odina_core-835b3605aeae42da)
+
+running 33 tests
+test hashing::tests::empty_input_is_stable ... ok
+test hashing::tests::known_vector ... ok
+test hashing::tests::reader_can_skip_the_full_digest ... ok
+test heuristics::tests::a_bidi_override_is_flagged ... ok
+test heuristics::tests::a_plain_name_scores_zero ... ok
+test heuristics::tests::an_unknown_path_is_not_suspicious ... ok
+test hashing::tests::head_and_tail_match_manual_slice_for_big_file ... ok
+test heuristics::tests::arabic_and_chinese_names_score_exactly_like_english ... ok
+test heuristics::tests::double_extension_is_the_strongest_name_signal ... ok
+test heuristics::tests::path_matrix_matches_the_spec ... ok
+test heuristics::tests::length_alone_does_not_carry_a_score ... ok
+test heuristics::tests::the_strongest_path_wins ... ok
+test heuristics::tests::trailing_space_is_flagged ... ok
+test scoring::tests::a_known_bad_hash_is_a_verdict_not_a_weight ... ok
+test scoring::tests::a_name_only_verdict_can_never_reach_suspicious ... ok
+test scoring::tests::caution_band_pushes_upward_only ... ok
+test scoring::tests::all_indicators_present_and_unique ... ok
+test scoring::tests::clean_corpus_is_capped_to_monitor ... ok
+test scoring::tests::fingerprints_alone_score_fifty_seven_percent ... ok
+test scoring::tests::everything_maxed_scores_one ... ok
+test scoring::tests::fuzzy_alone_counts_as_a_fingerprint ... ok
+test scoring::tests::known_bad_beats_a_heuristic_allow_list ... ok
+test scoring::tests::known_bad_false_changes_nothing ... ok
+test scoring::tests::no_evidence_scores_zero ... ok
+test scoring::tests::positive_signal_count_ignores_weak_values ... ok
+test scoring::tests::signed_publisher_caps_to_monitor ... ok
+test scoring::tests::timeout_never_allows ... ok
+test scoring::tests::values_outside_range_are_clamped ... ok
+test scoring::tests::verdict_boundaries_are_inclusive_at_the_bottom ... ok
+test scoring::tests::veto_beats_everything ... ok
+test scoring::tests::weights_sum_to_exactly_one_hundred ... ok
+test hashing::tests::tail_window_survives_odd_chunking ... ok
+test hashing::tests::reader_matches_in_memory ... ok
+
+test result: ok. 33 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
+
+[1m[92m     Running[0m tests/eicar.rs (target/debug/build/odina-core/7f0e68a5a11ad664/out/eicar-7f0e68a5a11ad664)
+
+running 7 tests
+test a_known_sample_without_a_fingerprint_match_is_not_reported_as_a_threat ... ok
+test a_sample_with_a_fingerprint_and_a_second_signal_does_interrupt ... ok
+test eicar_full_digest_matches_the_published_vector ... ok
+test eicar_on_the_allow_list_is_silent ... ok
+test eicar_string_is_the_expected_length ... ok
+test eicar_is_short_so_head_and_tail_are_the_full_file ... ok
+test eicar_through_the_streaming_reader_is_identical ... ok
+
+test result: ok. 7 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
+[1m[92m   Doc-tests[0m odina_core
+
+running 0 tests
+
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+
