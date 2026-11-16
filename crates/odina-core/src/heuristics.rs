@@ -221,7 +221,11 @@ mod tests {
             ("accounting.exe", "ملف_المحاسبة.exe", "会计文件.exe"),
             ("setup.exe", "تثبيت.exe", "安装.exe"),
             ("photo.jpg.exe", "صورة.jpg.exe", "照片.jpg.exe"),
-            ("report final.pdf.exe", "تقرير نهائي.pdf.exe", "报告 最终.pdf.exe"),
+            (
+                "report final.pdf.exe",
+                "تقرير نهائي.pdf.exe",
+                "报告 最终.pdf.exe",
+            ),
         ];
         for (english, arabic, chinese) in pairs {
             let a = name_shape(arabic).score();
@@ -244,26 +248,70 @@ mod tests {
 
     #[test]
     fn path_matrix_matches_the_spec() {
-        assert_eq!(path_score(PathFlags { usb_root: true, ..D }), 1.0);
-        assert_eq!(path_score(PathFlags { startup_folder: true, ..D }), 1.0);
-        assert_eq!(path_score(PathFlags { temp_folder: true, ..D }), 0.85);
-        assert_eq!(path_score(PathFlags { downloads: true, ..D }), 0.60);
+        assert_eq!(
+            path_score(PathFlags {
+                usb_root: true,
+                ..D
+            }),
+            1.0
+        );
+        assert_eq!(
+            path_score(PathFlags {
+                startup_folder: true,
+                ..D
+            }),
+            1.0
+        );
+        assert_eq!(
+            path_score(PathFlags {
+                temp_folder: true,
+                ..D
+            }),
+            0.85
+        );
+        assert_eq!(
+            path_score(PathFlags {
+                downloads: true,
+                ..D
+            }),
+            0.60
+        );
         assert_eq!(path_score(PathFlags { desktop: true, ..D }), 0.50);
-        assert_eq!(path_score(PathFlags { program_files: true, ..D }), 0.20);
-        assert_eq!(path_score(PathFlags { system32: true, ..D }), 0.10);
+        assert_eq!(
+            path_score(PathFlags {
+                program_files: true,
+                ..D
+            }),
+            0.20
+        );
+        assert_eq!(
+            path_score(PathFlags {
+                system32: true,
+                ..D
+            }),
+            0.10
+        );
         assert_eq!(path_score(D), 0.0);
     }
 
     #[test]
     fn the_strongest_path_wins() {
-        let flags = PathFlags { temp_folder: true, downloads: true, ..D };
+        let flags = PathFlags {
+            temp_folder: true,
+            downloads: true,
+            ..D
+        };
         assert_eq!(path_score(flags), 0.85);
     }
 
     #[test]
     fn an_unknown_path_is_not_suspicious() {
         let plain = guess_path_flags(std::path::Path::new("/home/u/docs/a.exe"));
-        assert_eq!(path_score(plain), 0.0, "unknown must never read as suspicious");
+        assert_eq!(
+            path_score(plain),
+            0.0,
+            "unknown must never read as suspicious"
+        );
 
         let dl = guess_path_flags(std::path::Path::new("/home/u/Downloads/a.exe"));
         assert!(dl.downloads);

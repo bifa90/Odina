@@ -189,7 +189,11 @@ fn report_to_text(report: &Report) -> String {
     out.push_str(&format!(
         "قاعدة البصمات: {}\n",
         if report.database_present {
-            if report.known_bad { "مطابقة معروفة الخبث" } else { "موجودة، بلا مطابقة" }
+            if report.known_bad {
+                "مطابقة معروفة الخبث"
+            } else {
+                "موجودة، بلا مطابقة"
+            }
         } else {
             "غير موجودة بعد — لم يُقارن الملف بأي قاعدة"
         }
@@ -329,7 +333,8 @@ fn selftest() -> ExitCode {
 
     match outcome {
         Ok(report) => {
-            const EXPECTED: &str = "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f";
+            const EXPECTED: &str =
+                "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f";
             let size_ok = report.hashes.size == 68;
             let hash_ok = report.hashes.full == EXPECTED;
             print!("{}", report_to_text(&report));

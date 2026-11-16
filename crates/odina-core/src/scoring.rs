@@ -539,7 +539,11 @@ mod tests {
         e.set(Indicator::TailHash, 1.0);
         e.set(Indicator::Size, 1.0);
         let weighted = score(&e, &Thresholds::default(), None);
-        assert!((weighted.value - 0.33).abs() < 1e-6, "got {}", weighted.value);
+        assert!(
+            (weighted.value - 0.33).abs() < 1e-6,
+            "got {}",
+            weighted.value
+        );
         assert!(!weighted.interrupts(), "this is the silent hole");
 
         let s = score_with_known_bad(&e, &Thresholds::default(), None, true);
