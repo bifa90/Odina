@@ -65,7 +65,11 @@ impl Behavior {
 
 /// Why a report was refused. Every variant is a rule from the schema, not a
 /// formatting preference.
-#[derive(Debug, Clone, PartialEq, Eq)]
+///
+/// `Eq` is deliberately absent: `BadScore` carries an `f32`, and claiming a
+/// total equality for a float would be a lie. `PartialEq` is all the tests and
+/// the caller need.
+#[derive(Debug, Clone, PartialEq)]
 pub enum ReportError {
     /// The serialised form passed 4 KB.
     TooLarge { bytes: usize, max: usize },
