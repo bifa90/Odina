@@ -23,11 +23,17 @@ use std::path::{Path, PathBuf};
 
 use odina_core::hashing::{hash_reader, FileHashes};
 use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds, Verdict};
-use odina_report::report::{Report, REPORT_SCHEMA};
+use odina_report::report::Report;
 use odina_report::{measure, pe};
 
 /// The app version written into every exported report.
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// No threat database ships yet, so the field carries the version of the
+/// built-in heuristic set rather than pretending a database exists. It must
+/// look like a version — the schema rejects anything else — and the schema
+/// name itself lives in its own field, `schema`.
+pub const DB_VERSION: &str = "builtin-1";
 
 /// What a scan of one file produced, kept in one place so the text output and
 /// the report cannot drift apart.
@@ -112,7 +118,7 @@ pub fn report_for(s: &Scanned) -> Report {
         s.hashes.full.clone(),
         s.hashes.size,
         APP_VERSION,
-        REPORT_SCHEMA, // no threat database ships yet; the field says so
+        DB_VERSION,
     );
     if !s.hashes.head.is_empty() {
         report.header_hash = Some(s.hashes.head.clone());
