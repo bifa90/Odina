@@ -1,0 +1,41 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Temporary: Actions logs cannot be read from the sandbox, so the runner
+# writes them into the repo. Deleted once the build is green.
+
+name: diag
+
+on:
+  push:
+    paths:
+      - '.github/workflows/diag.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  diag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - name: collect
+        run: |
+          {
+            echo "=== clippy ==="
+            cargo clippy --workspace --all-targets -- -D warnings 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | tail -60
+            echo "=== build ==="
+            cargo build --workspace --locked 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | tail -20
+            echo "=== test ==="
+            cargo test --workspace --locked 2>&1 | sed 's/\x1b\[[0-9;]*m//g' | tail -60
+          } > diag.txt 2>&1
+          echo done
+      - name: commit
+        run: |
+          git config user.name "odina-bot"
+          git config user.email "bifa90@users.noreply.github.com"
+          git add -A
+          git commit -m "chore: diagnostics (CI)" || exit 0
+          git push
