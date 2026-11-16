@@ -157,7 +157,7 @@ fn is_vocabulary_segment(segment: &str) -> bool {
 fn only_vocabulary(pattern: &str) -> bool {
     pattern
         .split(['.', '\\'])
-        .all(|segment| is_vocabulary_segment(segment))
+        .all(is_vocabulary_segment)
 }
 
 /// Public form of the vocabulary check, so a validator can refuse a pattern
