@@ -104,6 +104,8 @@ git clone https://github.com/bifa90/Odina.git
 
 لا يوجد CLA. من يساهم يحتفظ بحقوقه ويرخّص بموجب AGPL.
 
+**اقرأ [`CONTRIBUTING.md`](CONTRIBUTING.md) قبل أول مساهمة** — خصوصًا القسم الأول إن كان لديك عيّنة برمجية خبيثة (لا ترفعها إلى GitHub).
+
 ---
 
 **Odina — من تعز، للعالم.**
