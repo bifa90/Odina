@@ -64,9 +64,9 @@ jobs:
       - name: raw clippy, exact
         continue-on-error: true
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1
-          echo "rc1=$?"
+          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1 || true
+          echo "rc1 done"
           tail -c 900 /tmp/c1.txt | tr '\n' '|' | sed 's/^/::error::C1 /'
-          cargo clippy -p odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1
-          echo "rc2=$?"
+          cargo clippy -p odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
+          echo "rc2 done"
           tail -c 900 /tmp/c2.txt | tr '\n' '|' | sed 's/^/::error::C2 /'
