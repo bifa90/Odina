@@ -1,0 +1,56 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The Rust workspace builds and its tests pass on every push. This is gate G0
+# from docs/roadmap.md: until it is green, "we will write the app in Rust" is
+# a claim rather than a fact.
+
+name: rust
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: rust-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: build + test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: format
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo fmt --all -- --check
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets -- -D warnings
+
+      - name: build
+        run: cargo build --workspace
+
+      - name: test
+        run: cargo test --workspace
+
+      - name: doc
+        if: matrix.os == 'ubuntu-latest'
+        run: cargo test --workspace --doc

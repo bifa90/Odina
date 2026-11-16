@@ -69,8 +69,10 @@ fonts/         خطوط مضمّنة + حزم CDN، مع sha256 لكل ملف
 locales/       ملفات Fluent للغات العشر
 assets/logo/   الهوية البصرية (SVG · PNG · ICO)
 tools/         سكربتات البناء (MIT) · tools/ci/ بوابات الجودة
+crates/        النواة (odina-core): البصمات والتقييم — بلا نظام تشغيل
 site/          مانيفست الموقع (site.json) — ما يُنشر على odinaav.web.app
 ui-preview.html  معاينة الواجهة — 7 لغات، ملف واحد
+Cargo.toml     مساحة عمل Rust (عضو واحد الآن: odina-core)
 LICENSING.md   كيف يندمج AGPL مع MIT
 NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 ```
@@ -84,6 +86,7 @@ NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 | رفع الخطوط على موقعك | `docs/cdn-fonts.md` |
 | فهم الترخيص | `LICENSING.md` |
 | **البوابات و CI** | `docs/ci.md` |
+| **كود Rust: ما بُني وحدوده** | `docs/rust-workspace.md` |
 | **نشر الموقع** | `docs/site-deploy.md` |
 | رؤية الواجهة | `ui-preview.html` (يحتاج سيرفر محلي) |
 | رؤية الشعار بأحجامه | `logo-review.html` |

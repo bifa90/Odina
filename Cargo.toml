@@ -1,0 +1,27 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+#
+# Workspace root. Members are added as they become real; nothing is listed
+# here before it compiles, so `cargo build` is green at every commit.
+#
+# src-tauri/ (the shell) joins this workspace at stage B1, when the UI
+# exists. Listing it earlier would drag webkit2gtk into every CI run for a
+# crate nobody can use yet.
+
+[workspace]
+resolver = "2"
+members = ["crates/odina-core"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/bifa90/Odina"
+
+[profile.release]
+opt-level = "s"     # size over speed: the installer is the budget
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
