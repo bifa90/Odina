@@ -22,10 +22,6 @@ on:
   push:
     tags:
       - "v*"
-    # TEMPORARY: lets this branch build its own artifacts while the workflow is
-    # still unproven. Removed before this reaches main.
-    branches:
-      - ci/build-artifacts
 
 permissions:
   contents: write
@@ -100,13 +96,13 @@ jobs:
           # Every stage is marked, and the step ends with an explicit exit: a
           # cmdlet that writes a non-terminating error must not be able to fail
           # the step silently, which is what happened the first three times.
+          # A cmdlet that writes a non-terminating error must not be able to
+          # fail this step silently, so the step ends with an explicit exit.
           $ErrorActionPreference = 'Continue'
           $stage = "stage-${{ matrix.kind }}"
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
-          Write-Output "::error::M1 stage=$stage cwd=$(Get-Location)"
 
           Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}" -ErrorAction Continue
-          Write-Output "::error::M2 copied=$(Test-Path "$stage/${{ matrix.exe }}")"
 
           if ("${{ matrix.kind }}" -eq "check") {
             @(
@@ -130,20 +126,17 @@ jobs:
               '',
               'Commit: ${{ github.sha }}'
             ) | Set-Content -Path "$stage/READ-ME-FIRST.txt" -Encoding utf8
-            Write-Output "::error::M3 readme=$(Test-Path "$stage/READ-ME-FIRST.txt")"
           }
 
           $zip = "${{ matrix.artifact }}.zip"
           Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force -ErrorAction Continue
-          Write-Output "::error::M4 zip=$(Test-Path $zip)"
 
           if (Test-Path $zip) {
             $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
             "$hash  $zip" | Set-Content -Path "$zip.sha256" -Encoding utf8
-            Write-Output "::error::M5 sha256=$hash"
             exit 0
           }
-          Write-Output "::error::M6 the archive was not created"
+          Write-Output "the archive was not created"
           exit 1
 
       - uses: actions/upload-artifact@v4
