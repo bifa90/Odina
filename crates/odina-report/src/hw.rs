@@ -194,7 +194,10 @@ fn cpu_model_from_sysfs() -> Option<String> {
     Some(format!("arm64 midr {midr:#010x}"))
 }
 
-#[cfg(test)]
+// The module itself is gated, not just the tests inside it: on Windows every
+// test below disappears, and a `use super::*` with nothing to import is an
+// unused-import error there.
+#[cfg(all(test, target_os = "linux"))]
 mod linux_tests {
     use super::*;
 
