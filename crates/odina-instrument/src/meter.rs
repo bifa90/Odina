@@ -166,6 +166,9 @@ pub fn cpu_time() -> Option<Duration> {
 fn io_ops_windows() -> Option<u64> {
     #[repr(C)]
     #[derive(Default)]
+    // The names are the Windows ABI's, not ours: `IO_COUNTERS` is a documented
+    // struct and the field names are how the next reader maps this back to it.
+    #[allow(non_snake_case)]
     struct IoCounters {
         ReadOperationCount: u64,
         WriteOperationCount: u64,
