@@ -459,8 +459,8 @@ mod tests {
             }
         }
         // Optional fields that are absent are omitted rather than sent empty —
-        // the schema marks them ⬜, and a report with no TLSH says so by saying
-        // nothing. What is never allowed is a field outside the list.
+        // the schema marks them optional, and a report with no TLSH says so by
+        // saying nothing. What is never allowed is a field outside the list.
         for key in &keys {
             assert!(
                 Report::field_names().contains(&key.as_str()),
