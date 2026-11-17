@@ -97,19 +97,19 @@ jobs:
       - name: name, label and archive
         shell: pwsh
         run: |
+          # Every stage is marked, and the step ends with an explicit exit: a
+          # cmdlet that writes a non-terminating error must not be able to fail
+          # the step silently, which is what happened the first three times.
+          $ErrorActionPreference = 'Continue'
           $stage = "stage-${{ matrix.kind }}"
-          New-Item -ItemType Directory -Path $stage | Out-Null
-          Write-Output "::error::DEBUG cwd=$(Get-Location) exe_exists=$(Test-Path target/release/odina.exe) stage=$stage"
-          Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}"
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+          Write-Output "::error::M1 stage=$stage cwd=$(Get-Location)"
 
-          # The version is read from the binary's own package, not typed here,
-          # so the archive cannot claim a version the build did not have.
-          # The version comes from the crate manifest, so the archive cannot
-          # claim a version the build did not have.
-          $version = (Select-String -Path crates/odina-cli/Cargo.toml -Pattern '^version = "(.*)"').Matches.Groups[1].Value
+          Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}" -ErrorAction Continue
+          Write-Output "::error::M2 copied=$(Test-Path "$stage/${{ matrix.exe }}")"
 
           if ("${{ matrix.kind }}" -eq "check") {
-            $lines = @(
+            @(
               'odina - CHECK BUILD (nuskha al-fahs)',
               '=====================================',
               '',
@@ -128,23 +128,23 @@ jobs:
               'delete it and nothing happens. docs/review-instrumented.md says',
               'what happens to it next.',
               '',
-              "Version: $version",
-              "Built by: GitHub Actions, commit ${{ github.sha }}"
-            )
-            $lines | Set-Content -Path "$stage/READ-ME-FIRST.txt" -Encoding utf8
+              'Commit: ${{ github.sha }}'
+            ) | Set-Content -Path "$stage/READ-ME-FIRST.txt" -Encoding utf8
+            Write-Output "::error::M3 readme=$(Test-Path "$stage/READ-ME-FIRST.txt")"
           }
 
           $zip = "${{ matrix.artifact }}.zip"
-          try {
-            Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force -ErrorAction Stop
+          Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force -ErrorAction Continue
+          Write-Output "::error::M4 zip=$(Test-Path $zip)"
+
+          if (Test-Path $zip) {
             $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
             "$hash  $zip" | Set-Content -Path "$zip.sha256" -Encoding utf8
-            Get-Content "$zip.sha256"
-          } catch {
-            Write-Output "::error::PACK $($_.Exception.Message)"
-            Get-ChildItem -Recurse $stage | Select-Object -First 10 | ForEach-Object { Write-Output "::error::PACK file $($_.Name)" }
-            exit 1
+            Write-Output "::error::M5 sha256=$hash"
+            exit 0
           }
+          Write-Output "::error::M6 the archive was not created"
+          exit 1
 
       - uses: actions/upload-artifact@v4
         with:
