@@ -99,6 +99,7 @@ jobs:
         run: |
           $stage = "stage-${{ matrix.kind }}"
           New-Item -ItemType Directory -Path $stage | Out-Null
+          Write-Output "::error::DEBUG cwd=$(Get-Location) exe_exists=$(Test-Path target/release/odina.exe) stage=$stage"
           Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}"
 
           # The version is read from the binary's own package, not typed here,
@@ -134,11 +135,16 @@ jobs:
           }
 
           $zip = "${{ matrix.artifact }}.zip"
-          Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force
-          Get-FileHash $zip -Algorithm SHA256 |
-            ForEach-Object { "$($_.Hash.ToLower())  $zip" } |
-            Set-Content -Path "$zip.sha256" -Encoding utf8
-          Get-Content "$zip.sha256"
+          try {
+            Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force -ErrorAction Stop
+            $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+            "$hash  $zip" | Set-Content -Path "$zip.sha256" -Encoding utf8
+            Get-Content "$zip.sha256"
+          } catch {
+            Write-Output "::error::PACK $($_.Exception.Message)"
+            Get-ChildItem -Recurse $stage | Select-Object -First 10 | ForEach-Object { Write-Output "::error::PACK file $($_.Name)" }
+            exit 1
+          }
 
       - uses: actions/upload-artifact@v4
         with:
