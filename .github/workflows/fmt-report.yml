@@ -33,39 +33,13 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: collect
-        run: |
-          cargo clippy --workspace --all-targets -- -D warnings > /tmp/clippy.txt 2>&1 || true
-          cargo clippy -p odina-cli --features instrument --all-targets -- -D warnings > /tmp/instr.txt 2>&1 || true
-          cat > /tmp/split.py <<'PY'
-          import pathlib
-
-          SEP = ' <<<NL>>> '
-          lines = []
-          for tag, path in (('CLIPPY', '/tmp/clippy.txt'), ('INSTR', '/tmp/instr.txt')):
-              body = pathlib.Path(path).read_text(encoding='utf-8', errors='replace')
-              body = body.replace('\x1b', '')
-              keep = [l for l in body.splitlines()
-                      if l.startswith(('error', 'warning')) or l.lstrip().startswith('-->')]
-              lines.append('==== %s (%d lines) ====' % (tag, len(keep)))
-              lines.extend(keep)
-          joined = SEP.join(lines)
-          out = pathlib.Path('/tmp/chunks'); out.mkdir(exist_ok=True)
-          pieces = [joined[i:i + 1100] for i in range(0, len(joined), 1100)]
-          for i, piece in enumerate(pieces):
-              (out / ('%03d' % i)).write_text(piece.replace('\n', ' '), encoding='utf-8')
-          print(len(pieces), 'pieces')
-          PY
-          python3 /tmp/split.py
-          ls /tmp/chunks | wc -l
-
-
-
-      - name: clippy, windows, exactly as rust.yml runs it
+      - name: clippy on windows
         continue-on-error: true
+        shell: pwsh
         run: |
           cargo clippy --workspace --all-targets --locked -- -D warnings *> c1.txt
-          (Get-Content c1.txt -Tail 60) -join "|" | ForEach-Object { "::error::W1 $_" }
+          $tail = (Get-Content c1.txt -Tail 45) -join " <NL> "
+          Write-Output "::error::W1 $tail"
           cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings *> c2.txt
-          (Get-Content c2.txt -Tail 60) -join "|" | ForEach-Object { "::error::W2 $_" }
-        shell: pwsh
+          $tail2 = (Get-Content c2.txt -Tail 45) -join " <NL> "
+          Write-Output "::error::W2 $tail2"
