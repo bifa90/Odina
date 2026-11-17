@@ -22,6 +22,10 @@ on:
   push:
     tags:
       - "v*"
+    # TEMPORARY: lets this branch build its own artifacts while the workflow is
+    # still unproven. Removed before this reaches main.
+    branches:
+      - ci/build-artifacts
 
 permissions:
   contents: write
