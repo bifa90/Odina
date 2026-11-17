@@ -121,6 +121,37 @@ fn segment_pattern(segment: &str) -> String {
     out
 }
 
+/// Is this a run of `[word]{n}` / `[digits]{n}` / `[char]` tokens and nothing
+/// else? The emitter produces at most one token per character-class run, so a
+/// real segment is short; there is deliberately no upper bound, since a bound
+/// would be a thing to argue about rather than a leak to stop.
+fn is_token_run(segment: &str) -> bool {
+    let mut rest = segment;
+    if rest.is_empty() {
+        return false;
+    }
+    while !rest.is_empty() {
+        if let Some(after) = rest.strip_prefix("[char]") {
+            rest = after;
+            continue;
+        }
+        let Some(after_kind) = rest
+            .strip_prefix("[word]")
+            .or_else(|| rest.strip_prefix("[digits]"))
+        else {
+            return false;
+        };
+        let after_bucket = ["{1,3}", "{4,8}", "{9,}"]
+            .iter()
+            .find_map(|b| after_kind.strip_prefix(b));
+        match after_bucket {
+            Some(after) => rest = after,
+            None => return false,
+        }
+    }
+    true
+}
+
 /// Is this emitted segment part of the fixed vocabulary? See the module
 /// comment: this is the guard that turns a hypothetical leak into `[redacted]`.
 fn is_vocabulary_segment(segment: &str) -> bool {
@@ -130,11 +161,12 @@ fn is_vocabulary_segment(segment: &str) -> bool {
     if segment == "[char]" || segment == "<dir>" || segment == REDACTED {
         return true;
     }
-    if let Some(rest) = segment.strip_prefix("[word]") {
-        return matches!(rest, "" | "{1,3}" | "{4,8}" | "{9,}");
-    }
-    if let Some(rest) = segment.strip_prefix("[digits]") {
-        return matches!(rest, "" | "{1,3}" | "{4,8}" | "{9,}");
+    // A dot-free segment can be a *run* of tokens, because one part of a name
+    // may mix classes: `a12` is `[word]{1,3}[digits]{1,3}`. Strip the tokens in
+    // order and require nothing but tokens; a single strange character left
+    // over fails the whole segment, and that is the point.
+    if segment.starts_with("[word]") || segment.starts_with("[digits]") {
+        return is_token_run(segment);
     }
     if let Some(rest) = segment.strip_prefix("<name>") {
         // `<name>` alone, or `<name>.ext` / `<name>.ext.ext`.
@@ -264,11 +296,21 @@ pub fn path_pattern(path: &str) -> String {
     let file = segments.pop().unwrap_or_default();
     let mut out: Vec<String> = Vec::with_capacity(segments.len() + 1);
 
+    // `%USERPROFILE%` may appear only once, as the outermost home folder.
+    // Everything under it is a folder we do not name: `<dir>`. Without this,
+    // `C:\Users\Ahmed` and `/home/ahmed` produce different shapes, and the
+    // pattern starts depending on how deep somebody's files happen to sit.
+    let mut seen_profile = false;
     for segment in &segments {
-        out.push(match folder_token(segment) {
-            Some(token) => token.to_string(),
-            None => "<dir>".to_string(),
-        });
+        let token = match folder_token(segment) {
+            Some("%USERPROFILE%") if !seen_profile => {
+                seen_profile = true;
+                "%USERPROFILE%"
+            }
+            Some(other) if other != "%USERPROFILE%" => other,
+            _ => "<dir>",
+        };
+        out.push(token.to_string());
     }
 
     // The file keeps its recognised extension chain as `<name>.<ext>`, because
@@ -293,9 +335,15 @@ pub fn path_pattern(path: &str) -> String {
 mod tests {
     use super::*;
 
-    /// The promise, tested with names a real user would have. Each assertion
-    /// fails if any single character of the *stem* survives — extensions are a
-    /// category, not a name, so they are excluded from the check.
+    /// The promise, tested with names a real user would have.
+    ///
+    /// The check cannot be "the output does not contain the letter `a`": the
+    /// vocabulary itself contains letters (`<name>`, `[char]`, `[word]`). What
+    /// can be checked, and what the whole design rests on, is that the output
+    /// is **closed**: every character that survives is one of a handful of
+    /// constants, so nothing the user typed can travel through — and, for the
+    /// scripts the vocabulary does not cover, that not one character of the
+    /// stem appears at all.
     #[test]
     fn no_character_of_the_original_stem_survives() {
         let names = [
@@ -309,18 +357,31 @@ mod tests {
             "ملف.غيرمعروف",
             "report.w9.exe",
         ];
+        const ALLOWED: &str =
+            "abcdefghijklmnopqrstuvwxyz0123456789[]{},._<>%ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         for name in names {
             let p = name_pattern(name);
             assert_ne!(p, REDACTED, "{name} fell back to a redaction");
+            for c in p.chars() {
+                assert!(
+                    ALLOWED.contains(c),
+                    "pattern {p:?} for {name:?} contains {c:?}, which only the input could supply"
+                );
+            }
+            assert!(
+                only_vocabulary(&p),
+                "pattern {p:?} for {name:?} is not vocabulary"
+            );
             let stems: Vec<&str> = name
                 .split('.')
                 .filter(|s| !s.is_empty() && !is_known_ext(s))
                 .collect();
             for stem in stems {
-                for c in stem.chars() {
-                    if c == '.' || c.is_whitespace() || !c.is_alphanumeric() {
-                        continue;
-                    }
+                let outside_vocabulary: String = stem
+                    .chars()
+                    .filter(|c| c.is_alphanumeric() && !c.is_ascii())
+                    .collect();
+                for c in outside_vocabulary.chars() {
                     assert!(
                         !p.contains(c),
                         "pattern {p:?} for {name:?} still contains {c:?}"
@@ -404,9 +465,12 @@ mod tests {
 
     #[test]
     fn temp_stays_visible_inside_downloads() {
+        // The user's own folder name is a `<dir>`, even when the folder below
+        // it is a known one: the shape must not depend on how deep somebody's
+        // files sit, or on what their home folder is called.
         assert_eq!(
             path_pattern(r"C:\Users\Ahmed\Downloads\Temp\a.exe"),
-            r"%USERPROFILE%\%DOWNLOADS%\%TEMP%\<name>.exe"
+            r"%USERPROFILE%\<dir>\%DOWNLOADS%\%TEMP%\<name>.exe"
         );
     }
 
@@ -414,7 +478,7 @@ mod tests {
     fn unix_and_windows_paths_share_a_shape() {
         assert_eq!(
             path_pattern("/home/ahmed/Downloads/a.exe"),
-            r"%USERPROFILE%\%DOWNLOADS%\<name>.exe"
+            r"%USERPROFILE%\<dir>\%DOWNLOADS%\<name>.exe"
         );
         assert_eq!(
             path_pattern(r"C:\Users\ahmed\Downloads\a.exe"),
