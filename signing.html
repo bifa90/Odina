@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<!-- Copyright (c) 2026 bifa90 — Odina -->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Odina — سياسة توقيع الشيفرة · Code signing policy</title>
+<meta name="description" content="سياسة توقيع الشيفرة في Odina: ما نُوقّعه، وما لا نُوقّعه، وأين يُحفظ المفتاح، وكيف تتحقق بنفسك.">
+<style>
+:root{
+  --navy:#0A2540; --gold:#D4AF37; --accent:#0E7C6B;
+  --bg:#F7F8FA; --surface:#FFFFFF; --text:#14181C; --text2:#4A5560;
+  --border:rgba(20,24,28,.12); --code:#EFF1F4;
+  --ff:'Segoe UI','Tahoma',system-ui,sans-serif;
+  --mono:'Cascadia Mono','Consolas',ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#15181B; --surface:#1E2226; --text:#F2F4F6; --text2:#B7C0C8;
+    --border:rgba(242,244,246,.14); --code:#262B30; --accent:#3FC7B0;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--ff);line-height:1.7;font-size:17px}
+header{background:var(--navy);color:#F2F4F6;border-bottom:3px solid var(--gold)}
+.bar{max-width:860px;margin:0 auto;padding:18px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.mark{width:34px;height:34px;border:2px solid var(--gold);border-radius:8px;display:grid;place-items:center;
+  font-weight:700;font-size:18px;color:var(--gold);letter-spacing:.5px}
+.brand{font-weight:600;letter-spacing:.3px}
+.bar .spacer{flex:1}
+.bar a{color:#F2F4F6;text-decoration:none;border-bottom:1px solid rgba(242,244,246,.45);font-size:15px}
+.bar a:hover{border-bottom-color:var(--gold)}
+main{max-width:860px;margin:0 auto;padding:34px 22px 56px}
+h1{font-size:30px;line-height:1.3;margin:0 0 6px}
+.sub{color:var(--text2);margin:0 0 26px;font-size:17px}
+h2{font-size:20px;margin:34px 0 10px;padding-inline-start:12px;border-inline-start:4px solid var(--accent)}
+h3{font-size:17px;margin:22px 0 6px}
+p{margin:0 0 12px}
+ul{margin:0 0 12px;padding-inline-start:22px}
+li{margin:0 0 8px}
+.status{background:var(--surface);border:1px solid var(--border);border-inline-start:4px solid var(--gold);
+  border-radius:8px;padding:14px 16px;margin:0 0 26px}
+.status b{display:block;margin-bottom:2px}
+code{font-family:var(--mono);font-size:14.5px;background:var(--code);padding:2px 6px;border-radius:4px;
+  direction:ltr;display:inline-block;unicode-bidi:embed}
+pre{background:var(--code);border:1px solid var(--border);border-radius:8px;padding:14px 16px;overflow-x:auto;
+  direction:ltr;text-align:left}
+pre code{background:none;padding:0}
+.credit{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;
+  font-size:15.5px;color:var(--text2);margin:26px 0 0}
+.credit span{display:block;direction:ltr;text-align:left;margin-top:6px;color:var(--text)}
+hr{border:0;border-top:1px solid var(--border);margin:44px 0}
+.en{direction:ltr;text-align:left}
+.en h1,.en h2{letter-spacing:0}
+footer{max-width:860px;margin:0 auto;padding:0 22px 48px;color:var(--text2);font-size:14.5px}
+footer a{color:var(--accent)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="mark" aria-hidden="true">O</div>
+    <div class="brand">Odina</div>
+    <div class="spacer"></div>
+    <a href="index.html">معاينة الواجهة</a>
+  </div>
+</header>
+
+<main>
+  <h1>سياسة توقيع الشيفرة</h1>
+  <p class="sub">ما نُوقّعه، وما لا نُوقّعه، وأين يُحفظ المفتاح، وكيف تتحقق بنفسك.</p>
+
+  <div class="status">
+    <b>الحالة اليوم — 2026-11-16</b>
+    هذه السياسة <strong>منشورة قبل بدء التوقيع</strong>، ولم يُوقَّع أي ملف بعد. أول ملف موقّع سيُعلن في صفحة الإصدار
+    مع بصمة SHA-256 الخاصة به. وحتى ذلك الحين يُوزَّع البرنامج كأرشيف ZIP محمول، لا كمثبّت بلا توقيع.
+  </div>
+
+  <p>نُوقّع ملفات Windows التنفيذية فقط، ولا نُوقّع أي شيء لم يُبنَ من هذا المستودع.</p>
+
+  <h2>البناء</h2>
+  <p>كل توقيع يحدث على عدّاد GitHub Actions من الالتزام المُعلَن في سجل التغييرات؛ لا بناء محلي، ولا إعادة بناء قبل التوقيع.</p>
+
+  <h2>المفتاح</h2>
+  <p>لا نحتفظ بأي مفتاح توقيع. المفتاح في وحدة أمنية معزولة (HSM) لدى SignPath Foundation، ولكل عملية توقيع موافقةُ مشرف صريحة.</p>
+
+  <h2>ما يُوقَّع</h2>
+  <ul>
+    <li>المثبّت: <code>Odina-Setup-x.y.z.exe</code></li>
+    <li>حزمة المتجر: <code>Odina-x.y.z.msix</code></li>
+  </ul>
+
+  <h2>ما لا يُوقَّع</h2>
+  <ul>
+    <li>قواعد البصمات — تُوقَّع بمفتاح Ed25519 منفصل، لأنها تُحدَّث أكثر من البرنامج.</li>
+    <li>الأدوات في مجلد <code>tools/</code> — تُوزَّع بترخيص MIT كنص مصدري، لا كملفات تنفيذية.</li>
+  </ul>
+
+  <h2>التحقق</h2>
+  <p>بصمة SHA-256 لكل ملف تُنشر في صفحة الإصدار قبل التوقيع وبعده. ويمكنك التحقق من التوقيع بنفسك على ويندوز:</p>
+  <pre><code>Get-AuthenticodeSignature .\Odina-Setup-x.y.z.exe | Format-List Status, SignerCertificate</code></pre>
+  <p>يجب أن يكون الحالة <code>Valid</code>، وأن يكون الناشر <strong>SignPath Foundation</strong>. وإن اختلفت البصمة عن المنشورة، فلا تشغّل الملف.</p>
+
+  <h2>الإلغاء</h2>
+  <p>إن بُني إصدار من شيفرة غير مُراجَعة، نُلغيه ونُعلن الإلغاء قبل أي شيء آخر.</p>
+
+  <div class="credit">
+    التوقيع المجاني مقدَّم من SignPath.io، والشهادة من SignPath Foundation.
+    <span>Free code signing provided by SignPath.io, certificate by SignPath Foundation.</span>
+  </div>
+
+  <hr>
+
+  <section class="en" lang="en" dir="ltr">
+    <h1>Code signing policy</h1>
+    <p class="sub">What we sign, what we never sign, where the key lives, and how to verify it yourself.</p>
+
+    <div class="status">
+      <b>Status — 2026-11-16</b>
+      This policy is <strong>published before signing begins</strong>. No build has been signed yet. The first signed
+      build will be announced on its release page together with its SHA-256. Until then the program ships as a portable
+      ZIP archive, never as an unsigned installer.
+    </div>
+
+    <p>Only Windows binaries built from this repository are signed. Nothing else is.</p>
+
+    <h2>Build</h2>
+    <p>Builds run on GitHub Actions from the commit named in the release notes. There is no local build, and a binary is never rebuilt before signing.</p>
+
+    <h2>Key</h2>
+    <p>We hold no signing key. The key lives in SignPath Foundation's HSM, and every signing request requires explicit maintainer approval.</p>
+
+    <h2>Signed</h2>
+    <ul>
+      <li>The installer: <code>Odina-Setup-x.y.z.exe</code></li>
+      <li>The Store package: <code>Odina-x.y.z.msix</code></li>
+    </ul>
+
+    <h2>Not signed</h2>
+    <ul>
+      <li>Signature databases — signed with a separate Ed25519 key, because they update far more often than the program.</li>
+      <li>Everything under <code>tools/</code> — MIT-licensed and distributed as source, never as binaries.</li>
+    </ul>
+
+    <h2>Verification</h2>
+    <p>A SHA-256 for every artefact is published on the release page, before and after signing. You can verify the signature yourself on Windows:</p>
+    <pre><code>Get-AuthenticodeSignature .\Odina-Setup-x.y.z.exe | Format-List Status, SignerCertificate</code></pre>
+    <p><code>Status</code> must read <code>Valid</code> and the publisher must be <strong>SignPath Foundation</strong>. If the hash differs from the published one, do not run the file.</p>
+
+    <h2>Revocation</h2>
+    <p>If a build is ever produced from unreviewed code, it is revoked and the revocation is announced before anything else.</p>
+
+    <div class="credit">
+      Free code signing provided by SignPath.io, certificate by SignPath Foundation.
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>التفاصيل الكاملة وقائمة الشروط: <a href="https://github.com/bifa90/Odina/blob/main/docs/code-signing.md">docs/code-signing.md</a> · آخر تحديث 2026-11-16</p>
+</footer>
+
+</body>
+</html>

@@ -22,11 +22,27 @@
 //!   * nothing is blocked, isolated, or deleted. This command only looks.
 //!
 //! Run `odina selftest` to verify the engine against the standard test file.
+//!
+//! ## Two builds, one source
+//!
+//! The public build has no measurement code in it at all: `odina-report` and
+//! `odina-instrument` are optional dependencies, so a default build does not
+//! link them. The instrumented build (`--features instrument`) adds one
+//! command, `check`, which writes a local JSON file of counts and timings, and
+//! can export an `odina-report/v1` object for each file that would interrupt
+//! the user. Nothing is ever sent — the file is the user's to send or delete.
+//! See `docs/instrumented-build.md`.
+
+// Compiled only for the check build, or for this crate's own tests. In the
+// public build the module does not exist, and neither does the dependency it
+// needs.
+#[cfg(any(feature = "instrument", test))]
+mod check;
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-use odina_core::hashing::{hash_reader, FileHashes};
+use odina_core::hashing::{hash_bytes, hash_reader, FileHashes};
 use odina_core::heuristics::{guess_path_flags, name_shape, path_score};
 use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds};
 
@@ -35,7 +51,8 @@ odina — scan one file and print the decision (gate G1)
 
 USAGE:
     odina scan <path> [--json] [--recursive]
-    odina selftest
+    odina selftest                 # in memory: writes nothing to disk
+    odina check <path> [--out <file>]   # instrumented build only
     odina --version | --help
 
 EXIT CODES:
@@ -44,7 +61,10 @@ EXIT CODES:
     1   the command itself failed (missing file, unreadable, bad usage)
 
 A directory is scanned one level deep unless --recursive is given.
-This binary never blocks, isolates, or deletes anything. It only reads.";
+This binary never blocks, isolates, or deletes anything. It only reads.
+
+`check` exists only in the instrumented build. It scans the same way, writes
+one local JSON file of measurements, and sends nothing anywhere.";
 
 /// Everything the report needs, assembled in one place so the two output
 /// formats cannot drift apart.
@@ -75,6 +95,25 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Some("selftest") => selftest(),
+        // The refusal lives here, not inside the module, so the public build
+        // really has no `check` code: the module is not compiled at all.
+        Some("check") => {
+            #[cfg(feature = "instrument")]
+            {
+                check::command(&args[1..])
+            }
+            #[cfg(not(feature = "instrument"))]
+            {
+                eprintln!(
+                    "odina: this is the public build; it contains no measurement code.\n\
+                     \n\
+                     The check build is the same source built with --features instrument.\n\
+                     It adds local measurements and a local export of reports; it sends\n\
+                     nothing, and the file it writes is yours. See docs/instrumented-build.md."
+                );
+                ExitCode::FAILURE
+            }
+        }
         Some("scan") => {
             let json = args.iter().any(|a| a == "--json");
             let recursive = args.iter().any(|a| a == "--recursive" || a == "-r");
@@ -413,12 +452,22 @@ fn json_string(value: &str) -> String {
     out
 }
 
-/// `odina selftest` — proves the engine end to end without needing a sample,
-/// a database, or a network. It writes the standard 68-byte test file to a
-/// temporary path, scans it exactly as if the user had pointed at it, and
-/// checks the published digest.
+/// `odina selftest` — proves the hashing engine against the standard 68-byte
+/// EICAR string, **without writing it to disk**.
+///
+/// Why in memory: every antivirus on the machine (including Microsoft
+/// Defender, which is on by default on Windows) treats the EICAR string as
+/// malware and may quarantine or delete it the instant it appears in a file.
+/// The old version wrote it to `%TEMP%` and scanned it; on a machine with a
+/// live scanner that is a race, and the self-test then failed with a confusing
+/// "file not found" that said nothing about Odina. The bytes are the test
+/// vector, not a file: hashing them in memory tests the same code path
+/// (`hash_bytes`, the one the tests use) without alarming anything else.
+///
+/// A real file path is still exercised by `odina scan` and by the CLI tests
+/// that scan ordinary folders.
 fn selftest() -> ExitCode {
-    let path = std::env::temp_dir().join("odina-selftest.txt");
+    const EXPECTED: &str = "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f";
     let payload: Vec<u8> = [
         "X5O!P%@AP[4\\PZX54(P^)7CC)7}$",
         "EICAR-STANDARD-ANTIVIRUS-",
@@ -427,37 +476,30 @@ fn selftest() -> ExitCode {
     .concat()
     .into_bytes();
 
-    if let Err(err) = std::fs::write(&path, &payload) {
-        eprintln!("odina: selftest could not write {}: {err}", path.display());
-        return ExitCode::FAILURE;
-    }
+    let hashes = hash_bytes(&payload);
+    let size_ok = hashes.size == 68;
+    let full_ok = hashes.full == EXPECTED;
+    // 68 bytes < 4 KB, so both windows must see the whole vector.
+    let head_ok = hashes.head == EXPECTED;
+    let tail_ok = hashes.tail == EXPECTED;
 
-    let outcome = scan(&path);
-    let _ = std::fs::remove_file(&path);
+    println!("محرك Odina {}", odina_core::VERSION);
+    println!("الاختبار: متجه EICAR القياسي، 68 بايتًا، في الذاكرة (لا ملف على القرص).");
+    println!("الحجم:    {}", hashes.size);
+    println!("البصمة:   {}", hashes.full);
+    println!("الرأس:    {}", hashes.head);
+    println!("الذيل:    {}", hashes.tail);
+    println!();
 
-    match outcome {
-        Ok(report) => {
-            const EXPECTED: &str =
-                "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f";
-            let size_ok = report.hashes.size == 68;
-            let hash_ok = report.hashes.full == EXPECTED;
-            print!("{}", report_to_text(&report));
-            println!();
-            if size_ok && hash_ok {
-                println!("الاختبار الذاتي: نجح — 68 بايتًا، والبصمة تطابق المتجه المنشور.");
-                ExitCode::SUCCESS
-            } else {
-                println!(
-                    "الاختبار الذاتي: فشل — الحجم {} · البصمة {}",
-                    report.hashes.size, report.hashes.full
-                );
-                ExitCode::FAILURE
-            }
-        }
-        Err(err) => {
-            eprintln!("odina: selftest could not scan: {err}");
-            ExitCode::FAILURE
-        }
+    if size_ok && full_ok && head_ok && tail_ok {
+        println!("الاختبار الذاتي: نجح — الحجم والبصمات الثلاث تطابق المتجه المنشور.");
+        ExitCode::SUCCESS
+    } else {
+        println!(
+            "الاختبار الذاتي: فشل — \
+             size_ok={size_ok} full_ok={full_ok} head_ok={head_ok} tail_ok={tail_ok}"
+        );
+        ExitCode::FAILURE
     }
 }
 
