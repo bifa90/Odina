@@ -417,7 +417,11 @@ mod tests {
     fn a_double_extension_stays_visible_as_shape() {
         assert_eq!(name_pattern("invoice.pdf.exe"), "[word]{4,8}.pdf.exe");
         assert_eq!(name_pattern("صورة.jpg.exe"), "[word]{4,8}.jpg.exe");
-        assert_eq!(name_pattern("照片.jpg.exe"), "[word]{4,8}.jpg.exe");
+        // Two characters is a two-character bucket. The three rows below are
+        // the same *shape* at three different lengths, which is the point:
+        // the pattern says "a short foreign-language name with a deceptive
+        // extension", not which name it was.
+        assert_eq!(name_pattern("照片.jpg.exe"), "[word]{1,3}.jpg.exe");
     }
 
     #[test]

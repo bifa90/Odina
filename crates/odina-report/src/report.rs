@@ -458,7 +458,28 @@ mod tests {
                 _ => {}
             }
         }
-        assert_eq!(keys, Report::field_names().to_vec(), "got {json}");
+        // Optional fields that are absent are omitted rather than sent empty —
+        // the schema marks them ⬜, and a report with no TLSH says so by saying
+        // nothing. What is never allowed is a field outside the list.
+        for key in &keys {
+            assert!(
+                Report::field_names().contains(&key.as_str()),
+                "{key} is not a schema field: {json}"
+            );
+        }
+        for required in ["schema", "sha256", "size", "app_version", "db_version"] {
+            assert!(
+                keys.iter().any(|k| k == required),
+                "{required} missing: {json}"
+            );
+        }
+        // And the full report does carry all sixteen: `full_report()` sets the
+        // optional ones on purpose, so the count is checked there.
+        assert_eq!(Report::field_names().len(), 16);
+        assert!(
+            keys.len() <= Report::field_names().len(),
+            "more keys than the schema has fields: {json}"
+        );
     }
 
     #[test]
