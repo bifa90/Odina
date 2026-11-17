@@ -1,0 +1,16 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+
+[package]
+name = "odina-instrument"
+description = "The measurement layer of the instrumented build. Local only: no network, no user data, no file names."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Zero dependencies, like the report crate, and for the same reason: this layer
+# is the one that could grow a network client by accident.
+[dependencies]
+odina-report = { path = "../odina-report" }

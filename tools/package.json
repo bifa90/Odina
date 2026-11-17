@@ -1,0 +1,13 @@
+{
+  "name": "odina-tools",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Build-time helpers for Odina. Not shipped, not part of the app.",
+  "license": "MIT",
+  "scripts": {
+    "logo": "node build-logo.js"
+  },
+  "dependencies": {
+    "sharp": "^0.33.0"
+  }
+}

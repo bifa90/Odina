@@ -6,8 +6,16 @@
 
 Manual review is REQUIRED for every generated file (see §30.2 T-A/T-B levels).
 This script only guarantees key parity; it never ships as the source of truth.
+
+DANGER: this is a one-time bootstrap, not a translation tool. It contains a
+translated draft for each locale and writes the whole file, so running it
+after a translator has touched a line would silently undo the review. It
+therefore refuses to replace an existing file unless --force is passed.
 """
+import argparse
 import io
+import sys
+from pathlib import Path
 
 KEYS = ["app.name","app.tagline","app.window.title","state.protected","state.scanning","state.attention","state.paused","state.untrusted","wall.signatures.title","wall.signatures.on","wall.signatures.off","wall.behavior.title","wall.behavior.on","wall.behavior.off","wall.proactive.title","wall.proactive.on","wall.proactive.off","action.scan_now","action.pause","action.expert_mode","action.language","action.settings","action.why","scan.quick","scan.full","scan.usb","scan.running","scan.percent","scan.files_checked","scan.threats_found","scan.stop","scan.complete","scan.clean_result","alert.confirmed.title","alert.confirmed.body","alert.confirmed.note","alert.suspicious.title","alert.suspicious.body","alert.suspicious.note","alert.unsure.title","alert.unsure.body","alert.pua.title","alert.pua.body","alert.pua.allowed","alert.pua.quarantine","button.allow","button.block","button.restore","button.remove_forever","usb.detected","usb.scanning","usb.priority_done","usb.trust.new","usb.trust.scanning","usb.trust.trusted","usb.trust.suspicious","usb.trust.quarantined","quarantine.title","quarantine.reason","quarantine.restore_note","quarantine.retention","pause.title","pause.duration.10","pause.duration.30","pause.duration.60","pause.duration.until_reboot","pause.warning","pause.confirm","pause.badge","error.generic","error.tamper","error.offline","update.available","update.ask","update.db_age_warning"]
 
@@ -38,8 +46,19 @@ DATA = [
     ("hi", HI, "हिन्दी (hi)"),
 ]
 
+ap = argparse.ArgumentParser(description=__doc__)
+ap.add_argument("--force", action="store_true",
+                help="overwrite existing locale files (destroys reviewed edits)")
+args = ap.parse_args()
+
+wrote = skipped = 0
 for loc, vals, label in DATA:
     assert len(vals) == len(KEYS), f"{loc}: {len(vals)} != {len(KEYS)}"
+    target = f"locales/{loc}/odina.ftl"
+    if not args.force and Path(target).exists():
+        print(f"skip {target}: exists (use --force to overwrite)")
+        skipped += 1
+        continue
     lines = [
         f"# Odina Antivirus — {label}",
         "# المستوى: T-B (مجتمعية) — تحتاج مراجعة ناطق أصلي قبل ترقيتها إلى T-A (§30.2)",
@@ -47,6 +66,9 @@ for loc, vals, label in DATA:
         "",
     ]
     lines += [f"{k} = {v}" for k, v in zip(KEYS, vals)]
-    with io.open(f"locales/{loc}/odina.ftl", "w", encoding="utf-8") as f:
+    with io.open(target, "w", encoding="utf-8") as f:
         f.write("\n".join(lines) + "\n")
-    print(f"wrote locales/{loc}/odina.ftl ({len(vals)} keys)")
+    wrote += 1
+    print(f"wrote {target} ({len(vals)} keys)")
+
+print(f"bootstrap: {wrote} written · {skipped} kept. Review is still required.")

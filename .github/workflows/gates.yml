@@ -11,6 +11,7 @@
 #   pseudo    localization §3.9.5 +40% stress locale still builds
 #   fonts     docs/cdn-fonts.md   manifest hashes match the vendored files
 #   docs      this file           internal links resolve
+#   public    §34.3 rule 4        the public build links no measurement code
 
 name: gates
 
@@ -34,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [license, icons, contrast, i18n, pseudo, fonts, docs]
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, public]
 
     steps:
       - uses: actions/checkout@v4
@@ -73,3 +74,13 @@ jobs:
       - name: docs
         if: matrix.gate == 'docs'
         run: python3 tools/ci/check-docs.py
+
+      # The only gate that needs cargo, because half its value is the real
+      # dependency graph: `cargo tree` reports what would be linked, while the
+      # source can claim anything.
+      - name: public
+        if: matrix.gate == 'public'
+        run: |
+          python3 tools/ci/check-public-build.py
+          cargo tree -p odina-cli --edges normal | tee /tmp/public-tree.txt
+          ! grep -E 'odina-(report|instrument) v' /tmp/public-tree.txt

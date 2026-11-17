@@ -42,6 +42,7 @@ if [[ $FAST -eq 0 ]]; then
   run fonts  python3 tools/ci/check-fonts.py --quiet
 fi
 run docs     python3 tools/ci/check-docs.py --quiet
+run public   python3 tools/ci/check-public-build.py --quiet
 
 echo
 if [[ $fail -eq 0 ]]; then

@@ -72,6 +72,8 @@ name = "odina-cli"
 version = "0.1.0"
 dependencies = [
  "odina-core",
+ "odina-instrument",
+ "odina-report",
 ]
 
 [[package]]
@@ -80,6 +82,17 @@ version = "0.1.0"
 dependencies = [
  "sha2",
 ]
+
+[[package]]
+name = "odina-instrument"
+version = "0.1.0"
+dependencies = [
+ "odina-report",
+]
+
+[[package]]
+name = "odina-report"
+version = "0.1.0"
 
 [[package]]
 name = "sha2"
