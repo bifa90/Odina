@@ -63,11 +63,16 @@ jobs:
           # argument must not become a stray word on the command line.
           $features = "${{ matrix.features }}"
           if ($features) {
-            cargo build --release --locked --package odina-cli $features
+            cargo build --release --locked --package odina-cli $features *> build.log
           } else {
-            cargo build --release --locked --package odina-cli
+            cargo build --release --locked --package odina-cli *> build.log
           }
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($LASTEXITCODE -ne 0) {
+            $tail = (Get-Content build.log -Tail 20) -join " <NL> "
+            Write-Output "::error::BUILD $tail"
+            exit 1
+          }
+          Get-Content build.log -Tail 3
 
       - name: prove the public build carries no measurement code
         if: matrix.kind == 'public'
@@ -76,8 +81,13 @@ jobs:
           # The script is the same gate CI runs, but here it runs against the
           # real release binary rather than the source tree: a string that only
           # appears after linking is exactly what the textual check cannot see.
-          python tools/ci/check-public-build.py
-          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/ci/check-public-build.py *> gate.log
+          if ($LASTEXITCODE -ne 0) {
+            $tail = (Get-Content gate.log -Tail 25) -join " <NL> "
+            Write-Output "::error::GATE $tail"
+            exit 1
+          }
+          Get-Content gate.log -Tail 3
           $tree = cargo tree -p odina-cli --edges normal --release
           foreach ($crate in @("odina-report", "odina-instrument")) {
             if ($tree -match $crate) {
