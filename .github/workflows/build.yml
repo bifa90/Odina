@@ -155,9 +155,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           $tag = "${{ github.ref_name }}"
+          # Every tag this workflow reacts to produces a check build, and a
+          # check build must never look like a release anyone should download
+          # to run: the release is created as a prerelease, always.
           gh release view $tag 2>$null
           if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --title "Odina $tag" --notes "See CHANGELOG.md."
+            gh release create $tag --prerelease --title "Odina $tag" --notes-file RELEASE-NOTES.md
           }
           gh release upload $tag "${{ matrix.artifact }}.zip" `
             "${{ matrix.artifact }}.zip.sha256" --clobber
