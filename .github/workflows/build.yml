@@ -1,0 +1,163 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# Builds the two artifacts — the public build and the check build — and puts
+# them where they can be downloaded. This is the only place either binary is
+# produced: the workspace that writes the code has no Rust toolchain, so the
+# runner is the compiler of record (docs/ci.md §2.10).
+#
+# The check build is labelled in the file name, in the artifact name and in a
+# README that ships inside the archive, because §34.3 says it must never be
+# mistaken for something an end user should run.
+
+name: build
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag, if the artifacts should also be attached to a release"
+        required: false
+        default: ""
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: build (${{ matrix.kind }})
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - kind: public
+            features: ""
+            exe: odina.exe
+            artifact: odina-public-windows-x64
+          - kind: check
+            exe: odina-check.exe
+            artifact: odina-CHECK-BUILD-windows-x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.kind }}
+
+      - name: build
+        shell: pwsh
+        run: |
+          # `${{ matrix.features }}` is empty for the public build, and an empty
+          # argument must not become a stray word on the command line.
+          if ("${{ matrix.kind }}" -eq "check") {
+            cargo build --release --locked --package odina-cli --features instrument *> build.log
+          } else {
+            cargo build --release --locked --package odina-cli *> build.log
+          }
+          if ($LASTEXITCODE -ne 0) {
+            $tail = (Get-Content build.log -Tail 20) -join " <NL> "
+            Write-Output "::error::BUILD $tail"
+            exit 1
+          }
+          Get-Content build.log -Tail 3
+
+      - name: prove the public build carries no measurement code
+        if: matrix.kind == 'public'
+        shell: pwsh
+        run: |
+          # The script is the same gate CI runs, but here it runs against the
+          # real release binary rather than the source tree: a string that only
+          # appears after linking is exactly what the textual check cannot see.
+          python tools/ci/check-public-build.py *> gate.log
+          if ($LASTEXITCODE -ne 0) {
+            $tail = (Get-Content gate.log -Tail 25) -join " <NL> "
+            Write-Output "::error::GATE $tail"
+            exit 1
+          }
+          Get-Content gate.log -Tail 3
+          $tree = cargo tree -p odina-cli --edges normal
+          foreach ($crate in @("odina-report", "odina-instrument")) {
+            if ($tree -match $crate) {
+              Write-Error "$crate appears in the public build's dependency tree"
+              exit 1
+            }
+          }
+
+      - name: name, label and archive
+        shell: pwsh
+        run: |
+          # Every stage is marked, and the step ends with an explicit exit: a
+          # cmdlet that writes a non-terminating error must not be able to fail
+          # the step silently, which is what happened the first three times.
+          # A cmdlet that writes a non-terminating error must not be able to
+          # fail this step silently, so the step ends with an explicit exit.
+          $ErrorActionPreference = 'Continue'
+          $stage = "stage-${{ matrix.kind }}"
+          New-Item -ItemType Directory -Path $stage -Force | Out-Null
+
+          Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}" -ErrorAction Continue
+
+          if ("${{ matrix.kind }}" -eq "check") {
+            @(
+              'odina - CHECK BUILD (nuskha al-fahs)',
+              '=====================================',
+              '',
+              'This is NOT a release build. Do not give it to anyone.',
+              '',
+              'It is the public build plus the measurement layer described in',
+              'docs/instrumented-build.md. It:',
+              '',
+              '  - writes ONE local JSON file when you run:',
+              '        odina-check.exe check <folder>',
+              '  - sends nothing over the network: there is no socket and no URL',
+              '    anywhere in the source that builds it',
+              '  - is labelled CHECK BUILD everywhere it appears, on purpose',
+              '',
+              'Run it, read the file it produces, and send that file back - or',
+              'delete it and nothing happens. docs/review-instrumented.md says',
+              'what happens to it next.',
+              '',
+              'Commit: ${{ github.sha }}'
+            ) | Set-Content -Path "$stage/READ-ME-FIRST.txt" -Encoding utf8
+          }
+
+          $zip = "${{ matrix.artifact }}.zip"
+          Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force -ErrorAction Continue
+
+          if (Test-Path $zip) {
+            $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
+            "$hash  $zip" | Set-Content -Path "$zip.sha256" -Encoding utf8
+            exit 0
+          }
+          Write-Output "the archive was not created"
+          exit 1
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            ${{ matrix.artifact }}.zip
+            ${{ matrix.artifact }}.zip.sha256
+          if-no-files-found: error
+          retention-days: 90
+
+      - name: attach to the release, when a tag built this
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          gh release view $tag 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --title "Odina $tag" --notes "See CHANGELOG.md."
+          }
+          gh release upload $tag "${{ matrix.artifact }}.zip" `
+            "${{ matrix.artifact }}.zip.sha256" --clobber
