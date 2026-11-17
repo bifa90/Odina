@@ -21,7 +21,7 @@ permissions:
 jobs:
   report:
     name: format and lint
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     if: "!contains(github.event.head_commit.message, '[ci-skip]')"
 
     steps:
@@ -61,21 +61,11 @@ jobs:
 
 
 
-      - name: tests
+      - name: clippy, windows, exactly as rust.yml runs it
         continue-on-error: true
         run: |
-          cargo test --workspace --locked > /tmp/t1.txt 2>&1 || true
-          grep -E '^(test .*FAILED|failures:|---- .* stdout|error|assertion|thread )' /tmp/t1.txt | head -40 | tr '\n' '|' | sed 's/^/::error::T1 /'
-          tail -c 700 /tmp/t1.txt | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::T2 /'
-
-      - name: instrument tests
-        continue-on-error: true
-        run: |
-          cargo test -p odina-cli --features instrument --locked > /tmp/t3.txt 2>&1 || true
-          grep -E '^(test .*FAILED|failures:|error|assertion|thread )' /tmp/t3.txt | head -40 | tr '\n' '|' | sed 's/^/::error::T3 /'
-          tail -c 700 /tmp/t3.txt | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::T4 /'
-
-      - name: windows-style clippy
-        continue-on-error: true
-        run: |
-          RUSTFLAGS="-D warnings" cargo clippy --workspace --all-targets --locked 2>&1 | tail -c 1500 | sed 's/\x1b\[[0-9;]*m//g' | tr '\n' '|' | sed 's/^/::error::W1 /'
+          cargo clippy --workspace --all-targets --locked -- -D warnings *> c1.txt
+          (Get-Content c1.txt -Tail 60) -join "|" | ForEach-Object { "::error::W1 $_" }
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings *> c2.txt
+          (Get-Content c2.txt -Tail 60) -join "|" | ForEach-Object { "::error::W2 $_" }
+        shell: pwsh
