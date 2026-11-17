@@ -43,7 +43,6 @@ jobs:
             exe: odina.exe
             artifact: odina-public-windows-x64
           - kind: check
-            features: "--features instrument"
             exe: odina-check.exe
             artifact: odina-CHECK-BUILD-windows-x64
 
@@ -61,9 +60,8 @@ jobs:
         run: |
           # `${{ matrix.features }}` is empty for the public build, and an empty
           # argument must not become a stray word on the command line.
-          $features = "${{ matrix.features }}"
-          if ($features) {
-            cargo build --release --locked --package odina-cli $features *> build.log
+          if ("${{ matrix.kind }}" -eq "check") {
+            cargo build --release --locked --package odina-cli --features instrument *> build.log
           } else {
             cargo build --release --locked --package odina-cli *> build.log
           }
@@ -88,7 +86,7 @@ jobs:
             exit 1
           }
           Get-Content gate.log -Tail 3
-          $tree = cargo tree -p odina-cli --edges normal --release
+          $tree = cargo tree -p odina-cli --edges normal
           foreach ($crate in @("odina-report", "odina-instrument")) {
             if ($tree -match $crate) {
               Write-Error "$crate appears in the public build's dependency tree"
