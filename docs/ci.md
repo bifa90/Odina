@@ -23,6 +23,7 @@
 | **pseudo** | `tools/pseudo-localize.py` | +40% طول لا يكسر التخطيط | `localization-spec` §3.9.5 |
 | **fonts** | `tools/ci/check-fonts.py` | sha256 لكل خط | `docs/cdn-fonts.md` |
 | **docs** | `tools/ci/check-docs.py` | كل إشارة داخلية تُحلّ | — |
+| **exc-ui** | `tools/ci/check-exception-ui.py` | شارة الاستثناء أولًا · العاقبة فوق الزر · لا toggle · لون من الرموز · زرّان كحد أقصى | `design-system-v1` §6.1–§6.4 |
 | **public** | `tools/ci/check-public-build.py` | لا كود قياس في البناء العام | §34.3 قاعدة 4 |
 
 ---
@@ -208,7 +209,7 @@ light: --text3 #6B7783 on --bg #F7F8FA      = 4.30:1  (FILES)
 | ثماني بوابات تعمل | ✅ |
 | فحص التباين من الوثيقة | ✅ (يُصحّح نفسه تلقائيًا مع كل تعديل) |
 | إثبات الفشل (اختبار سلبي) | ✅ لكل بوابة |
-| **بناء Rust في CI** | ✅ على Windows وLinux · 99 اختبارًا · كل أوامر Cargo بـ`--locked` |
+| **بناء Rust في CI** | ✅ على Windows وLinux · 112 اختبارًا · كل أوامر Cargo بـ`--locked` |
 | **بناء Tauri في CI** | ⬜ يبدأ مع B1 |
 | **تفريغ التوقيع (SignPath)** | ⬜ بعد أول إصدار |
 | **Golden Set في CI** | ⬜ يحتاج العيّنات |

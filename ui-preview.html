@@ -125,7 +125,7 @@ html[data-theme="dark"] .btn.danger{color:#0B1416}
 
 /* ═══ الألوان ═══ */
 .swatches{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.sw{border:1px solid var(--border);border-radius:var(--r);overflow:hidden;background:var(--surface)}
+.sw{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;background:var(--surface)}
 .sw .chip{height:52px}
 .sw .meta{padding:8px 10px;font-size:12px}
 .sw .meta b{display:block;font-size:13px}
@@ -133,7 +133,7 @@ html[data-theme="dark"] .btn.danger{color:#0B1416}
 
 /* ═══ الخطوط ═══ */
 .fonts{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
-.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px}
+.fcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
 .fcard .nm{font-size:12px;color:var(--text3);margin-bottom:6px;font-family:'Inter',sans-serif}
 .fcard .smp{font-size:19px;line-height:1.5}
 .fcard .tag{display:inline-block;margin-top:8px;font-size:11px;padding:2px 8px;border-radius:99px;
@@ -166,6 +166,48 @@ html[data-theme="dark"] .warnbox{background:rgba(255,123,114,.09);border-color:r
 .warnbox .resp{margin-top:8px;font-weight:600;color:var(--text)}
 .mt{margin-top:12px}
 .shield.gray .label{color:var(--text2)}
+
+/* ══════════ الاستثناء الجراحي (§4.8 · D45) ══════════
+   لا لون جديد: الاستثناء يستعير --warn، لأن --accent يقول «كل شيء بخير»
+   والاستثناء ليس «كل شيء بخير» بل «شيء يعمل بخلاف الأصل، بقرارك». */
+.excbadge{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--radius);
+  background:var(--surface);border:1px solid var(--border);border-inline-start:3px solid var(--warn);
+  font-size:15px;color:var(--text)}
+.excbadge .i{color:var(--warn);flex:none}
+.excbadge .grow{flex:1;min-width:0}
+.excbadge b{font-weight:600}
+.excbadge .when{color:var(--text2);font-size:13px;display:block;margin-top:2px}
+.excbadge .act{background:none;border:1px solid var(--border);border-radius:99px;
+  padding:5px 12px;font:inherit;font-size:13px;color:var(--text2);cursor:pointer;flex:none}
+.excbadge .act:hover{border-color:var(--accent);color:var(--accent)}
+.excbadge .act:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.excgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.exccard{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
+  padding:14px;display:flex;flex-direction:column;gap:8px}
+.exccard.live{border-inline-start:3px solid var(--warn)}
+.exccard .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
+.exccard .nm .i{color:var(--text2);flex:none}
+.exccard.live .nm .i{color:var(--warn)}
+.exccard .ds{font-size:13px;color:var(--text2);line-height:1.5}
+.exccard .st{font-size:12px;color:var(--text3)}
+.exccard.live .st{color:var(--warn)}
+/* العاقبة فوق الزر، لا تحته (§2.1.4) */
+.exccard .conseq{font-size:13px;color:var(--text);background:var(--surface2);
+  border-radius:var(--r-sm);padding:8px 10px;line-height:1.45}
+.exccard .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.exccard .adv{background:none;border:0;padding:0;font:inherit;font-size:12px;
+  color:var(--text3);text-decoration:underline;cursor:pointer}
+.exccard .adv:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.exccard .advpanel{display:none;border-top:1px solid var(--border);padding-top:8px;
+  font-size:12px;color:var(--text2)}
+.exccard.open .advpanel{display:block}
+/* شرائح الأزمنة: نفس .chip المستخدم في الإيقاف، لا مكوّن جديد */
+.exccard .chips{margin-top:0}
+.excnote{font-size:13px;color:var(--text2);margin-top:14px;line-height:1.6}
+.excnote b{color:var(--text)}
+/* ── نهاية أنماط الاستثناء ── */
+
 .note-inline{font-size:12px;color:var(--text3);max-width:230px;line-height:1.5}
 
 /* ═══ نظام الأيقونات (SVG · ليست إيموجي) ═══ */
@@ -191,7 +233,7 @@ body.real .sec + .sec{margin-top:26px}
 .tog.on{background:var(--accent);color:#fff;border-color:transparent}
 /* ═══ أسس الثقة ═══ */
 .trustgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-top:14px}
-.tcard{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.tcard{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px}
 .ticon{font-size:18px;line-height:1}
 .tt{font-weight:600;font-size:14px;margin:6px 0 4px}
 .td{font-size:12.5px;color:var(--text2);line-height:1.6}
@@ -232,7 +274,7 @@ body.real .sec + .sec{margin-top:26px}
   text-decoration:underline;cursor:pointer}
 .linkbtn:hover{color:var(--accent)}
 
-.note{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);
+.note{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);
   padding:14px 16px;font-size:13px;color:var(--text2);max-width:760px}
 .note b{color:var(--text)}
 code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2);
@@ -403,6 +445,109 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
         <button class="btn primary" data-k="action.turn_on">أعد الحماية</button>
         <span class="note-inline" data-k="disable.re_enable_note">تستطيع إعادتها في أي لحظة — بلا كلمة مرور.</span>
       </div>
+    </div>
+  </section>
+
+  <!-- ══════════ 1d. الاستثناء الجراحي — قاعدة واحدة، لا الكل (D45 · §4.8) ══════════ -->
+  <section class="sec review-only">
+    <h2><svg class="i"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات — قاعدة واحدة، لا الكل</span></h2>
+    <p class="hint" data-k="exception.sub">إن احتاج عملك قاعدة تخالف الأصل، اسمح بها وحدها. الباقي يبقى كما هو.</p>
+
+    <!-- الشارة الحيّة: تُرى بلا تمرير ولا نقر (§6.1 القاعدة 1) -->
+    <div class="excbadge" style="margin-bottom:14px">
+      <svg class="i" style="width:18px;height:18px"><use href="#i-pause"/></svg>
+      <span class="grow">
+        <b data-k="exception.badge" data-k-args='{"rule":"Windows Script Host"}' data-tmpl="exception.badge">Windows Script Host مسموحة · حتى 14:30</b>
+        <span class="when" data-k="exception.live_note">بقرارك · الباقي فعّال كما هو · تستطيع الإبطال في أي لحظة</span>
+      </span>
+      <button class="act" data-k="exception.action.revoke">أبطِل</button>
+    </div>
+
+    <div class="excgrid">
+      <!-- A1 · WSH — مسموحة الآن -->
+      <div class="exccard live">
+        <div class="nm"><svg class="i"><use href="#i-pause"/></svg><span data-k="exception.rule.a1.wsh">تشغيل سكربتات Windows</span></div>
+        <div class="ds" data-k="exception.rule.a1.wsh.desc">ملفات .vbs و .js تعمل مقيّدة ما لم تكن موقّعة من ناشر معروف.</div>
+        <div class="st" data-k="exception.state.allowed_until" data-tmpl="exception.state.allowed_until" data-k-args='{"until":"14:30"}'>مسموحة حتى 14:30</div>
+        <div class="conseq" data-k="exception.consequence.allow" data-tmpl="exception.consequence.allow" data-k-args='{"rule":"Windows Script Host","until":"14:30"}'>ستعمل Windows Script Host بلا قيد حتى 14:30 ثم تعود. الباقي لا يتغيّر.</div>
+        <div class="row">
+          <button class="btn ghost sm" data-k="exception.action.revoke">أبطِل</button>
+          <button class="adv" data-adv="1" aria-expanded="false" data-k="exception.action.advanced">خيارات متقدمة</button>
+        </div>
+        <div class="advpanel" data-k="exception.expert_note">الوضع الخبير: يفتح «دائم» و«القاعدة كاملة». لا كلمة مرور، ولا سؤال عن السبب.</div>
+      </div>
+
+      <!-- A1 · PowerShell — خامل، يُظهر الشرائح -->
+      <div class="exccard">
+        <div class="nm"><svg class="i"><use href="#i-info"/></svg><span data-k="exception.rule.a1.powershell">أوامر PowerShell</span></div>
+        <div class="ds" data-k="exception.rule.a1.powershell.desc">PowerShell يعمل في الوضع المقيّد. استثناؤه لا يفتح Windows Script Host.</div>
+        <div class="st" data-k="exception.state.on">فعّالة</div>
+        <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"PowerShell","until":"14:30"}'>ستعمل PowerShell بلا تنبيه حتى 14:30 ثم تعود. لن يُمنع شيء في هذه المدة.</div>
+        <div class="chips">
+          <span class="chip" data-k="pause.duration.10">١٠ دقائق</span><span class="chip" data-k="pause.duration.30">٣٠ دقيقة</span>
+          <span class="chip" data-k="pause.duration.60">ساعة</span><span class="chip" data-k="exception.until_reboot">حتى إعادة التشغيل</span>
+        </div>
+        <div class="row">
+          <button class="btn primary sm" data-k="exception.action.allow">اسمح</button>
+          <button class="adv" data-adv="1" aria-expanded="false" data-k="exception.action.advanced">خيارات متقدمة</button>
+        </div>
+        <div class="advpanel" data-k="exception.permanent_note">استثناء دائم لا ينتهي وحده. سيبقى ظاهرًا في الرئيسية حتى تبطلته.</div>
+      </div>
+
+      <!-- A1 · ماكرو Office -->
+      <div class="exccard">
+        <div class="nm"><svg class="i"><use href="#i-folder"/></svg><span data-k="exception.rule.a1.macros">ماكرو Office</span></div>
+        <div class="ds" data-k="exception.rule.a1.macros.desc">المستندات غير الموقّعة لا تُشغّل ماكرو. استثناؤه لا يمسّ السكربتات.</div>
+        <div class="st" data-k="exception.state.on">فعّالة</div>
+        <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"ماكرو Office","until":"14:30"}'>ستعمل ماكرو Office بلا تنبيه حتى 14:30 ثم تعود. لن يُمنع شيء في هذه المدة.</div>
+        <div class="row">
+          <button class="btn primary sm" data-k="exception.action.allow">اسمح</button>
+          <button class="adv" data-adv="1" aria-expanded="false" data-k="exception.action.advanced">خيارات متقدمة</button>
+        </div>
+        <div class="advpanel" data-k="exception.expert_note">الوضع الخبير: يفتح «دائم» و«القاعدة كاملة». لا كلمة مرور، ولا سؤال عن السبب.</div>
+      </div>
+
+      <!-- A3 · التنزيلات -->
+      <div class="exccard">
+        <div class="nm"><svg class="i"><use href="#i-folder"/></svg><span data-k="exception.rule.a3.downloads">اشتباه مجلد التنزيلات</span></div>
+        <div class="ds" data-k="exception.rule.a3.downloads.desc">كل ملف جديد في التنزيلات يُعدّ مشتبهًا حتى يُثبت العكس.</div>
+        <div class="st" data-k="exception.state.on">فعّالة</div>
+        <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"اشتباه التنزيلات","until":"14:30"}'>سيعمل اشتباه التنزيلات بلا تنبيه حتى 14:30 ثم يعود. لن يُمنع شيء في هذه المدة.</div>
+        <div class="row">
+          <button class="btn primary sm" data-k="exception.action.allow">اسمح</button>
+          <button class="adv" data-adv="1" aria-expanded="false" data-k="exception.action.advanced">خيارات متقدمة</button>
+        </div>
+        <div class="advpanel" data-k="exception.expert_note">الوضع الخبير: يفتح «دائم» و«القاعدة كاملة». لا كلمة مرور، ولا سؤال عن السبب.</div>
+      </div>
+
+      <!-- A4 · الفحص الدوري -->
+      <div class="exccard">
+        <div class="nm"><svg class="i"><use href="#i-pulse"/></svg><span data-k="exception.rule.a4.periodic">الفحص الدوري</span></div>
+        <div class="ds" data-k="exception.rule.a4.periodic.desc">فحص صامت كل ساعتين لملفات الإقلاع والمفاتيح الحساسة.</div>
+        <div class="st" data-k="exception.state.on">فعّالة</div>
+        <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"الفحص الدوري","until":"14:30"}'>سيعمل الفحص الدوري بلا تنبيه حتى 14:30 ثم يعود. لن يُمنع شيء في هذه المدة.</div>
+        <div class="row">
+          <button class="btn primary sm" data-k="exception.action.allow">اسمح</button>
+          <button class="adv" data-adv="1" aria-expanded="false" data-k="exception.action.advanced">خيارات متقدمة</button>
+        </div>
+        <div class="advpanel" data-k="exception.expert_note">الوضع الخبير: يفتح «دائم» و«القاعدة كاملة». لا كلمة مرور، ولا سؤال عن السبب.</div>
+      </div>
+
+      <!-- A6 · الحذر — مُرخّاة فقط، بلا زر سماح -->
+      <div class="exccard">
+        <div class="nm"><svg class="i"><use href="#i-scale"/></svg><span data-k="exception.rule.a6.doubt">الحذر عند الشك</span></div>
+        <div class="ds" data-k="exception.rule.a6.doubt.desc">عند الشك يمنع أولًا ثم يسأل. يُرخّى فقط، ولا يُسمح به كاملًا.</div>
+        <div class="st" data-k="exception.state.on">فعّالة</div>
+        <div class="conseq" data-k="exception.refused.not_allowed">هذه القاعدة لا تُسمح بالكامل — تُرخّى فقط.</div>
+        <div class="row">
+          <button class="btn ghost sm" data-k="exception.action.relax_30">رخّها ٣٠ دقيقة</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="excnote">
+      <b data-k="exception.lines_title">أربعة لا تُستثنى:</b>
+      <span data-k="exception.lines_body">حكم الجدار 1 (مؤكد يُعزل حتى تحت الاستثناء) · حماية العبث · القاعدة الثانية (استثناء WSH لا يفتح PowerShell) · «مشتبه بشدة» وأعلى. والتراجع بضغطة واحدة، بلا كلمة مرور، دائمًا.</span>
     </div>
   </section>
 
@@ -597,6 +742,7 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
 const T = {
   ar: {
     'lvl.title':'الإيقاف — مستويان لا مستوى واحد','lvl.hint':'المستخدم يملك جهازه · نُخبره ونتركه يقرر · والمسؤولية عليه','lvl1.name':'إسكات التنبيهات','lvl1.body':'لا نافذة، لا إشعار، لا صوت. لكن الفحص والمنع يستمران في الخلفية: أي ملف مصاب يُعزل بصمت ويُعرض عليك عند العودة.','lvl.what_stops':'ما يتوقف','lvl1.stops':'التنبيهات فقط','lvl.what_continues':'ما يستمر','lvl1.cont':'الجدران الثلاثة','lvl.app':'التطبيق','lvl1.app':'يعمل · يفحص · يمنع · لا يسأل','lvl2.name':'إيقاف الحماية','lvl2.body':'لا فحص، لا منع، لا تنبيه. الخدمة تبقى مشغّلة لكن خاملة. جهازك غير محمي تمامًا.','lvl2.warn':'لن نتوقف عن التنبيه — سنتوقف عن الحماية. لن يُفحص ملف ولن يُمنع تهديد.','lvl2.resp':'القرار قرارك، والمسؤولية عليك أثناء هذه المدة.','lvl.d10':'١٠ دقائق','lvl.d30':'٣٠ دقيقة','lvl.d60':'ساعة','lvl.dpeak':'حتى نهاية ساعة الذروة','lvl.dreboot':'حتى إعادة التشغيل','lvl.no_permanent':'لا توجد مدة «دائمة». أقصى إيقاف ينتهي بإعادة التشغيل — وهذا الحدّ الوحيد الذي نفرضه.','lvl.state_off':'الحماية موقوفة','lvl.state_off_sub':'حتى 14:30 · بقرارك',
+    'exception.title':'الاستثناءات — قاعدة واحدة، لا الكل','exception.sub':'إن احتاج عملك قاعدة تخالف الأصل، اسمح بها وحدها. الباقي يبقى كما هو.','exception.rule.a1.wsh':'تشغيل سكربتات Windows','exception.rule.a1.wsh.desc':'ملفات .vbs و .js تعمل مقيّدة ما لم تكن موقّعة من ناشر معروف.','exception.rule.a1.powershell':'أوامر PowerShell','exception.rule.a1.powershell.desc':'PowerShell يعمل في الوضع المقيّد. استثناؤه لا يفتح Windows Script Host.','exception.rule.a1.macros':'ماكرو Office','exception.rule.a1.macros.desc':'المستندات غير الموقّعة لا تُشغّل ماكرو. استثناؤه لا يمسّ السكربتات.','exception.rule.a3.downloads':'اشتباه مجلد التنزيلات','exception.rule.a3.downloads.desc':'كل ملف جديد في التنزيلات يُعدّ مشتبهًا حتى يُثبت العكس.','exception.rule.a4.periodic':'الفحص الدوري','exception.rule.a4.periodic.desc':'فحص صامت كل ساعتين لملفات الإقلاع والمفاتيح الحساسة.','exception.rule.a6.doubt':'الحذر عند الشك','exception.rule.a6.doubt.desc':'عند الشك يمنع أولًا ثم يسأل. يُرخّى فقط، ولا يُسمح به كاملًا.','exception.state.on':'فعّالة','exception.state.allowed_until':'مسموحة حتى 14:30','exception.consequence.allow':'ستعمل Windows Script Host بلا قيد حتى 14:30 ثم تعود. الباقي لا يتغيّر.','exception.consequence.relax':'ستعمل PowerShell بلا تنبيه حتى 14:30 ثم تعود. لن يُمنع شيء في هذه المدة.','exception.action.revoke':'أبطِل','exception.action.allow':'اسمح','exception.action.advanced':'خيارات متقدمة','exception.action.relax_30':'رخّها ٣٠ دقيقة','exception.until_reboot':'حتى إعادة التشغيل','exception.expert_note':'الوضع الخبير: يفتح «دائم» و«القاعدة كاملة». لا كلمة مرور، ولا سؤال عن السبب.','exception.permanent_note':'استثناء دائم لا ينتهي وحده. سيبقى ظاهرًا في الرئيسية حتى تبطلته.','exception.refused.not_allowed':'هذه القاعدة لا تُسمح بالكامل — تُرخّى فقط.','exception.live_note':'بقرارك · الباقي فعّال كما هو · تستطيع الإبطال في أي لحظة','exception.lines_title':'أربعة لا تُستثنى:','exception.lines_body':'حكم الجدار 1 (مؤكد يُعزل حتى تحت الاستثناء) · حماية العبث · القاعدة الثانية (استثناء WSH لا يفتح PowerShell) · «مشتبه بشدة» وأعلى. والتراجع بضغطة واحدة، بلا كلمة مرور، دائمًا.','badge.exc':'Windows Script Host مسموحة · حتى 14:30',
     'trust.title':'أسس الثقة — دستور الواجهة','trust.sub':'كل شاشة تُقاس على هذه الأربعة. وعند التعارض: الأمان ← عدم الإزعاج ← الوضوح ← البساطة ← الجمال.','trust.1t':'الوضوح','trust.1d':'نقول ما حدث، لا ما هو التقنية. جملة واحدة. ولا «تمّ» بلا سبب.','trust.2t':'البساطة','trust.2d':'زرّان كحد أقصى. خيار واحد أساسي. صفر إعداد مطلوب.','trust.3t':'الطمأنينة','trust.3d':'بلا حدث = بلا نافذة. ≤ 3 إشعارات يوميًا. لا Modal أبدًا.','trust.4t':'معرفة العواقب','trust.4d':'عاقبة كل زر مكتوبة قبله لا بعده. والخيار الآمن هو الظاهر.',
     'alert.confirmed.cta':'فتح صندوق العزل','word.isolated':'معزول','word.temporary':'مؤقتًا','tip.quarantine':'نقلناه إلى مخزن مشفّر — مكانه الأصلي محفوظ ويمكن استرجاعه.','tip.suspended':'أوقفناه الآن. سيعود للعمل إذا سمحت له.','quarantine.keep':'احتفظ به','quarantine.delete':'حذف نهائي','quarantine.hint':'كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا','quarantine.title':'3 · صندوق العزل — هنا فقط يوجد «حذف»','q.reason1':'تهديد مؤكد','q.reason2':'أداة كسر حماية','tips.legend':'الشرح عند الطلب:','tips.body':'مرّر المؤشر فوق الكلمة المسطّرة لترى سطرًا واحدًا · اضغطها ليفتح بحثًا شارحًا بلغتك (Google · Baidu · Yahoo Japan · Yandex).','sec.alerts':'2 · التنبيهات','sec.alerts.hint':'نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب',
     'path.label':'المسار','path.open_folder':'فتح المجلد','path.copy':'نسخ المسار',
@@ -628,6 +774,7 @@ const T = {
   },
   en: {
     'lvl.title':'Turning off — two levels, not one','lvl.hint':'You own your device · we inform and let you decide · the responsibility is yours','lvl1.name':'Silence the alerts','lvl1.body':'No window, no notification, no sound. Scanning and blocking continue in the background: any infected file is isolated silently and shown to you when you return.','lvl.what_stops':'What stops','lvl1.stops':'The alerts only','lvl.what_continues':'What continues','lvl1.cont':'All three walls','lvl.app':'The app','lvl1.app':'runs · scans · blocks · asks nothing','lvl2.name':'Turn protection off','lvl2.body':'No scanning, no blocking, no alerts. The service stays running but idle. Your device is completely unprotected.','lvl2.warn':'We do not stop alerting — we stop protecting. No file is scanned and no threat blocked.','lvl2.resp':'The decision is yours, and so is the responsibility for that period.','lvl.d10':'10 min','lvl.d30':'30 min','lvl.d60':'1 hour','lvl.dpeak':'Until peak hour ends','lvl.dreboot':'Until I restart','lvl.no_permanent':'There is no “permanent”. The longest option ends with a restart — the only limit we impose.','lvl.state_off':'Protection is off','lvl.state_off_sub':'until 14:30 · by your decision',
+    'exception.title':'Exceptions — one rule, not all of them','exception.sub':'If your work needs one rule to bend, allow just that one. The rest stays as it was.','exception.rule.a1.wsh':'Windows scripts','exception.rule.a1.wsh.desc':'Files .vbs and .js run restricted unless signed by a known publisher.','exception.rule.a1.powershell':'PowerShell commands','exception.rule.a1.powershell.desc':'PowerShell runs in constrained mode. Allowing it does not open Windows Script Host.','exception.rule.a1.macros':'Office macros','exception.rule.a1.macros.desc':'Unsigned documents cannot run macros. Allowing it does not touch scripts.','exception.rule.a3.downloads':'Downloads suspicion','exception.rule.a3.downloads.desc':'Every new file in Downloads counts as suspicious until cleared.','exception.rule.a4.periodic':'Periodic scan','exception.rule.a4.periodic.desc':'A silent scan every two hours of startup items and sensitive keys.','exception.rule.a6.doubt':'Caution when doubtful','exception.rule.a6.doubt.desc':'When doubtful it blocks first, then asks. It can be relaxed, never allowed outright.','exception.state.on':'Active','exception.state.allowed_until':'Allowed until 14:30','exception.consequence.allow':'Windows Script Host will run unrestricted until 14:30, then return. Nothing else changes.','exception.consequence.relax':'PowerShell will run without alerts until 14:30, then return. Nothing is blocked during that time.','exception.action.revoke':'Revoke','exception.action.allow':'Allow','exception.action.advanced':'Advanced options','exception.action.relax_30':'Relax for 30 minutes','exception.until_reboot':'until restart','exception.expert_note':'Expert mode reveals “permanent” and “the whole rule”. No password, and no question about why.','exception.permanent_note':'A permanent exception does not end on its own. It stays visible on the home screen until you revoke it.','exception.refused.not_allowed':'This rule cannot be allowed outright — only relaxed.','exception.live_note':'your decision · everything else is still active · you can revoke at any moment','exception.lines_title':'Four things are never excepted:','exception.lines_body':'the first wall\'s verdict (confirmed is quarantined even under an exception) · tamper protection · the second rule (a WSH exception does not open PowerShell) · “high risk” and above. Revoking is always one click, without a password.','badge.exc':'Windows Script Host allowed · until 14:30',
     'trust.title':'Trust foundations — the UI constitution','trust.sub':'Every screen is measured against these four. On conflict: safety → no interruption → clarity → simplicity → beauty.','trust.1t':'Clarity','trust.1d':'We say what happened, not how it works. One sentence. No “done” without a reason.','trust.2t':'Simplicity','trust.2d':'Two buttons at most. One primary action. Zero setup required.','trust.3t':'Calm','trust.3d':'No event = no window. ≤ 3 notifications a day. Never a modal.','trust.4t':'Known consequences','trust.4d':'Every button states its outcome before you press it. The safe choice is the visible one.',
     'alert.confirmed.cta':'Open quarantine','word.isolated':'isolated','word.temporary':'temporarily','tip.quarantine':'Moved to an encrypted store — its original location is kept and it can be restored.','tip.suspended':'We stopped it now. It works again only if you allow it.','quarantine.keep':'Keep it','quarantine.delete':'Delete permanently','quarantine.hint':'everything stays until you decide · never auto-deleted','quarantine.title':'3 · Quarantine — the only place with “delete”','q.reason1':'Confirmed threat','q.reason2':'Cracking tool','tips.legend':'Explanation on demand:','tips.body':'Hover the underlined word for one line · click it to open an explaining search in your language (Google · Baidu · Yahoo Japan · Yandex).','sec.alerts':'2 · Alerts','sec.alerts.hint':'less text · no delete button at all · explanation on request',
     'path.label':'Path','path.open_folder':'Open folder','path.copy':'Copy path',
@@ -876,6 +1023,16 @@ function setModeLabel(){
   modeBtn.classList.toggle('on', real);
 }
 modeBtn.addEventListener('click', ()=>{ document.body.classList.toggle('real'); setModeLabel(); });
+
+/* خيارات متقدمة: تكشف «دائم» و«القاعدة كاملة» في البطاقة نفسها، لا شاشة منفصلة.
+   aria-expanded يُحدَّث لأن قارئ الشاشة يجب أن يعرف أن شيئًا انفتح. */
+document.querySelectorAll('[data-adv]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const card = btn.closest('.exccard');
+    const open = card.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+});
 document.getElementById('popout').addEventListener('click', ()=>{
   window.open(location.pathname + '?v=app', '_blank', 'noopener');
 });

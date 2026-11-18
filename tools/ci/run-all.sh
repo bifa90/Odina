@@ -42,6 +42,8 @@ if [[ $FAST -eq 0 ]]; then
   run fonts  python3 tools/ci/check-fonts.py --quiet
 fi
 run docs     python3 tools/ci/check-docs.py --quiet
+run exc-ui   python3 tools/ci/check-exception-ui.py --quiet
+run rust-syn bash -c "python3 tools/check-rust-syntax.py > /dev/null"
 run public   python3 tools/ci/check-public-build.py --quiet
 
 echo
