@@ -25,15 +25,23 @@ def main() -> int:
 
     lines = [ANSI.sub("", line).rstrip() for line in LOG.read_text(errors="replace").splitlines()]
     exits = [line for line in lines if re.match(r"^(WORKSPACE|INSTRUMENT)_EXIT=", line)]
-    errors = [line for line in lines if line.startswith("error")]
-    where = [line.strip().lstrip("--> ") for line in lines if line.strip().startswith("-->")]
-
     print("::error::" + " ".join(exits or ["no exit codes recorded"])[:400])
-    for index, error in enumerate(errors[1:9], start=0):
-        location = where[index] if index < len(where) else ""
-        print(f"::error::{error.strip()[:300]} {location[:200]}".rstrip())
 
-    if not errors:
+    # One diagnostic, in order: the `error:` line and the `-->` that follows it.
+    # Pairing the two lists by index instead reads as a mismatch and sends the
+    # reader to the wrong line.
+    reported = 0
+    for index, line in enumerate(lines):
+        if not line.startswith("error") or reported >= 8:
+            continue
+        location = next(
+            (later.strip() for later in lines[index + 1 : index + 6] if later.strip().startswith("-->")),
+            "",
+        )
+        print(f"::error::{line.strip()[:300]} {location[:200]}".rstrip())
+        reported += 1
+
+    if not reported:
         print("::error::no 'error' lines — last: " + (lines[-1] if lines else "empty")[:400])
     return 0
 
