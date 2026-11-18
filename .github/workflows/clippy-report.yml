@@ -28,26 +28,33 @@ jobs:
           components: clippy
       - uses: Swatinem/rust-cache@v2
 
-      - name: collect
+      - name: clippy workspace
+        continue-on-error: true
         run: |
-          # Byte for byte what rust.yml runs, including running both in one
-          # step: `set -e` in a workflow step means the second command aborts
-          # the step, and that is exactly the difference being chased.
           cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1 || true
-          echo "rc1 done" >> /tmp/c1.txt
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
-          echo "rc2=$?" >> /tmp/c2.txt
-          cat /tmp/c1.txt /tmp/c2.txt > /tmp/c.txt
           python3 - <<'PY'
           import pathlib
-          body = pathlib.Path('/tmp/c.txt').read_text(errors='replace').replace('\x1b', '')
+          body = pathlib.Path('/tmp/c1.txt').read_text(errors='replace').replace('\x1b', '')
           keep = [l for l in body.splitlines() if l.startswith(('error', 'warning')) or l.lstrip().startswith('-->')]
-          joined = ' <<<NL>>> '.join(keep) if keep else 'CLEAN'
-          out = pathlib.Path('/tmp/chunks'); out.mkdir(exist_ok=True)
-          for i in range(0, max(len(joined), 1), 1100):
-              (out / ('%03d' % (i // 1100))).write_text(joined[i:i+1100], encoding='utf-8')
-          print(len(keep), 'lines')
+          print(keep[:8])
+          joined = ' <<<NL>>> '.join(keep[:8]) if keep else 'CLEAN'
+          pathlib.Path('/tmp/a.txt').write_text(joined[:1400], encoding='utf-8')
           PY
+          echo "::error::A1 $(cat /tmp/a.txt)"
+
+      - name: clippy instrument
+        continue-on-error: true
+        run: |
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
+          python3 - <<'PY'
+          import pathlib
+          body = pathlib.Path('/tmp/c2.txt').read_text(errors='replace').replace('\x1b', '')
+          keep = [l for l in body.splitlines() if l.startswith(('error', 'warning')) or l.lstrip().startswith('-->')]
+          print(keep[:8])
+          joined = ' <<<NL>>> '.join(keep[:8]) if keep else 'CLEAN'
+          pathlib.Path('/tmp/b.txt').write_text(joined[:1400], encoding='utf-8')
+          PY
+          echo "::error::B1 $(cat /tmp/b.txt)"
 
       - name: version and raw tail
         continue-on-error: true
