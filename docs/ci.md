@@ -24,11 +24,13 @@
 | **fonts** | `tools/ci/check-fonts.py` | sha256 لكل خط | `docs/cdn-fonts.md` |
 | **docs** | `tools/ci/check-docs.py` | كل إشارة داخلية تُحلّ | — |
 | **exc-ui** | `tools/ci/check-exception-ui.py` | شارة الاستثناء أولًا · العاقبة فوق الزر · لا toggle · لون من الرموز · زرّان كحد أقصى | `design-system-v1` §6.1–§6.4 |
+| **ui-law** | `tools/ci/check-ui-constitution.py` | دستور الواجهة: تلميح ≤٩٠ · زر واحد أساسي · شاشة واحدة لكل عقدة في الخريطة · رمز من المكتبة · محرّك البحث حسب اللغة · كل نص قابل للتحرير | `design-system-v1` §6أ |
+| **loc-js** | `tools/gen-locale-js.py --check` | `locales.js` لم يتقادم عن `locales/*/odina.ftl` | `localization-spec` §3 |
 | **public** | `tools/ci/check-public-build.py` | لا كود قياس في البناء العام | §34.3 قاعدة 4 |
 
 ---
 
-## 2. البوابات الثماني — ما ترفضه بالضبط
+## 2. البوابات الإحدى عشرة — ما ترفضه بالضبط
 
 ### 2.1 license
 

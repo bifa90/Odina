@@ -105,7 +105,10 @@ NOTICE         إشعار النطاق (AGPL · MIT · OFL · العلامة)
 | `report-schema-v1.md` | 16 حقلًا · أنماط بدل أسماء · قائمة سوداء |
 | `usb-security-spec-v1.md` | Hot-Trigger · Device Trust · P0–P3 · القواعد الثماني |
 | `localization-spec-v1.md` | 10 لغات · الخطوط · RTL · pseudo-l10n |
-| `design-system-v1.md` | رموز مُقاسة · أزرار · وصول · RTL |
+| `design-system-v1.md` | رموز مُقاسة · أزرار · وصول · RTL · **دستور الواجهة §6أ** |
+| `glossary-v1.md` | ٢٢ مصطلحًا · تلميح ≤٩٠ حرفًا · محرك البحث حسب اللغة |
+| `navigation-map-v1.md` | كيف تُفتح كل شاشة · ومن أين |
+| `translation-review-v1.md` | كيف يحرّر المراجع ويُصدّر `odina.ftl` |
 
 ---
 
