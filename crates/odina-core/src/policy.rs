@@ -209,7 +209,9 @@ pub struct Exception {
 impl Exception {
     /// When this exception stops applying, if it ever does.
     pub fn expires_at_ms(&self) -> Option<i64> {
-        self.duration.seconds().map(|s| self.granted_at_ms + s as i64 * 1000)
+        self.duration
+            .seconds()
+            .map(|s| self.granted_at_ms + s as i64 * 1000)
     }
 
     /// Whether it still applies at `now_ms`.
@@ -244,14 +246,6 @@ impl Exception {
                 ConsentTier::Expert => "expert",
             }
         )
-    }
-
-    /// The one-line label the home screen shows while this is live. Returned
-    /// as a machine key, not a sentence: the sentence is the localization
-    /// layer's job, and putting Arabic here would bake one language into the
-    /// core.
-    pub fn badge_key(&self) -> String {
-        format!("exception.active.{}", self.rule.key())
     }
 }
 
@@ -304,6 +298,16 @@ pub struct Granted {
     pub expires_at_ms: Option<i64>,
     /// True when the user will have to come back and revoke it.
     pub permanent: bool,
+}
+
+impl Granted {
+    /// The one-line label the home screen shows while this is live. Returned
+    /// as a machine key, not a sentence: the sentence is the localization
+    /// layer's job, and putting Arabic here would bake one language into the
+    /// core.
+    pub fn badge_key(&self) -> String {
+        format!("exception.active.{}", self.rule.key())
+    }
 }
 
 /// The whole set of exceptions, with the rules that keep them honest.
@@ -385,7 +389,8 @@ impl Policy {
     /// Revoke a single exception.
     pub fn revoke(&mut self, rule: Rule, target: &Target) -> bool {
         let before = self.exceptions.len();
-        self.exceptions.retain(|e| !(e.rule == rule && &e.target == target));
+        self.exceptions
+            .retain(|e| !(e.rule == rule && &e.target == target));
         before != self.exceptions.len()
     }
 
@@ -512,7 +517,10 @@ mod tests {
         let p = policy_with(Rule::WindowsScriptHost, Mode::Relax, Duration::Minutes(30));
         let target = Target::Path("C:\\Scripts".into());
 
-        assert_eq!(p.effective(Rule::WindowsScriptHost, &target, T0), Some(Mode::Relax));
+        assert_eq!(
+            p.effective(Rule::WindowsScriptHost, &target, T0),
+            Some(Mode::Relax)
+        );
         assert_eq!(
             p.effective(Rule::WindowsScriptHost, &target, T0 + 30 * 60_000 - 1),
             Some(Mode::Relax)
@@ -531,7 +539,10 @@ mod tests {
         let p = policy_with(Rule::WindowsScriptHost, Mode::Allow, Duration::Minutes(60));
         let target = Target::Path("C:\\Scripts".into());
 
-        assert_eq!(p.effective(Rule::WindowsScriptHost, &target, T0), Some(Mode::Allow));
+        assert_eq!(
+            p.effective(Rule::WindowsScriptHost, &target, T0),
+            Some(Mode::Allow)
+        );
         for other in Rule::ALL {
             if other == Rule::WindowsScriptHost {
                 continue;
@@ -621,11 +632,7 @@ mod tests {
     /// narrow, and it is the case the user actually meets.
     #[test]
     fn a_permanent_path_exception_is_standard() {
-        let p = policy_with(
-            Rule::DownloadsSuspicion,
-            Mode::Allow,
-            Duration::Permanent,
-        );
+        let p = policy_with(Rule::DownloadsSuspicion, Mode::Allow, Duration::Permanent);
         let live = p.live(T0);
         assert_eq!(live.len(), 1);
         assert!(live[0].permanent);
@@ -688,7 +695,10 @@ mod tests {
 
         let live = p.live(T0 + 120_000);
         assert_eq!(live.len(), 1, "one in force, not two");
-        assert_eq!(p.effective(Rule::WindowsScriptHost, &target, T0 + 120_000), Some(Mode::Allow));
+        assert_eq!(
+            p.effective(Rule::WindowsScriptHost, &target, T0 + 120_000),
+            Some(Mode::Allow)
+        );
     }
 
     #[test]
