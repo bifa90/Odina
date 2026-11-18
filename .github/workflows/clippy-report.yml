@@ -42,6 +42,12 @@ jobs:
           print(len(keep), 'lines')
           PY
 
+      - name: version and raw tail
+        continue-on-error: true
+        run: |
+          echo "::error::VER $(rustc --version) clippy $(cargo clippy --version)"
+          tail -c 800 /tmp/c.txt | tr '\n' '|' | sed 's/^/::error::RAW /'
+
       - name: emit 0
         continue-on-error: true
         run: echo "::error::P000 $(cat /tmp/chunks/000)"
