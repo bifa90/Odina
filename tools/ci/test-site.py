@@ -48,7 +48,7 @@ def check_picker(page: Page, picker: str, sample: str, langs: list[str]) -> None
             expect(entry).to_have_accessible_name(label)
             expect(entry).to_have_accessible_description(scope)
             assert page.locator('.list-tip [role="tooltip"]').evaluate_all("""(tips, l) =>
-                tips.every(t => t.textContent && t.textContent === window.ODINA_STRINGS[l][t.dataset.k])
+                tips.every(t => t.textContent && t.textContent === renderString(window.ODINA_STRINGS[l][t.dataset.k], t))
             """, lang), lang
 
 
@@ -128,6 +128,64 @@ def check_touch_help(page: Page, base: str) -> None:
     assert len(page.context.pages) == 1, "local help opened another tab"
 
 
+def check_recovery(page: Page, cta) -> None:
+    cta.click()
+    screen = page.locator('#screen-remediation')
+    expect(screen).to_be_focused()
+    advance = screen.locator('#recovery-next')
+    cases = screen.locator('#recovery-case')
+    vault = screen.locator('#recovery-vault')
+    count = page.locator('.appbar [data-goto="quarantine"] [data-numeral]')
+    for case, reason in [('recoverable', None), ('standalone', 'q.reason1'),
+                         ('unmatched', 'recovery.no_rule'), ('missing', 'recovery.no_db'),
+                         ('invalid', 'recovery.bad_verify')]:
+        cases.select_option(case)
+        status = 'recovery.no_db' if case == 'missing' else 'settings.repair_db.status'
+        expect(page.locator('#repair-db-status')).to_have_attribute('data-k', status)
+        expect(vault).to_be_hidden()
+        advance.click()
+        for step in ['scan', 'neutralize', 'clean', 'repair']:
+            expect(cases).to_be_disabled()
+            expect(screen.locator('[aria-current="step"]')).to_have_attribute('data-step', step)
+            expect(screen.locator('#recovery-result')).to_be_hidden()
+            expect(page.locator('#q-demo')).to_be_hidden()
+            expect(count).to_have_attribute('data-numeral', '2')
+            advance.click()
+        expect(screen).to_have_attribute('data-phase', 'verify')
+        expect(page.locator('[data-effective="contained"]')).to_have_count(9)
+        expect(screen.locator('#recovery-result')).to_be_visible()
+        if reason:
+            expect(screen.locator('#file-result')).to_have_attribute('data-k', 'recovery.file_isolated')
+            expect(screen.locator('#file-reason')).to_have_attribute('data-k', reason)
+            expect(count).to_have_attribute('data-numeral', '3')
+            if case == 'invalid':
+                for lang in page.evaluate('window.ODINA_ORDER'):
+                    page.select_option('#lang', lang)
+                    text = page.evaluate("([l,k]) => window.ODINA_STRINGS[l][k]", [lang, reason])
+                    expect(screen.locator('#file-reason')).to_have_text(text)
+                    expect(screen.locator('[aria-current="step"]')).to_have_attribute('data-step', 'verify')
+                    assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'), lang
+                page.select_option('#lang', 'ar')
+            vault.click()
+            quarantine = page.locator('#screen-quarantine')
+            expect(quarantine).to_be_focused()
+            expect(quarantine.locator('#q-demo .qname')).to_have_text('sample.dat')
+            expect(quarantine.locator('#q-demo-reason')).to_have_attribute('data-k', reason)
+            quarantine.locator('[data-back]').click()
+            expect(vault).to_be_focused()
+        else:
+            expect(screen.locator('#file-result')).to_have_attribute('data-k', 'recovery.file_ok')
+            expect(vault).to_be_hidden()
+            expect(page.locator('#q-demo')).to_be_hidden()
+        advance.click()
+        expect(screen).to_have_attribute('data-phase', 'restored')
+        expect(page.locator('[data-effective="contained"]')).to_have_count(0)
+    cases.select_option('recoverable')
+    screen.locator('[data-back]').click()
+    expect(cta).to_be_focused()
+    page.keyboard.press('Escape')
+
+
 def check_proactive(page: Page) -> None:
     page.locator('.appbar [data-goto="proactive"]').click()
     root = page.locator('#screen-proactive')
@@ -161,7 +219,7 @@ def check_proactive(page: Page) -> None:
     mode.select_option('muted')  # Silenced alerts are NOT disabled protection.
     assert states() == baseline
     advance.click()
-    for phase in ['scan', 'clean', 'repair']:
+    for phase in ['scan', 'neutralize', 'clean', 'repair', 'verify']:
         expect(root).to_have_attribute('data-phase', phase)
         assert set(states().values()) == {'contained'}
         expect(root.locator('[data-set-block]:disabled')).to_have_count(6)
@@ -183,6 +241,11 @@ def check_proactive(page: Page) -> None:
         advance.click()
     expect(root).to_have_attribute('data-phase', 'restored')
     expect(mode).to_have_value('muted')
+    expect(page.locator('#pause-demo')).to_be_hidden()
+    mode.select_option('on')
+    summary = page.locator('#pause-demo [data-tmpl]')
+    expect(summary).to_be_visible()
+    assert summary.evaluate('e => JSON.parse(e.dataset.kArgs)') == {'restored': 1, 'isolated': 0, 'pending': 0}
     assert states() == baseline
     expect(page.locator('.exccard.live .conseq')).to_have_attribute('data-k', 'proactive.user_wsh_block')
     root.locator('[data-surface="wsh_script"] button').click()
@@ -210,8 +273,13 @@ def review(page: Page, base: str) -> None:
     check_picker(page, "#lang", "state.protected", langs)
     page.locator('.langcard[value="ar"]').click()
     expect(page.locator("#lang")).to_have_value("ar")
-    expect(page.locator('[data-k="alert.confirmed.body"]')).to_contain_text("PhotoTool.exe")
+    expect(page.locator('[data-k="alert.confirmed.body"]')).to_contain_text("sample.dat")
     check_list_help(page)
+    install = page.locator('#screen-settings .component-install')
+    install.locator('summary').click()
+    expect(install).to_contain_text('odina-repair-v1-r1.zip')
+    expect(install.locator('a')).to_have_attribute('href', 'https://github.com/bifa90/Odina/releases')
+    install.locator('summary').click()
     page.locator('.appbar [data-goto="settings"]').click()
     appearance = page.locator('#screen-settings summary[data-k="settings.appearance"]')
     hint = appearance.locator("..").locator('[role="tooltip"]')
@@ -243,14 +311,8 @@ def review(page: Page, base: str) -> None:
 
     alerts = page.locator('.appbar [data-goto="alerts"]')
     alerts.click()
-    cta = page.locator('[data-k="alert.confirmed.cta"]')
-    cta.click()
-    quarantine = page.locator("#screen-quarantine")
-    expect(quarantine).to_be_focused()
-    expect(quarantine.locator(".qname").first).to_have_text("PhotoTool.exe")
-    quarantine.locator("[data-back]").click()
-    expect(cta).to_be_focused()
-    page.keyboard.press("Escape")
+    cta = page.locator('#screen-alerts [data-k="alert.confirmed.cta"]')
+    check_recovery(page, cta)
     expect(alerts).to_be_focused()
 
     check_proactive(page)
@@ -284,7 +346,7 @@ def main() -> None:
                 browser.close()
         finally:
             server.shutdown()
-    print("site smoke: 10 locales · list help · alert → quarantine → back · nine surfaces, containment and restoration")
+    print("site smoke: 10 locales · list help · alert → recovery → conditional quarantine → back · five recovery cases · nine surfaces, containment and restoration")
 
 
 if __name__ == "__main__":

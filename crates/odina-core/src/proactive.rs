@@ -7,6 +7,7 @@
 use std::collections::{btree_map::Entry, BTreeMap, BTreeSet};
 
 use crate::policy::{Mode, Policy, Rule, Target};
+use crate::remediation::{FileId, Incident};
 use crate::scoring::Verdict;
 
 /// Scope and rationale: protection-policy-v1 §2.3.1. These tiers describe
@@ -90,13 +91,6 @@ pub enum ProtectionMode {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Stage {
-    Scan,
-    Clean,
-    Repair,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Outcome {
     Succeeded,
     Failed,
@@ -138,7 +132,7 @@ pub struct SurfacePolicy {
     // Persist preferences separately from unresolved jobs. Never save an
     // effective incident block as if it were a user's choice.
     user_blocks: BTreeSet<Surface>,
-    jobs: BTreeMap<JobId, Stage>,
+    jobs: BTreeMap<JobId, Incident>,
 }
 
 impl SurfacePolicy {
@@ -171,36 +165,50 @@ impl SurfacePolicy {
     /// Observe a verdict *during the infection scan*. A routine scan, a
     /// suspicion or a delayed notification while explicitly off cannot lock
     /// the system. Multiple confirmed files in the same job acquire one hold.
-    pub fn observe_scan(&mut self, id: JobId, verdict: Verdict, mode: ProtectionMode) {
-        if verdict == Verdict::Confirmed && mode != ProtectionMode::OffByUser {
-            self.jobs.entry(id).or_insert(Stage::Scan);
+    pub fn observe_file(
+        &mut self,
+        id: JobId,
+        file: FileId,
+        verdict: Verdict,
+        mode: ProtectionMode,
+    ) -> bool {
+        if verdict != Verdict::Confirmed || mode == ProtectionMode::OffByUser {
+            return false;
+        }
+        match self.jobs.entry(id) {
+            Entry::Vacant(job) => {
+                job.insert(Incident::new(file));
+                true
+            }
+            Entry::Occupied(mut job) => job.get_mut().include(file),
         }
     }
 
-    pub fn stage(&self, id: JobId) -> Option<Stage> {
-        self.jobs.get(&id).copied()
+    pub fn incident(&self, id: JobId) -> Option<&Incident> {
+        self.jobs.get(&id)
     }
-
-    /// Accept success for the *current* stage of this job only. Failure,
-    /// cancellation, duplicate and stale callbacks cannot release a hold.
-    pub fn finish_stage(&mut self, id: JobId, stage: Stage, outcome: Outcome) -> bool {
-        let Entry::Occupied(mut job) = self.jobs.entry(id) else {
+    pub fn incident_mut(&mut self, id: JobId, mode: ProtectionMode) -> Option<&mut Incident> {
+        if mode == ProtectionMode::OffByUser {
+            return None;
+        }
+        self.jobs.get_mut(&id)
+    }
+    /// A clean final incident rescan (after repair), not a single clean file,
+    /// is the only event that releases this job. On a new finding, register a
+    /// new job; on failed/cancelled verification, retain this job and retry.
+    pub fn finish_verified(
+        &mut self,
+        id: JobId,
+        mode: ProtectionMode,
+        rescan: Option<Verdict>,
+    ) -> bool {
+        let Some(job) = self.incident_mut(id, mode) else {
             return false;
         };
-        if *job.get() != stage || outcome != Outcome::Succeeded {
+        if !job.verify_incident(rescan) {
             return false;
         }
-        match stage {
-            Stage::Scan => {
-                job.insert(Stage::Clean);
-            }
-            Stage::Clean => {
-                job.insert(Stage::Repair);
-            }
-            Stage::Repair => {
-                job.remove();
-            }
-        }
+        self.jobs.remove(&id);
         true
     }
 }
@@ -238,10 +246,25 @@ impl Policy {
 mod tests {
     use super::*;
     use crate::policy::{ConsentTier, Duration};
+    use crate::remediation::{Disposition, Object, Stage, Wall, WallResult};
     use BlockReason::*;
     use Outcome::*;
     use ProtectionMode::*;
     use Stage::*;
+
+    fn complete(p: &mut Policy, job: JobId) {
+        let i = p.surfaces.incident_mut(job, On).unwrap();
+        for w in Wall::ORDER {
+            assert!(i.record_wall(w, WallResult::Checked));
+        }
+        assert!(i.advance(Scan, Succeeded));
+        assert!(i.advance(Neutralize, Succeeded));
+        i.plan(FileId(0), Object::MalwareOnly, None).unwrap();
+        assert!(i.advance(Clean, Succeeded));
+        assert!(i.record_disposition(FileId(0), Disposition::Quarantine, Succeeded));
+        assert!(i.advance(Repair, Succeeded));
+        assert!(p.surfaces.finish_verified(job, On, Some(Verdict::Clean)));
+    }
 
     const A: JobId = JobId(17);
     const B: JobId = JobId(18);
@@ -306,10 +329,11 @@ mod tests {
             Verdict::Suspicious,
             Verdict::HighRisk,
         ] {
-            p.surfaces.observe_scan(A, v, On);
+            p.surfaces.observe_file(A, FileId(0), v, On);
             assert_eq!(decisions(&p, On), before);
         }
-        p.surfaces.observe_scan(A, Verdict::Confirmed, AlertsMuted);
+        p.surfaces
+            .observe_file(A, FileId(0), Verdict::Confirmed, AlertsMuted);
         assert_eq!(
             decisions(&p, AlertsMuted),
             vec![Decision::Block(Containment); 9]
@@ -318,18 +342,36 @@ mod tests {
             p.surfaces.set_blocked(Surface::ScheduledTask, true),
             Err(PreferenceError::IncidentOpen)
         );
-        assert!(!p.surfaces.finish_stage(A, Repair, Succeeded));
-        for stage in [Scan, Clean, Repair] {
-            p.surfaces.observe_scan(A, Verdict::Confirmed, On);
-            assert_eq!(p.surfaces.stage(A), Some(stage));
+        assert!(!p.surfaces.finish_verified(A, On, Some(Verdict::Clean)));
+        for stage in [Scan, Neutralize, Clean, Repair] {
+            p.surfaces
+                .observe_file(A, FileId(0), Verdict::Confirmed, On);
             for outcome in [Failed, Cancelled] {
-                assert!(!p.surfaces.finish_stage(A, stage, outcome));
+                assert!(!p
+                    .surfaces
+                    .incident_mut(A, On)
+                    .unwrap()
+                    .advance(stage, outcome));
                 all_contained(&p);
             }
-            assert!(p.surfaces.finish_stage(A, stage, Succeeded));
-            assert!(!p.surfaces.finish_stage(A, stage, Succeeded));
+            let i = p.surfaces.incident_mut(A, On).unwrap();
+            if stage == Scan {
+                for w in Wall::ORDER {
+                    assert!(i.record_wall(w, WallResult::Checked));
+                }
+            }
+            if stage == Clean {
+                i.plan(FileId(0), Object::MalwareOnly, None).unwrap();
+            }
+            if stage == Repair {
+                assert!(i.record_disposition(FileId(0), Disposition::Quarantine, Succeeded));
+            }
+            assert!(i.advance(stage, Succeeded));
+            assert!(!i.advance(stage, Succeeded));
         }
-        assert_eq!(p.surfaces.stage(A), None);
+        all_contained(&p);
+        assert!(p.surfaces.finish_verified(A, On, Some(Verdict::Clean)));
+        assert!(p.surfaces.incident(A).is_none());
         assert_eq!(decisions(&p, On), before);
     }
 
@@ -353,7 +395,7 @@ mod tests {
             true,
         )
         .verdict;
-        p.surfaces.observe_scan(A, verdict, On);
+        p.surfaces.observe_file(A, FileId(0), verdict, On);
         all_contained(&p);
         assert_eq!(
             p.evaluate_activity(&[], On, &target, 0),
@@ -367,19 +409,19 @@ mod tests {
     fn overlapping_jobs_and_explicit_off_are_independent_of_completion() {
         let mut p = Policy::new();
         let before = decisions(&p, On);
-        p.surfaces.observe_scan(A, Verdict::Confirmed, OffByUser);
-        assert_eq!(p.surfaces.stage(A), None);
-        p.surfaces.observe_scan(A, Verdict::Confirmed, On);
-        p.surfaces.observe_scan(B, Verdict::Confirmed, On);
-        for stage in [Scan, Clean, Repair] {
-            assert!(p.surfaces.finish_stage(A, stage, Succeeded));
-        }
+        p.surfaces
+            .observe_file(A, FileId(0), Verdict::Confirmed, OffByUser);
+        assert!(p.surfaces.incident(A).is_none());
+        p.surfaces
+            .observe_file(A, FileId(0), Verdict::Confirmed, On);
+        p.surfaces
+            .observe_file(B, FileId(0), Verdict::Confirmed, On);
+        complete(&mut p, A);
         all_contained(&p);
-        assert!(!p.surfaces.finish_stage(A, Repair, Succeeded));
-        for stage in [Scan, Clean, Repair] {
-            assert_eq!(decisions(&p, OffByUser), vec![Decision::OffByUser; 9]);
-            assert!(p.surfaces.finish_stage(B, stage, Succeeded));
-        }
+        assert!(!p.surfaces.finish_verified(A, On, Some(Verdict::Clean)));
+        assert!(p.surfaces.incident_mut(B, OffByUser).is_none());
+        assert_eq!(decisions(&p, OffByUser), vec![Decision::OffByUser; 9]);
+        complete(&mut p, B);
         assert_eq!(decisions(&p, OffByUser), vec![Decision::OffByUser; 9]);
         assert_eq!(decisions(&p, On), before);
     }
@@ -414,11 +456,10 @@ mod tests {
             Decision::Block(UserChoice)
         );
         p.surfaces.set_blocked(wsh, false).unwrap();
-        p.surfaces.observe_scan(A, Verdict::Confirmed, On);
+        p.surfaces
+            .observe_file(A, FileId(0), Verdict::Confirmed, On);
         all_contained(&p);
-        for stage in [Scan, Clean, Repair] {
-            assert!(p.surfaces.finish_stage(A, stage, Succeeded));
-        }
+        complete(&mut p, A);
         assert_eq!(
             p.evaluate_activity(&[wsh], On, &target, 600_000),
             Decision::ContinueChecks {

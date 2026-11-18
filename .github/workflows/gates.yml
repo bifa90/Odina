@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, ui-law, loc-js, site, rust-syn, public]
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, ui-law, loc-js, site, repair-pkg, rust-syn, public]
 
     steps:
       - uses: actions/checkout@v4
@@ -102,6 +102,10 @@ jobs:
             python3 -m playwright install --with-deps --only-shell chromium
           fi
           python3 tools/ci/test-site.py
+
+      - name: repair-pkg
+        if: matrix.gate == 'repair-pkg'
+        run: python3 tools/ci/test-repair-package.py
 
       - name: rust-syn
         if: matrix.gate == 'rust-syn'

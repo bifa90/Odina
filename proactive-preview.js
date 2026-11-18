@@ -9,8 +9,10 @@
   const rows = [...root.querySelectorAll('[data-surface]')];
   const editable = new Set(rows.filter(r => r.closest('[data-tier]').dataset.tier !== 'mandatory')
     .map(r => r.dataset.surface));
+  const screen = document.getElementById('screen-remediation');
+  const byId = id => document.getElementById(id);
   const choiceKey = 'odina.preview.surface-blocks.v1';
-  const jobKey = 'odina.preview.remediation.v1';
+  const jobKey = 'odina.preview.remediation.v2';
   function read(store, key) {
     try { return JSON.parse(window[store].getItem(key)); } catch { return null; }
   }
@@ -23,19 +25,26 @@
   }
   let blocked = loadChoices();
   const saved = read('sessionStorage', jobKey);
-  let mode = ['on', 'muted', 'off'].includes(saved?.mode) ? saved.mode : 'on';
-  let phase = ['scan', 'clean', 'repair', 'restored'].includes(saved?.phase) ? saved.phase : 'ready';
-  const active = () => ['scan', 'clean', 'repair'].includes(phase);
+  const previous = saved ? null : read('sessionStorage', 'odina.preview.remediation.v1');
+  const storedMode = (saved || previous)?.mode;
+  let mode = ['on', 'muted', 'off'].includes(storedMode) ? storedMode : 'on';
+  // No old demo completion proves the new neutralization/verification steps.
+  const sequence = ['scan', 'neutralize', 'clean', 'repair', 'verify'];
+  const phases = [...sequence, 'restored'];
+  let phase = phases.includes(saved?.phase) ? saved.phase :
+    sequence.includes(previous?.phase) ? 'scan' : 'ready';
+  const active = () => sequence.includes(phase);
   let failed = active() && saved?.failed === true;
-
-  const next = root.querySelector('#demo-next');
-  const fail = root.querySelector('#demo-fail');
-  const selector = root.querySelector('#demo-mode');
-  const steps = {
-    ready: ['proactive.demo.start', 'scan'], restored: ['proactive.demo.start', 'scan'],
-    scan: ['scan.complete', 'clean'], clean: ['proactive.demo.cleaned', 'repair'],
-    repair: ['proactive.demo.repaired', 'restored'],
-  };
+  let foundWhileMuted = saved?.foundWhileMuted === true;
+  const reasons = new Map([
+    ['recoverable', null], ['standalone', 'q.reason1'], ['unmatched', 'recovery.no_rule'],
+    ['missing', 'recovery.no_db'], ['invalid', 'recovery.bad_verify'],
+  ]);
+  let example = reasons.has(saved?.example) ? saved.example : 'recoverable';
+  const scenario = byId('recovery-case');
+  const advances = [byId('demo-next'), byId('recovery-next')];
+  const fail = byId('demo-fail');
+  const selector = byId('demo-mode');
   function bind(el, key) {
     el.dataset.k = key;
     if (el.hasAttribute('data-tmpl')) el.dataset.tmpl = key;
@@ -50,12 +59,45 @@
     // New turn-off requests go through the real consent flow (§4.5); here
     // the selector illustrates an already-off device, not a way out of a job.
     selector.querySelector('[value="off"]').disabled = hold && !off;
-    next.disabled = off;
-    bind(next, steps[phase][0]);
+    screen.dataset.phase = phase;
+    scenario.value = example;
+    scenario.disabled = hold || off;
+    const status = 'proactive.demo.' + (off ? 'off' : phase);
+    for (const next of advances) {
+      next.disabled = off;
+      bind(next, hold ? 'recovery.next' : 'proactive.demo.start');
+    }
     fail.hidden = off || !hold;
     fail.disabled = failed;
-    root.querySelector('#remediation-error').hidden = !failed || off;
-    bind(root.querySelector('#remediation-status'), 'proactive.demo.' + (off ? 'off' : phase));
+    for (const id of ['remediation-error', 'recovery-error']) byId(id).hidden = !failed || off;
+    for (const id of ['remediation-status', 'recovery-status']) bind(byId(id), status);
+    for (const step of screen.querySelectorAll('[data-step]')) {
+      if (step.dataset.step === phase) step.setAttribute('aria-current', 'step');
+      else step.removeAttribute('aria-current');
+    }
+    // A simulated durable file result may appear at VERIFY; all nine blocks
+    // still apply. Only the *incident's* clean verification restores choices.
+    const resolved = phase === 'verify' || phase === 'restored';
+    const why = reasons.get(example);
+    const isolated = resolved && !!why;
+    byId('recovery-result').hidden = !resolved;
+    bind(byId('file-result'), isolated ? 'recovery.file_isolated' : 'recovery.file_ok');
+    byId('file-reason').hidden = !isolated;
+    if (isolated) {
+      bind(byId('file-reason'), why);
+      bind(byId('q-demo-reason'), why);
+    }
+    byId('recovery-vault').hidden = !isolated;
+    byId('q-demo').hidden = !isolated;
+    const count = document.querySelector('.appbar [data-goto="quarantine"] [data-numeral]');
+    count.dataset.numeral = isolated ? '3' : '2';
+    count.textContent = formatNumber(Number(count.dataset.numeral));
+    bind(byId('repair-db-status'), example === 'missing' ? 'recovery.no_db' : 'settings.repair_db.status');
+    const summary = byId('pause-demo');
+    summary.hidden = !(foundWhileMuted && mode === 'on');
+    const report = summary.querySelector('[data-tmpl]');
+    report.dataset.kArgs = JSON.stringify({restored: Number(resolved && !why), isolated: Number(isolated), pending: Number(!resolved)});
+    bind(report, 'pause.resume_report');
     for (const row of rows) {
       const id = row.dataset.surface;
       const baseline = !editable.has(id) || blocked.has(id);
@@ -79,7 +121,7 @@
     bind(exc.querySelector('.exccard.live .conseq'), reason || 'exception.consequence.allow');
   }
   function saveJob() {
-    write('sessionStorage', jobKey, {mode, phase, failed});
+    write('sessionStorage', jobKey, {mode, phase, failed, example, foundWhileMuted});
     render();
   }
   root.addEventListener('click', event => {
@@ -95,9 +137,18 @@
     if (!(active() && selector.value === 'off')) mode = selector.value;
     saveJob();
   });
-  next.addEventListener('click', () => {
+  scenario.addEventListener('change', () => {
+    if (!active() && mode !== 'off' && reasons.has(scenario.value)) {
+      example = scenario.value;
+      phase = 'ready';
+      failed = foundWhileMuted = false;
+    }
+    saveJob();
+  });
+  for (const next of advances) next.addEventListener('click', () => {
     if (mode === 'off') return;
-    phase = steps[phase][1];
+    if (!active()) foundWhileMuted = mode === 'muted';
+    phase = phases[sequence.indexOf(phase) + 1];
     failed = false;
     saveJob();
   });

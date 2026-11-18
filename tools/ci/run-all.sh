@@ -48,6 +48,7 @@ run loc-js   python3 tools/gen-locale-js.py --check --quiet
 # Validate the allowlisted output, not just the source pages. The browser
 # half of this gate is run separately in CI (see docs/ci.md).
 run site     python3 tools/deploy-site.py --dry-run
+run repair-pkg python3 tools/ci/test-repair-package.py
 run rust-syn bash -c "python3 tools/check-rust-syntax.py > /dev/null"
 run public   python3 tools/ci/check-public-build.py --quiet
 

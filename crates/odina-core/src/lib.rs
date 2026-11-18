@@ -17,6 +17,8 @@ pub mod hashing;
 pub mod heuristics;
 pub mod policy;
 pub mod proactive;
+pub mod remediation;
+pub mod repair_db;
 pub mod scoring;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};

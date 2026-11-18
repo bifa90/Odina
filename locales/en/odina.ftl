@@ -48,7 +48,7 @@ scan.clean_result = Nothing harmful was found.
 
 ## ── Alerts — CONFIRMED (never auto-dismiss) ───────────────
 alert.confirmed.title = We stopped a known threat
-alert.confirmed.body = { $file } is a confirmed threat and has been isolated — not deleted.
+alert.confirmed.body = We confirmed an infection in { $file }. Execution was blocked; nothing was deleted.
 
 ## ── Alerts — HIGHLY SUSPICIOUS ───────────────────────────
 alert.suspicious.title = A program is trying to reach your files
@@ -147,7 +147,7 @@ action.turn_off = Turn protection off
 action.turn_on = Turn protection back on
 disable.re_enable_note = You can turn protection back on at any moment — no password.
 disable.reminder = { $minutes} minutes left before protection comes back automatically.
-pause.resume_report = While alerts were paused: { $count} file(s) isolated
+pause.resume_report = While muted: { $restored } repaired · { $isolated } isolated · { $pending } pending
 
 ## ── Surgical exception (D45 · §4.8) ─────────────────────────
 exception.title = Exceptions
@@ -195,7 +195,7 @@ exception.refused.veto_stands = The file is confirmed. An exception relaxes the 
 
 exception.live_note = your decision · everything else is still active · you can revoke at any moment
 exception.lines_title = Four things are never excepted:
-exception.lines_body = the first wall's verdict (confirmed is quarantined even under an exception) · tamper protection · the second rule (a WSH exception does not open PowerShell) · “high risk” and above. Revoking is always one click, without a password.
+exception.lines_body = the first wall's verdict (an exception cannot run a confirmed infection) · tamper protection · the second rule (a WSH exception does not open PowerShell) · “high risk” and above. Revoking is always one click, without a password.
 
 ## ── App map and navigation (constitution §6أ.3) ─────────────────
 nav.home = Home
@@ -271,7 +271,7 @@ settings.startup.body = Runs in the background from boot. You can turn it off.
 settings.notifications = Notifications
 settings.notifications.body = Three a day at most. The most important first.
 settings.updates = Updates
-settings.updates.body = Automatic for the threat database, manual for the program.
+settings.updates.body = Threat data updates automatically; the program updates manually. Repair data is a separate package.
 settings.about = About
 settings.version = Version
 settings.database = Threat database
@@ -341,16 +341,16 @@ proactive.state.off = Not enforced
 proactive.saved_until = { $rule } · exception saved until { $until }
 proactive.user_wsh_block = Your Windows script block takes precedence over this exception.
 proactive.demo.title = Containment simulation
-proactive.demo.note = Local simulation only. No files are scanned and no Windows settings are changed.
+proactive.demo.note = Simulation of automatic recovery. No files are scanned and no Windows settings are changed.
 proactive.demo.mode = Simulated protection mode
 proactive.demo.ready = When a scan confirms an infection, all nine activities stay blocked through repair.
 proactive.demo.start = Simulate confirmed infection
-proactive.demo.scan = Scanning a confirmed infection · all nine activities are temporarily blocked.
-proactive.demo.clean = Cleaning · the scan succeeded; the block remains.
-proactive.demo.repair = Repairing · cleanup succeeded; the block remains.
+proactive.demo.scan = Three-wall assessment in progress. All nine activities are temporarily blocked.
+proactive.demo.clean = The danger is neutralized. Checking for a trusted way to disinfect the file.
+proactive.demo.repair = Repairing damage and checking the file. The block stays until incident verification.
 proactive.demo.cleaned = Cleanup succeeded
 proactive.demo.repaired = Repair succeeded
-proactive.demo.restored = Repair succeeded. The temporary block is lifted; your previous choices apply again.
+proactive.demo.restored = Recovery was verified. Your previous choices apply again.
 proactive.demo.off = Protection is off by your choice. No containment starts and your choices are unchanged.
 proactive.demo.fail = Step failed
 proactive.demo.failed = This step did not succeed. Containment stays in place until recovery succeeds.
@@ -387,7 +387,7 @@ path.copy_hint = copy
 nav.preview = UI preview
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = Open quarantine
+alert.confirmed.cta = View recovery
 badge.confirmed = Confirmed
 badge.high = Highly suspicious
 badge.low = Suspicious
@@ -432,9 +432,9 @@ notes.5b = logotype, tray icon and error states — reviewed separately (R3).
 notes.5t = Not covered here:
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = Confirmed threat
+q.reason1 = Standalone malware; no host file to save
 q.reason2 = Cracking tool
-quarantine.opened_from = Opened from an alert, and from the counter on Home — never from a hidden menu.
+quarantine.opened_from = Malware itself, files that could not be safely disinfected, and items you moved here.
 quarantine.restore = Restore
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -483,7 +483,7 @@ num.sample = 3 alerts · 12 files
 num.note = The change is instant. No restart needed.
 
 ## ── Pause tips — on demand ─────────────────────────────
-tip.lvl1 = No window, no notice, no sound, but scanning and blocking continue in the background: an infected file is isolated silently and shown when you return.
+tip.lvl1 = Scanning, blocking and recovery continue silently. Results appear when alerts resume.
 tip.lvl2 = No scanning, no blocking, no alert. The service runs but does nothing, and your device is fully unprotected.
 tip.no_permanent = The longest pause ends at a restart, and that is the only limit we impose.
 
@@ -499,3 +499,32 @@ visual.n5 = Text explains the picture, it does not repeat it.
 visual.sample = Hover the icon: one word. Click it: a full explanation in your language.
 trust.count = Five, not four.
 help.sample.title = A live example
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = Stopping the active threat before touching the infected file.
+proactive.demo.verify = Checking the whole incident before lifting the temporary block.
+recovery.title = Recovery
+recovery.tip = Stop the threat, disinfect and repair. Quarantine only malware or files unsafe to clean.
+recovery.case = Example case
+recovery.match = Recoverable host file
+recovery.no_rule = No matching safe recipe
+recovery.no_db = Repair data missing or untrusted
+recovery.bad_verify = The cleaned copy failed verification
+recovery.scan = Three-wall assessment
+recovery.neutralize = Neutralize the danger
+recovery.clean = Disinfect the file
+recovery.repair = Repair the damage
+recovery.verify = Final verification
+recovery.next = Next step
+recovery.file_ok = File disinfected, repaired and verified.
+recovery.file_isolated = File quarantined, not deleted.
+settings.repair_db = Repair database
+settings.repair_db.status = v1/r1 · two training recipes
+settings.repair_db.help = Family recipes ship with the app. Download separately if the bundle exceeds { $mb } MB.
+recovery.case_malware = Standalone malware
+recovery.case_unknown = No matching recipe
+recovery.case_missing = Database unavailable
+recovery.case_invalid = Verification failure
+settings.repair_db.install = Separate installation
+settings.repair_db.instructions = Extract { $package } from the matching Odina release beside the program. Keep the folder structure.
+settings.repair_db.releases = Release packages

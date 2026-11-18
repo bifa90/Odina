@@ -1,10 +1,10 @@
 # Copyright (c) 2026 bifa90 — Odina
 # SPDX-License-Identifier: AGPL-3.0-or-later
 #
-# Builds the two artifacts — the public build and the check build — and puts
+# Builds the artifacts — the public build, the check build and their shared data — and puts
 # them where they can be downloaded. This is the only place either binary is
-# produced: the workspace that writes the code has no Rust toolchain, so the
-# runner is the compiler of record (docs/ci.md §2.10).
+# produced for release: the Windows runner is the compiler of record
+# (docs/ci.md §2.10), not a developer’s local simulation.
 #
 # The check build is labelled in the file name, in the artifact name and in a
 # README that ships inside the archive, because §34.3 says it must never be
@@ -93,16 +93,11 @@ jobs:
       - name: name, label and archive
         shell: pwsh
         run: |
-          # Every stage is marked, and the step ends with an explicit exit: a
-          # cmdlet that writes a non-terminating error must not be able to fail
-          # the step silently, which is what happened the first three times.
-          # A cmdlet that writes a non-terminating error must not be able to
-          # fail this step silently, so the step ends with an explicit exit.
-          $ErrorActionPreference = 'Continue'
+          $ErrorActionPreference = 'Stop'
           $stage = "stage-${{ matrix.kind }}"
           New-Item -ItemType Directory -Path $stage -Force | Out-Null
 
-          Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}" -ErrorAction Continue
+          Copy-Item "target/release/odina.exe" "$stage/${{ matrix.exe }}"
 
           if ("${{ matrix.kind }}" -eq "check") {
             @(
@@ -129,15 +124,28 @@ jobs:
           }
 
           $zip = "${{ matrix.artifact }}.zip"
-          Compress-Archive -Path "$stage/*" -DestinationPath $zip -Force -ErrorAction Continue
+          python tools/package-windows.py $stage "${{ matrix.exe }}" $zip
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-          if (Test-Path $zip) {
-            $hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
-            "$hash  $zip" | Set-Content -Path "$zip.sha256" -Encoding utf8
-            exit 0
+      - name: test the component in the extracted download
+        shell: pwsh
+        run: |
+          Expand-Archive "${{ matrix.artifact }}.zip" unpack
+          if (-not (Test-Path "unpack/components/repair/odina-repair-v1.tsv")) {
+            Expand-Archive odina-repair-v1-r1.zip unpack -Force
           }
-          Write-Output "the archive was not created"
-          exit 1
+          & "./unpack/${{ matrix.exe }}" repair-db --demo
+          exit $LASTEXITCODE
+
+      - uses: actions/upload-artifact@v4
+        if: matrix.kind == 'public'
+        with:
+          name: odina-repair-v1-r1
+          path: |
+            odina-repair-v1-r1.zip
+            odina-repair-v1-r1.zip.sha256
+          if-no-files-found: error
+          retention-days: 90
 
       - uses: actions/upload-artifact@v4
         with:
@@ -148,19 +156,30 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-      - name: attach to the release, when a tag built this
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
+  release:
+    name: attach the tested downloads
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: odina-*
+          path: downloads
+          merge-multiple: true
+      - name: publish one prerelease from both builds
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
         run: |
-          $tag = "${{ github.ref_name }}"
-          # Every tag this workflow reacts to produces a check build, and a
-          # check build must never look like a release anyone should download
-          # to run: the release is created as a prerelease, always.
-          gh release view $tag 2>$null
-          if ($LASTEXITCODE -ne 0) {
-            gh release create $tag --prerelease --title "Odina $tag" --notes-file RELEASE-NOTES.md
-          }
-          gh release upload $tag "${{ matrix.artifact }}.zip" `
-            "${{ matrix.artifact }}.zip.sha256" --clobber
+          set -euo pipefail
+          cd downloads
+          for name in odina-public-windows-x64 odina-CHECK-BUILD-windows-x64 odina-repair-v1-r1; do
+            sha256sum -c "$name.zip.sha256"
+          done
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" --verify-tag --prerelease --title "Odina $TAG" --notes-file ../RELEASE-NOTES.md
+          fi
+          gh release upload "$TAG" ./*.zip ./*.zip.sha256 --clobber

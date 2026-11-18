@@ -36,7 +36,7 @@ scan.stop = Parar
 scan.complete = Verificação concluída
 scan.clean_result = Nada prejudicial foi encontrado.
 alert.confirmed.title = Paramos uma ameaça conhecida
-alert.confirmed.body = { $file } é uma ameaça confirmada e foi isolado.
+alert.confirmed.body = Infecção confirmada em { $file }. A execução foi bloqueada; nada foi excluído.
 alert.suspicious.title = Um programa está tentando acessar seus arquivos
 alert.suspicious.body = { $file } está alterando arquivos em Documentos. Nós o paramos temporariamente.
 alert.suspicious.note = Nós o paramos temporariamente.
@@ -116,7 +116,7 @@ action.turn_off = Desligar a proteção
 action.turn_on = Religar a proteção
 disable.re_enable_note = Você pode religar a proteção a qualquer momento — sem senha.
 disable.reminder = Faltam { $minutes} minutos para a proteção voltar sozinha.
-pause.resume_report = Enquanto os avisos estavam pausados: { $count} arquivo(s) isolado(s)
+pause.resume_report = Durante o silêncio: { $restored } reparados · { $isolated } isolados · { $pending } pendentes
 
 ## ── Exceção cirúrgica (D45 · §4.8) ─────────────────────────
 exception.title = Exceções
@@ -164,7 +164,7 @@ exception.refused.veto_stands = O arquivo está confirmado. Uma exceção flexib
 
 exception.live_note = sua decisão · todo o resto continua ativo · você pode revogar a qualquer momento
 exception.lines_title = Quatro coisas nunca são excetuadas:
-exception.lines_body = o veredito do primeiro muro (um arquivo confirmado é isolado mesmo sob exceção) · a proteção contra adulteração · a segunda regra (uma exceção de WSH não abre o PowerShell) · “risco alto” e acima. Revogar é sempre um clique, sem senha.
+exception.lines_body = o veredito do primeiro muro (nenhuma exceção permite executar um arquivo com infecção confirmada) · a proteção contra adulteração · a segunda regra (uma exceção de WSH não abre o PowerShell) · “risco alto” e acima. Revogar é sempre um clique, sem senha.
 
 ## ── Mapa do aplicativo e navegação (constituição §6أ.3) ─────────────────
 nav.home = Início
@@ -240,7 +240,7 @@ settings.startup.body = Roda em segundo plano desde a inicialização. Você pod
 settings.notifications = Avisos
 settings.notifications.body = Três por dia no máximo. O mais importante primeiro.
 settings.updates = Atualizações
-settings.updates.body = Automáticas para a base de ameaças, manuais para o programa.
+settings.updates.body = Os dados de ameaças têm atualização automática; o programa, manual. A base de reparo é um pacote separado.
 settings.about = Sobre
 settings.version = Versão
 settings.database = Base de ameaças
@@ -310,16 +310,16 @@ proactive.state.off = Não aplicado
 proactive.saved_until = { $rule } · exceção salva até { $until }
 proactive.user_wsh_block = O bloqueio de scripts do Windows que você escolheu prevalece sobre esta exceção.
 proactive.demo.title = Simulação de contenção
-proactive.demo.note = Simulação local. Nenhum arquivo é verificado e nenhum ajuste do Windows é alterado.
+proactive.demo.note = Simulação do tratamento automático. Nenhum arquivo é verificado e nenhum ajuste do Windows é alterado.
 proactive.demo.mode = Modo de proteção simulado
 proactive.demo.ready = Quando a verificação confirma uma infecção, as nove atividades ficam bloqueadas até o reparo terminar com sucesso.
 proactive.demo.start = Simular infecção confirmada
-proactive.demo.scan = Verificando infecção confirmada · as nove atividades estão bloqueadas temporariamente.
-proactive.demo.clean = Limpando · verificação concluída, bloqueio mantido.
-proactive.demo.repair = Reparando · limpeza concluída, bloqueio mantido.
+proactive.demo.scan = Análise pelas três barreiras. As nove atividades estão bloqueadas temporariamente.
+proactive.demo.clean = Perigo neutralizado. Procurando uma regra confiável para desinfetar o arquivo.
+proactive.demo.repair = Reparando danos e verificando o arquivo. O bloqueio continua até a verificação final.
 proactive.demo.cleaned = Limpeza concluída
 proactive.demo.repaired = Reparo concluído
-proactive.demo.restored = Reparo concluído. O bloqueio temporário terminou e suas escolhas anteriores voltaram a valer.
+proactive.demo.restored = Reparo verificado. Suas escolhas anteriores voltaram a valer.
 proactive.demo.off = Você desativou a proteção. A contenção não inicia e suas escolhas não mudam.
 proactive.demo.fail = Falha na etapa
 proactive.demo.failed = A etapa falhou. A contenção continua até a recuperação ser concluída.
@@ -356,7 +356,7 @@ path.copy_hint = copiar
 nav.preview = Prévia da interface
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = Abrir a quarentena
+alert.confirmed.cta = Ver tratamento
 badge.confirmed = Confirmado
 badge.high = Risco alto
 badge.low = Suspeito
@@ -401,9 +401,9 @@ notes.5b = Uma frase de estado. Dois números. Um botão.
 notes.5t = O Início se lê em dez segundos
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = Ameaça confirmada
+q.reason1 = Malware independente, sem arquivo hospedeiro para salvar
 q.reason2 = Ferramenta de crack
-quarantine.opened_from = Abre de um aviso e do contador do Início — nunca de um menu escondido.
+quarantine.opened_from = Malware, arquivos que não puderam ser desinfetados com segurança e itens movidos por você.
 quarantine.restore = Restaurar
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -452,7 +452,7 @@ num.sample = 3 avisos · 12 arquivos
 num.note = A mudança é imediata. Sem reiniciar.
 
 ## ── Dicas da pausa — sob demanda ─────────────────────────────
-tip.lvl1 = Sem janela, sem aviso, sem som, mas a verificação e o bloqueio continuam em segundo plano: um arquivo infectado é isolado em silêncio e mostrado na volta.
+tip.lvl1 = Verificação, bloqueio e reparo continuam em silêncio. O resumo aparece na volta.
 tip.lvl2 = Sem verificação, sem bloqueio, sem aviso. O serviço roda mas não faz nada, e seu dispositivo fica sem proteção.
 tip.no_permanent = A pausa mais longa termina ao reiniciar, e esse é o único limite que impomos.
 
@@ -468,3 +468,32 @@ visual.n5 = O texto explica a imagem, não a repete.
 visual.sample = Passe o mouse no ícone: uma palavra. Clique: a explicação inteira no seu idioma.
 trust.count = Cinco, não quatro.
 help.sample.title = Um exemplo real
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = Interrompendo a ameaça ativa antes de tocar no arquivo infectado.
+proactive.demo.verify = Verificando todo o incidente antes de retirar o bloqueio.
+recovery.title = Tratamento
+recovery.tip = Neutralizar, limpar e reparar. Isolar só malware ou arquivos sem recuperação segura.
+recovery.case = Caso de exemplo
+recovery.match = Arquivo recuperável
+recovery.no_rule = Nenhuma regra segura compatível
+recovery.no_db = Dados de reparo ausentes ou não confiáveis
+recovery.bad_verify = A cópia desinfetada falhou na verificação
+recovery.scan = Análise por três barreiras
+recovery.neutralize = Neutralizar o perigo
+recovery.clean = Desinfetar o arquivo
+recovery.repair = Reparar os danos
+recovery.verify = Verificação final
+recovery.next = Próxima etapa
+recovery.file_ok = Arquivo desinfetado, reparado e verificado.
+recovery.file_isolated = Arquivo isolado, não excluído.
+settings.repair_db = Base de reparo
+settings.repair_db.status = v1/r1 · duas regras de teste
+settings.repair_db.help = Regras por família já incluídas. Download separado se o pacote superar { $mb } MB.
+recovery.case_malware = Malware independente
+recovery.case_unknown = Sem regra compatível
+recovery.case_missing = Base indisponível
+recovery.case_invalid = Falha na verificação
+settings.repair_db.install = Instalação separada
+settings.repair_db.instructions = Extraia { $package } da versão correspondente do Odina ao lado do programa, mantendo as pastas.
+settings.repair_db.releases = Pacotes publicados

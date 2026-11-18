@@ -48,7 +48,7 @@ DEFAULT_ENGINE = "google"
 
 SCREEN_IDS = [
     "home", "quarantine", "proactive", "alerts", "settings",
-    "language", "privacy", "exception",
+    "language", "privacy", "exception", "remediation",
 ]
 
 

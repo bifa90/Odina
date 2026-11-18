@@ -48,7 +48,7 @@ scan.clean_result = لم يُعثر على شيء ضار.
 
 ## ── التنبيهات — مؤكد (لا يختفي تلقائيًا) ──────────────────
 alert.confirmed.title = أوقفنا تهديدًا معروفًا
-alert.confirmed.body = { $file } تهديد مؤكد وتم عزله — لم يُحذف.
+alert.confirmed.body = تأكدت إصابة { $file }. أوقفنا تشغيله ولم نحذفه.
 
 ## ── التنبيهات — مشتبه بشدة ────────────────────────────────
 alert.suspicious.title = برنامج يحاول الوصول إلى ملفاتك
@@ -155,7 +155,7 @@ action.turn_off = إيقاف الحماية
 action.turn_on = أعد الحماية
 disable.re_enable_note = تستطيع إعادة الحماية في أي لحظة — بلا كلمة مرور.
 disable.reminder = لديك { $minutes } دقيقة متبقية على إعادة الحماية تلقائيًا.
-pause.resume_report = أثناء الإسكات: { $count } ملفًا عُزل
+pause.resume_report = أثناء الإسكات: أُصلح { $restored } · عُزل { $isolated } · قيد المعالجة { $pending }
 
 ## ── الاستثناء الجراحي (D45 · §4.8) ─────────────────────────
 exception.title = الاستثناءات
@@ -203,7 +203,7 @@ exception.refused.veto_stands = الملف مؤكد. الاستثناء يُرخ
 
 exception.live_note = بقرارك · الباقي فعّال كما هو · تستطيع الإبطال في أي لحظة
 exception.lines_title = أربعة لا تُستثنى:
-exception.lines_body = حكم الجدار 1 (مؤكد يُعزل حتى تحت الاستثناء) · حماية العبث · القاعدة الثانية (استثناء WSH لا يفتح PowerShell) · «مشتبه بشدة» وأعلى. والتراجع بضغطة واحدة، بلا كلمة مرور، دائمًا.
+exception.lines_body = حكم الجدار 1 (لا استثناء يسمح بتشغيل ملف مصاب مؤكد) · حماية العبث · القاعدة الثانية (استثناء WSH لا يفتح PowerShell) · «مشتبه بشدة» وأعلى. والتراجع بضغطة واحدة، بلا كلمة مرور، دائمًا.
 
 ## ── خريطة البرنامج والتنقل (الدستور §6أ.3) ─────────────────
 nav.home = الرئيسية
@@ -279,7 +279,7 @@ settings.startup.body = يعمل في الخلفية منذ الإقلاع. يم
 settings.notifications = الإشعارات
 settings.notifications.body = ثلاثة في اليوم كحد أقصى. الأهم أولًا.
 settings.updates = التحديثات
-settings.updates.body = تلقائي لقاعدة التهديدات، ويدوي للبرنامج.
+settings.updates.body = تحديث قاعدة التهديدات تلقائي والبرنامج يدوي. لقاعدة الإصلاح حزمة مستقلة.
 settings.about = عن البرنامج
 settings.version = النسخة
 settings.database = قاعدة التهديدات
@@ -349,16 +349,16 @@ proactive.state.off = غير مطبّق
 proactive.saved_until = { $rule } · الاستثناء محفوظ حتى { $until }
 proactive.user_wsh_block = منع سكربتات ويندوز الذي اخترته مقدَّم على هذا الاستثناء.
 proactive.demo.title = محاكاة الاحتواء
-proactive.demo.note = هذه تجربة محلية. لا تُفحص ملفاتك ولا تتغيّر إعدادات ويندوز.
+proactive.demo.note = هذه محاكاة لخطوات آلية. لا تُفحص ملفاتك ولا تتغيّر إعدادات ويندوز.
 proactive.demo.mode = وضع الحماية في التجربة
 proactive.demo.ready = عند فحص إصابة مؤكدة، تُمنع الأنشطة التسعة حتى ينجح الإصلاح.
 proactive.demo.start = حاكِ إصابة مؤكدة
-proactive.demo.scan = فحص إصابة مؤكدة · الأنشطة التسعة ممنوعة مؤقتًا.
-proactive.demo.clean = جارٍ التنظيف · اكتمل الفحص وما زال المنع قائمًا.
-proactive.demo.repair = جارٍ الإصلاح · اكتمل التنظيف وما زال المنع قائمًا.
+proactive.demo.scan = يجري الفحص بالجدران الثلاثة. الأنشطة التسعة ممنوعة مؤقتًا.
+proactive.demo.clean = بعد تحييد الخطر، نبحث عن طريقة موثوقة لتطهير الملف.
+proactive.demo.repair = نجري الإصلاح ونتحقق من الملف. يبقى المنع حتى فحص آثار الإصابة.
 proactive.demo.cleaned = اكتمل التنظيف
 proactive.demo.repaired = اكتمل الإصلاح
-proactive.demo.restored = نجح الإصلاح. رُفع المنع المؤقت وعادت اختياراتك السابقة.
+proactive.demo.restored = اكتمل التحقق من الإصلاح. عادت اختياراتك السابقة.
 proactive.demo.off = الحماية موقوفة بقرارك. لا يبدأ الاحتواء ولا تتغيّر اختياراتك.
 proactive.demo.fail = تعذّرت الخطوة
 proactive.demo.failed = لم تنجح الخطوة. يبقى المنع حتى تنجح المعالجة.
@@ -395,7 +395,7 @@ path.copy_hint = نسخ
 nav.preview = معاينة الواجهة
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = فتح صندوق العزل
+alert.confirmed.cta = متابعة المعالجة
 badge.confirmed = مؤكد
 badge.high = مشتبه بشدة
 badge.low = مشتبه
@@ -440,9 +440,9 @@ notes.5b = الـlogotype، وأيقونة التطبيق داخل شريط ال
 notes.5t = ما ينقص هذه المعاينة:
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = تهديد مؤكد
+q.reason1 = برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه
 q.reason2 = أداة كسر حماية
-quarantine.opened_from = يُفتح من التنبيه، ومن العدّاد في الرئيسية — لا من قائمة مخفية.
+quarantine.opened_from = هنا البرمجيات الخبيثة نفسها والملفات التي تعذّر تطهيرها بأمان، وما نقلتَه بنفسك.
 quarantine.restore = استرجع
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -491,7 +491,7 @@ num.sample = ٣ تنبيهات · ١٢ ملفًا
 num.note = التغيير فوري. لا يحتاج إعادة تشغيل.
 
 ## ── تلميحات الإيقاف — عند الطلب ─────────────────────────────
-tip.lvl1 = لا نافذة ولا إشعار ولا صوت، لكن الفحص والمنع يستمران في الخلفية: أي ملف مصاب يُعزل بصمت ويُعرض عليك عند العودة.
+tip.lvl1 = يستمر الفحص والمنع والمعالجة بصمت. ترى النتائج عند العودة.
 tip.lvl2 = لا فحص ولا منع ولا تنبيه. الخدمة تعمل لكنها خاملة، وجهازك غير محمي تمامًا.
 tip.no_permanent = أقصى إيقاف ينتهي بإعادة التشغيل، وهذا الحدّ الوحيد الذي نفرضه.
 
@@ -507,3 +507,32 @@ visual.n5 = النص يشرح الصورة، لا يكرّرها.
 visual.sample = وقوف على الرمز: كلمة واحدة. ضغط عليه: شرح كامل بلغتك.
 trust.count = خمسة، لا أربعة.
 help.sample.title = مثال حيّ
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = نوقف الخطر النشط قبل لمس الملف المصاب.
+proactive.demo.verify = نُعيد فحص آثار الإصابة قبل رفع المنع المؤقت.
+recovery.title = المعالجة
+recovery.tip = نحيّد الخطر ثم نطهّر ونصلح. العزل للبرمجية الخبيثة نفسها أو عند تعذّر التطهير الآمن.
+recovery.case = حالة التجربة
+recovery.match = ملف قابل للتطهير
+recovery.no_rule = لا توجد وصفة آمنة مطابقة
+recovery.no_db = قاعدة الإصلاح غائبة أو غير موثوقة
+recovery.bad_verify = تعذّر التحقق من سلامة النسخة المطهّرة
+recovery.scan = الفحص بالجدران الثلاثة
+recovery.neutralize = تحييد الخطر
+recovery.clean = تطهير الملف
+recovery.repair = إصلاح الضرر
+recovery.verify = التحقق النهائي
+recovery.next = الخطوة التالية
+recovery.file_ok = طُهّر الملف وأُصلح واجتاز التحقق.
+recovery.file_isolated = عُزل الملف ولم يُحذف.
+settings.repair_db = قاعدة الإصلاح
+settings.repair_db.status = v1/r1 · وصفتان تجريبيتان
+settings.repair_db.help = وصفات حسب العائلة. تُرفق بالبرنامج؛ وإذا تجاوزت الحزمة { $mb } م.ب تُنزّل منفصلة.
+recovery.case_malware = برمجية مستقلة
+recovery.case_unknown = لا وصفة مطابقة
+recovery.case_missing = القاعدة غائبة
+recovery.case_invalid = فشل التحقق
+settings.repair_db.install = التثبيت المنفصل
+settings.repair_db.instructions = فكّ { $package } من إصدار Odina المطابق بجوار البرنامج، مع الحفاظ على المجلدات.
+settings.repair_db.releases = حزم الإصدارات

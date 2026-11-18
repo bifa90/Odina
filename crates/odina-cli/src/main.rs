@@ -39,6 +39,8 @@
 #[cfg(any(feature = "instrument", test))]
 mod check;
 
+mod repair;
+
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
@@ -51,6 +53,7 @@ odina — scan one file and print the decision (gate G1)
 
 USAGE:
     odina scan <path> [--json] [--recursive]
+    odina repair-db [--demo]       # verify external data; optional in-memory repair exercise
     odina selftest                 # in memory: writes nothing to disk
     odina check <path> [--out <file>]   # instrumented build only
     odina --version | --help
@@ -95,6 +98,7 @@ fn main() -> ExitCode {
             ExitCode::SUCCESS
         }
         Some("selftest") => selftest(),
+        Some("repair-db") => repair::command(&args[1..]),
         // The refusal lives here, not inside the module, so the public build
         // really has no `check` code: the module is not compiled at all.
         Some("check") => {
@@ -374,8 +378,12 @@ fn report_to_text(report: &Report) -> String {
         out.push_str(&format!("سقوف مطبَّقة: {}\n", names.join(" · ")));
     }
     out.push_str(&format!(
-        "ما يحدث عند انتهاء المهلة: {}\n",
-        report.score.verdict.timeout_action()
+        "الإجراء المقرّر (لا ينفّذه أمر الفحص): {}\n",
+        match report.score.verdict {
+            odina_core::Verdict::Confirmed => "منع التشغيل وبدء المعالجة",
+            odina_core::Verdict::HighRisk | odina_core::Verdict::Suspicious => "منع التشغيل",
+            _ => "لا إجراء",
+        }
     ));
 
     out.push_str("\nالمؤشرات المقيسة فقط:\n");
@@ -541,6 +549,21 @@ mod tests {
     fn json_escapes_quotes_and_controls() {
         assert_eq!(json_string("a\"b"), r#""a\"b""#);
         assert_eq!(json_string("a\tb"), r#""a\tb""#);
+    }
+
+    #[test]
+    fn a_confirmed_report_does_not_claim_the_file_was_quarantined() {
+        let r = Report {
+            path: PathBuf::from("sample.dat"),
+            hashes: FileHashes::default(),
+            database_present: true,
+            known_bad: true,
+            score: score_with_known_bad(&Evidence::new(), &Thresholds::default(), None, true),
+            name_score: 0.0,
+            path_score: 0.0,
+        };
+        assert!(report_to_json(&r).contains(r#""timeout_action":"block_and_remediate""#));
+        assert!(report_to_text(&r).contains("منع التشغيل وبدء المعالجة"));
     }
 
     #[test]
