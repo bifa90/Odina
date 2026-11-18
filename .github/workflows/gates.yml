@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, ui-law, loc-js, rust-syn, public]
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, ui-law, loc-js, site, rust-syn, public]
 
     steps:
       - uses: actions/checkout@v4
@@ -90,6 +90,18 @@ jobs:
       - name: loc-js
         if: matrix.gate == 'loc-js'
         run: python3 tools/gen-locale-js.py --check
+
+      # Static checks cannot tell whether a packaged page boots. No Firebase
+      # account or deployment: exercise only the staged files in Chromium.
+      - name: site
+        if: matrix.gate == 'site'
+        run: |
+          python3 tools/deploy-site.py --dry-run
+          python3 -m pip install -r tools/ci/requirements-site.txt
+          if ! command -v google-chrome >/dev/null; then
+            python3 -m playwright install --with-deps --only-shell chromium
+          fi
+          python3 tools/ci/test-site.py
 
       - name: rust-syn
         if: matrix.gate == 'rust-syn'

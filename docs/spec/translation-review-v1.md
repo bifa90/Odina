@@ -51,7 +51,7 @@ python3 tools/gen-translation-editor.py  # المحرّر نفسه، بمفات�
 # 3. تحقّق قبل الدمج
 python3 tools/i18n-lint.py                       # 0 أخطاء مطلوبة
 python3 tools/ci/check-ui-constitution.py        # كل نص له مفتاح في كل لغة
-./tools/ci/run-all.sh --fast                     # البوابات الإحدى عشرة
+./tools/ci/run-all.sh --fast                     # البوابات دون فحص الخطوط
 ```
 
 إن فشل `gen-translation-editor.py` برسالة «keys with no screen»، فالمفتاح الجديد

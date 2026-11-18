@@ -5,13 +5,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="assets/logo/svg/odina-icon-light.svg">
 <title>Odina — معاينة الواجهة (v1)</title>
-<style>
+<style data-vendor-fonts>
 /* ══════════════════════════════════════════════════════════════════
-   Odina — UI Preview · ملف واحد قابل للتعديل
+   Odina — UI Preview
    الخطوط المسجّلة هنا من fonts/vendor/ (محلية). عند فتح الملف من
    القرص تأكد أن مجلد fonts/ بجانبه. الخطوط الآسيوية ← خطوط النظام.
-   الألوان والنصوص مأخوذة من docs/odina-agent-prompt-v10.md (§23.3، §36.2)
    ══════════════════════════════════════════════════════════════════ */
 
 @font-face{font-family:'Inter';src:url('fonts/vendor/inter/inter-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
@@ -22,6 +22,8 @@
 @font-face{font-family:'PT Sans';src:url('fonts/vendor/pt-sans/pt-sans-cyrillic-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
 @font-face{font-family:'Noto Sans Devanagari';src:url('fonts/vendor/noto-sans-devanagari/noto-sans-devanagari-devanagari-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
 
+</style>
+<style>
 :root{
   --accent:#0E7C6B; --ok:#157A4B; --warn:#8A5200; --danger:#B3261E; --focus:#0B5FFF;
   --bg:#F7F8FA; --surface:#FFFFFF; --surface2:#EFF1F4;
@@ -112,7 +114,7 @@ html[data-theme="dark"] .btn.danger{color:#0B1416}
 .alert .t{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center}
 .alert .b{color:var(--text2);font-size:14px;margin:6px 0 0}
 .alert .why{font-size:12px;color:var(--text3);margin-top:8px;text-decoration:underline;cursor:pointer}
-.alert .row{display:flex;gap:10px;margin-top:14px;align-items:center}
+.alert .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
 .alert .row .btn{flex:0 0 auto;min-width:104px}
 .badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
 .badge.conf{color:var(--danger)} .badge.med{color:var(--warn)} .badge.low{color:var(--ok)}
@@ -332,7 +334,7 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
 
 /* الإعدادات: صفوف لا بطاقات — كل صف فعل واحد */
 .setrows{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--surface);overflow:hidden}
+  background:var(--surface)}
 .setrow{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
 .setrow:last-child{border-bottom:0}
 .setrow .txt{flex:1;min-width:0}
@@ -373,7 +375,7 @@ body.real .screen{display:block}
   direction:ltr;margin-inline-start:6px}
 
 /* شريط تنقل الرئيسية: رمز + كلمة + عدد · الهدف 64px، لا أصغر */
-.appbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;
+.appbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px;
   border-top:1px solid var(--border);padding-top:14px}
 .appbar .navcell{display:flex;flex-direction:column;align-items:center;gap:7px;
   background:none;border:1px solid transparent;border-radius:var(--radius);
@@ -384,13 +386,21 @@ body.real .screen{display:block}
 .appbar .navcell[data-goto="quarantine"] .nb{}
 .appbar .ni{position:relative;display:inline-flex}
 .appbar .ni .i{width:26px;height:26px;stroke-width:1.7}
-.appbar .nl{font-size:12.5px;line-height:1.25;text-align:center;max-width:96px}
+.appbar .nl{overflow-wrap:anywhere;font-size:12.5px;line-height:1.25;text-align:center;max-width:96px}
 /* العدد على الرمز، لا بجانبه: العين تجده قبل أن تقرأ (§6أ.4أ) */
 .appbar .nb{position:absolute;inset-inline-end:-11px;top:-8px;min-width:19px;height:19px;
   border-radius:99px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;
   display:grid;place-items:center;padding:0 5px;line-height:1}
 .appbar .nb.warn{background:var(--warn);color:#231A00}
 html[data-theme="dark"] .appbar .nb{color:#0B1416}
+
+/* Scroll targets must not land under a toolbar whose height changes with language. */
+html{scroll-padding-block-start:var(--toolbar-height,0px)}
+@media (max-width:600px){
+  html{scroll-padding-block-start:0}
+  .topbar{position:static;gap:8px;padding:8px 12px}
+  .appbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 
 /* نظام الأرقام: البديلان معًا، والمختار عليه الإطار (§6أ.6) */
 .numpick{display:flex;gap:10px;flex-wrap:wrap}
@@ -435,12 +445,12 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <path d="M476 592 Q476 566 502 566 L522 566 Q548 566 548 592 L548 756 L476 756 Z"
             fill="var(--gold)" transform="translate(512 512) scale(1.13) translate(-512 -512)"/>
     </svg>
-    <span>Odina</span>
+    <span>Odina · <span data-k="nav.preview">معاينة الواجهة</span></span>
   </div>
   <div class="spacer"></div>
-  <a class="policy-link" href="signing.html">سياسة التوقيع · Code signing</a>
-  <label style="font-size:13px;color:var(--text3)" for="lang">اللغة</label>
-  <select id="lang" aria-label="Language">
+  <a class="policy-link" href="signing.html" data-k="signing.title">سياسة توقيع الشيفرة</a>
+  <label style="font-size:13px;color:var(--text3)" for="lang" data-k="lang.current">اللغة الحالية</label>
+  <select id="lang">
     <option value="ar">العربية (ar)</option>
     <option value="en">English (en)</option>
     <option value="zh-Hans">简体中文 (zh-Hans)</option>
@@ -452,7 +462,8 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <option value="fr">Français (fr)</option>
     <option value="pt-BR">Português (pt-BR)</option>
   </select>
-  <button class="tog" id="theme">الوضع الداكن</button>
+  <span id="draftflag" hidden data-k="lang.review">مراجعة ناطق أصلي</span>
+  <button class="tog" id="theme" data-k="settings.theme_dark">الوضع الداكن</button>
   <button class="tog" id="mode">كل الأقسام</button>
   <button class="tog" id="popout" title="open standalone"><svg class="i sm"><use href="#i-external"/></svg></button>
 </div>
@@ -577,7 +588,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         </svg>
         <div class="label" data-k="state.protected">أنت محمي</div>
         <div class="sub" data-k="shield.sub" data-tmpl="shield.sub"
-             data-k-args='{"n":"3"}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
+             data-k-args='{"n":3}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
       </div>
 
       <div class="walls">
@@ -658,7 +669,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 1c. الإيقاف: مستويان ══════════ -->
   <section class="sec screen" id="screen-pause" data-screen="pause">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="pause.title">الإيقاف المؤقت</span>
@@ -678,7 +689,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="lvrow"><span data-k="lvl.app">التطبيق</span><b data-k="lvl1.app">يعمل · يفحص · يمنع · لا يسأل</b></div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":"10"}'>١٠ دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":"30"}'>٣٠ دقيقة</span>
+          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":10}'>١٠ دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>٣٠ دقيقة</span>
           <span class="chip" data-k="lvl.d60">ساعة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
       </div>
@@ -692,7 +703,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="resp" data-k="lvl2.resp">القرار قرارك، والمسؤولية عليك أثناء هذه المدة.</div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":"30"}'>٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
+          <span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
           <span class="chip" data-k="lvl.dpeak">حتى نهاية ساعة الذروة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
         <div class="note" style="margin-top:10px" data-k="lvl.no_permanent">لا إيقاف دائم. أقصاه إعادة تشغيل.</div>
@@ -717,7 +728,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 1d. الاستثناء الجراحي — قاعدة واحدة، لا الكل (D45 · §4.8) ══════════ -->
   <section class="sec review-only screen" id="screen-exception" data-screen="exception">
     <div class="crumb">
-      <button class="back" data-goto="proactive"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="proactive"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.proactive">الحماية الاستباقية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="exception.title">الاستثناءات</span>
@@ -729,7 +740,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <div class="excbadge" style="margin-bottom:14px">
       <svg class="i" style="width:18px;height:18px"><use href="#i-pause"/></svg>
       <span class="grow">
-        <b data-k="exception.badge" data-k-args='{"rule":"Windows Script Host"}' data-tmpl="exception.badge">Windows Script Host مسموحة · حتى 14:30</b>
+        <b data-k="exception.badge" data-k-args='{"rule":"Windows Script Host","until":"14:30"}' data-tmpl="exception.badge">Windows Script Host مسموحة · حتى 14:30</b>
         <span class="when" data-k="exception.live_note">بقرارك · الباقي فعّال كما هو · تستطيع الإبطال في أي لحظة</span>
       </span>
       <button class="act" data-k="exception.action.revoke">أبطِل</button>
@@ -826,7 +837,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 2. التنبيهات ══════════ -->
   <section class="sec screen" id="screen-alerts" data-screen="alerts">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.alerts">مركز التنبيهات</span>
@@ -839,14 +850,14 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert confirmed">
         <div class="t"><svg class="i"><use href="#i-stop"/></svg><span><span class="badge conf" data-k="badge.confirmed">مؤكد</span>&nbsp;
           <span data-k="alert.confirmed.title">أوقفنا تهديدًا معروفًا</span></span></div>
-        <p class="b" data-k="alert.confirmed.body">عُزل PhotoTool.exe — لم يُحذف.</p>
+        <p class="b" data-k="alert.confirmed.body" data-k-args='{"file":"PhotoTool.exe"}'>عُزل PhotoTool.exe — لم يُحذف.</p>
         <div class="pathrow">
           <span class="plabel" data-k="path.label">المسار</span>
           <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\PhotoTool.exe</span>
           <button class="pcopy" title="copy" data-copy="C:\Users\Ahmed\Downloads\PhotoTool.exe"><svg class="i"><use href="#i-copy"/></svg></button>
         </div>
         <div class="row">
-          <button class="btn primary" data-k="alert.confirmed.cta">فتح صندوق العزل</button>
+          <button class="btn primary" data-goto="quarantine" data-k="alert.confirmed.cta">فتح صندوق العزل</button>
           <span class="tip" tabindex="0" data-tipkey="tip.quarantine" data-k="word.isolated">معزول</span>
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
@@ -856,7 +867,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert high">
         <div class="t"><svg class="i"><use href="#i-alert"/></svg><span><span class="badge conf" data-k="badge.high">مشتبه بشدة</span>&nbsp;
           <span data-k="alert.suspicious.title">برنامج يحاول الوصول إلى ملفاتك</span></span></div>
-        <p class="b" data-k="alert.suspicious.body">PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.</p>
+        <p class="b" data-k="alert.suspicious.body" data-k-args='{"file":"PhotoTool.exe"}'>PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.</p>
         <div class="row">
           <button class="btn ghost" data-k="button.allow">السماح</button>
           <button class="btn primary" data-k="button.block">المنع</button>
@@ -869,7 +880,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert medium">
         <div class="t"><svg class="i"><use href="#i-key"/></svg><span><span class="badge med" data-k="badge.pua">خطر متوسط</span>&nbsp;
           <span data-k="alert.pua.title">يبدو أنها أداة كسر حماية</span></span></div>
-        <p class="b" data-k="alert.pua.body">setup-key.exe يتجاوز حماية ترخيص برنامج مدفوع.</p>
+        <p class="b" data-k="alert.pua.body" data-k-args='{"file":"setup-key.exe"}'>setup-key.exe يتجاوز حماية ترخيص برنامج مدفوع.</p>
         <div class="pathrow">
           <span class="plabel" data-k="path.label">المسار</span>
           <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</span>
@@ -877,7 +888,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
                   data-copy="C:\Users\Ahmed\Downloads\setup-key.exe"><svg class="i"><use href="#i-copy"/></svg></button>
         </div>
         <div class="row">
-          <button class="btn ghost" data-k="alert.pua.quarantine">انقله جانبًا</button>
+          <button class="btn ghost" data-goto="quarantine" data-k="alert.pua.quarantine">انقله جانبًا</button>
           <button class="btn primary" data-k="alert.pua.allowed">اسمح به</button>
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
@@ -887,7 +898,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert low">
         <div class="t"><svg class="i"><use href="#i-info"/></svg><span><span class="badge low" data-k="badge.low">مشتبه</span>&nbsp;
           <span data-k="alert.unsure.title">هذا البرنامج غير مألوف</span></span></div>
-        <p class="b" data-k="alert.unsure.body">newapp.exe جديد هنا ويتصرف بغرابة.</p>
+        <p class="b" data-k="alert.unsure.body" data-k-args='{"file":"newapp.exe"}'>newapp.exe جديد هنا ويتصرف بغرابة.</p>
         <div class="row">
           <button class="btn ghost" data-k="button.allow">السماح</button>
           <button class="btn primary" data-k="button.block">المنع</button>
@@ -903,16 +914,24 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   </section>
 
   <!-- ══════════ 2b. صندوق العزل ══════════ -->
-  <section class="sec review-only" data-partof="quarantine">
+  <section class="sec screen review-only" id="screen-quarantine" data-screen="quarantine">
+    <div class="crumb">
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <span data-k="nav.home">الرئيسية</span>
+      <span style="color:var(--text3)">/</span>
+      <span class="here" data-k="nav.quarantine">صندوق العزل</span>
+    </div>
     <h2><svg class="i"><use href="#i-folder"/></svg><span data-k="quarantine.title">3 · صندوق العزل — هنا فقط يوجد «حذف»</span></h2>
     <p class="hint" data-k="quarantine.hint">كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا</p>
+    <p style="color:var(--text2);font-size:14px"
+       data-k="quarantine.opened_from">يُفتح من التنبيه، ومن العدّاد في الرئيسية — لا من قائمة مخفية.</p>
 
     <div class="app" style="max-width:620px">
       <div class="qitem">
         <div class="qmain">
           <div class="qname">PhotoTool.exe</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\PhotoTool.exe</div>
-          <div class="qmeta"><span data-k="q.reason1">تهديد مؤكد</span> · <span data-k="quarantine.retention">يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason1">تهديد مؤكد</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -925,7 +944,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         <div class="qmain">
           <div class="qname">setup-key.exe</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</div>
-          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention">يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -942,7 +961,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <p class="hint" data-k="sec.usb.hint">شريط تقدم واحد + مرحلة واحدة · RTL-aware</p>
     <div class="usb">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <strong style="font-size:14px;display:flex;align-items:center;gap:8px"><svg class="i" style="color:var(--text2)"><use href="#i-usb"/></svg><span data-k="usb.scanning">جارٍ فحص USB_32GB…</span></strong>
+        <strong style="font-size:14px;display:flex;align-items:center;gap:8px"><svg class="i" style="color:var(--text2)"><use href="#i-usb"/></svg><span data-k="usb.scanning" data-k-args='{"name":"USB_32GB"}'>جارٍ فحص USB_32GB…</span></strong>
         <span style="font-size:13px;color:var(--text3)" data-k="usb.priority_done">تم فحص الملفات الخطرة</span>
       </div>
       <div class="bar"><i></i></div>
@@ -955,7 +974,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 6. الحماية الاستباقية — مدخل بطاقات الاستثناء ══════════ -->
   <section class="sec screen review-only" id="screen-proactive" data-screen="proactive">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.proactive">الحماية الاستباقية</span>
@@ -965,24 +984,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <p><button class="btn primary" data-goto="exception"><svg class="i sm"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات — قاعدة واحدة، لا الكل</span></button></p>
   </section>
 
-  <!-- ══════════ 8. صندوق العزل — الشاشة، لا البطاقة ══════════ -->
-  <section class="sec screen review-only" id="screen-quarantine" data-screen="quarantine">
-    <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
-      <span data-k="nav.home">الرئيسية</span>
-      <span style="color:var(--text3)">/</span>
-      <span class="here" data-k="nav.quarantine">صندوق العزل</span>
-    </div>
-    <h2><svg class="i"><use href="#i-folder"/></svg><span data-k="quarantine.title">3 · صندوق العزل — هنا فقط يوجد «حذف»</span></h2>
-    <p class="hint" data-k="quarantine.hint">كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا</p>
-    <p style="color:var(--text2);font-size:14px"
-       data-k="quarantine.opened_from">يُفتح من التنبيه، ومن العدّاد في الرئيسية — لا من قائمة مخفية.</p>
-  </section>
-
   <!-- ══════════ 9. الإعدادات ══════════ -->
   <section class="sec screen review-only" id="screen-settings" data-screen="settings">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.settings">الإعدادات</span>
@@ -1047,7 +1052,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 10. الخصوصية ══════════ -->
   <section class="sec screen review-only" id="screen-privacy" data-screen="privacy">
     <div class="crumb">
-      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.settings">الإعدادات</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.privacy">الخصوصية</span>
@@ -1070,7 +1075,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 11. اللهجة واللغة ══════════ -->
   <section class="sec screen review-only" id="screen-language" data-screen="language">
     <div class="crumb">
-      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.settings">الإعدادات</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.language">اللهجة واللغة</span>
@@ -1078,16 +1083,16 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <h2><svg class="i"><use href="#i-info"/></svg><span data-k="lang.title">اللهجة واللغة</span></h2>
     <p class="hint" data-k="lang.sub">عشرة ألسنة. الترجمة تراها فورًا، والخط يتبع لغتك.</p>
     <div class="langs">
-      <button class="langcard" aria-pressed="true"><span class="nm">العربية<span class="code">ar</span></span><span class="smp" dir="rtl">عدينة — أنت محمي ١٢٣٤٥</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">English<span class="code">en</span></span><span class="smp" dir="ltr">Odina — you are protected</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">简体中文<span class="code">zh-Hans</span></span><span class="smp" dir="ltr">Odina — 你已受到保护</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">日本語<span class="code">ja</span></span><span class="smp" dir="ltr">Odina — 保護されています</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Español<span class="code">es</span></span><span class="smp" dir="ltr">Odina — estás protegido</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Русский<span class="code">ru</span></span><span class="smp" dir="ltr">Odina — вы защищены</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">हिन्दी<span class="code">hi</span></span><span class="smp" dir="ltr">Odina — आप सुरक्षित हैं</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Deutsch<span class="code">de</span></span><span class="smp" dir="ltr">Odina — Sie sind geschützt</span><span class="st">مسودة</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Français<span class="code">fr</span></span><span class="smp" dir="ltr">Odina — vous êtes protégé</span><span class="st">مسودة</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Português<span class="code">pt-BR</span></span><span class="smp" dir="ltr">Odina — você está protegido</span><span class="st">مسودة</span></button>
+      <button class="langcard" value="ar" aria-pressed="true"><span class="nm">العربية<span class="code">ar</span></span><span class="smp" dir="rtl">عدينة — أنت محمي ١٢٣٤٥</span></button>
+      <button class="langcard" value="en" aria-pressed="false"><span class="nm">English<span class="code">en</span></span><span class="smp" dir="ltr">Odina — you are protected</span></button>
+      <button class="langcard" value="zh-Hans" aria-pressed="false"><span class="nm">简体中文<span class="code">zh-Hans</span></span><span class="smp" dir="ltr">Odina — 你已受到保护</span></button>
+      <button class="langcard" value="ja" aria-pressed="false"><span class="nm">日本語<span class="code">ja</span></span><span class="smp" dir="ltr">Odina — 保護されています</span></button>
+      <button class="langcard" value="es" aria-pressed="false"><span class="nm">Español<span class="code">es</span></span><span class="smp" dir="ltr">Odina — estás protegido</span></button>
+      <button class="langcard" value="ru" aria-pressed="false"><span class="nm">Русский<span class="code">ru</span></span><span class="smp" dir="ltr">Odina — вы защищены</span></button>
+      <button class="langcard" value="hi" aria-pressed="false"><span class="nm">हिन्दी<span class="code">hi</span></span><span class="smp" dir="ltr">Odina — आप सुरक्षित हैं</span></button>
+      <button class="langcard" value="de" aria-pressed="false"><span class="nm">Deutsch<span class="code">de</span></span><span class="smp" dir="ltr">Odina — Sie sind geschützt</span><span class="st">مسودة</span></button>
+      <button class="langcard" value="fr" aria-pressed="false"><span class="nm">Français<span class="code">fr</span></span><span class="smp" dir="ltr">Odina — vous êtes protégé</span><span class="st">مسودة</span></button>
+      <button class="langcard" value="pt-BR" aria-pressed="false"><span class="nm">Português<span class="code">pt-BR</span></span><span class="smp" dir="ltr">Odina — você está protegido</span><span class="st">مسودة</span></button>
     </div>
     <p style="margin-top:14px"><button class="btn ghost" data-goto="numbers">
       <svg class="i sm"><use href="#i-db"/></svg><span data-k="num.title">الأرقام</span></button></p>
@@ -1157,7 +1162,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 13. الأرقام — نظامان، والاختيار للمستخدم (§6أ.6) ══════════ -->
   <section class="sec screen review-only" id="screen-numbers" data-screen="numbers">
     <div class="crumb">
-      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.settings">الإعدادات</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="num.title">الأرقام</span>
@@ -1253,8 +1258,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 <script src="locales.js"></script>
 <script>
 /* ══════════ النصوص: locales.js وحده — لا نسخة ثانية ══════════ */
-const DIR = {};
-LANGS.forEach(l => { DIR[l] = RTL_LANGS.includes(l) ? 'rtl' : 'ltr'; });
+const langPicker = document.getElementById('lang');
 
 /* ══════════ الألوان + حساب التباين ══════════ */
 const PALETTE = [
@@ -1295,12 +1299,16 @@ function renderPalette(){
 
 /* ══════════ التطبيق ══════════ */
 function applyLang(code){
-  document.body.dataset.lang = code;
-  document.documentElement.lang = code;
-  document.documentElement.dir = DIR[code] || 'ltr';
-  /* locales.js هو المصدر: نسخة واحدة من كل نص، يولّدها tools/gen-locale-js.py
-     من locales/<lang>/odina.ftl. القاموس المحلي لا يغطّي إلا مفاتيح المعاينة. */
-  const dict = (window.ODINA_STRINGS || {})[code] || {};
+  if (!window.ODINA_ORDER.includes(code)) code = 'ar';
+  const dict = window.ODINA_STRINGS[code];
+  langPicker.value = code;
+  document.documentElement.lang = document.body.dataset.lang = code;
+  document.documentElement.dir = code === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('draftflag').hidden = !window.ODINA_DRAFT.includes(code);
+  document.querySelectorAll('.langcard').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(btn.value === code));
+  });
+  try { localStorage.setItem('odina.lang', code); } catch (e) {}
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k = el.dataset.k;
     if (!dict[k]) return;
@@ -1314,7 +1322,10 @@ function applyLang(code){
   });
   if (typeof setModeLabel==='function') setModeLabel();
 }
-document.getElementById('lang').addEventListener('change', e=>applyLang(e.target.value));
+langPicker.addEventListener('change', () => applyLang(langPicker.value));
+document.querySelectorAll('.langcard').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.value));
+});
 
 const modeBtn = document.getElementById('mode');
 function setModeLabel(){
@@ -1328,29 +1339,35 @@ modeBtn.addEventListener('click', ()=>{ document.body.classList.toggle('real'); 
 /* ══════════ التنقل بين الشاشات (§6أ.3) ══════════
    كل مدخل ظاهر في الخريطة يعمل هنا: href حقيقي أو زر data-goto.
    والرجوع يعيد المستخدم إلى نفس الموضع لا إلى أعلى الصفحة. */
+const topbar = document.querySelector('.topbar');
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--toolbar-height', topbar.offsetHeight + 'px');
+}).observe(topbar);
 const backStack = [];
 
-function goto(id, opts) {
-  const target = document.getElementById('screen-' + id);
-  if (!target) return;
-  if (!opts || !opts.replace) backStack.push(window.scrollY);
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  target.setAttribute('tabindex', '-1');
-  target.focus({ preventScroll: true });
-  history.replaceState(null, '', '#' + id);
+function goBack() {
+  const previous = backStack.pop();
+  if (!previous) return false;
+  history.replaceState(null, '', previous.url);
+  previous.trigger.focus({ preventScroll: true });
+  window.scrollTo({ top: previous.y, behavior: 'auto' });
+  return true;
 }
 
 document.querySelectorAll('[data-goto]').forEach(btn => {
   btn.addEventListener('click', e => {
     e.preventDefault();
-    const id = btn.getAttribute('data-goto');
-    if (id === 'home' && backStack.length) {
-      const y = backStack.pop();
-      document.getElementById('screen-home').scrollIntoView();
-      window.scrollTo({ top: y, behavior: 'auto' });
-      return;
-    }
-    goto(id);
+    if (btn.hasAttribute('data-back') && goBack()) return;
+    const target = document.getElementById('screen-' + btn.dataset.goto);
+    if (!target) return;
+    // The menu item disappears on navigation; return focus to its visible toggle.
+    const trigger = btn.closest('.menu')?.querySelector('[data-menu]') || btn;
+    backStack.push({ trigger, y: window.scrollY, url: location.href });
+    history.replaceState(null, '', '#' + target.id);
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    target.scrollIntoView({ behavior, block: 'start' });
   });
 });
 
@@ -1379,10 +1396,7 @@ document.addEventListener('keydown', e => {
     if (b) { b.setAttribute('aria-expanded', 'false'); b.focus(); }
     return;
   }
-  if (backStack.length) {
-    document.getElementById('screen-home').scrollIntoView();
-    window.scrollTo({ top: backStack.pop(), behavior: 'auto' });
-  }
+  goBack();
 });
 
 /* ══════════ «لماذا؟» — الشرح عند الطلب فقط (§6أ.1) ══════════
@@ -1409,10 +1423,9 @@ document.querySelectorAll('[data-why]').forEach(b => {
    كل نص فيه { $var } يمر من هنا. القيمة تُقرأ من data-k-args،
    وتُنسَّق بأرقام المستخدم قبل أن تدخل الجملة — لا بعدها. */
 function formatNumber(value) {
+  // Times, names and device labels are opaque strings, even when they contain digits.
+  if (typeof value !== 'number') return value;
   const s = String(value);
-  /* الوقت والتاريخ لا يتبعان نظام الأرقام: «١٤:٣٠» تُقرأ خطأً كـ«١٤ و٣٠»,
-     بينما «14:30» تُقرأ كساعة في كل مكان. العدّادات تتبعه، واللحظة لا. */
-  if (s.indexOf(':') !== -1 || s.indexOf('/') !== -1 || s.indexOf('-') !== -1) return s;
   return numeralStyle === 'hindi' ? s.replace(/[0-9]/g, d => HINDI[+d]) : s;
 }
 
@@ -1458,11 +1471,6 @@ document.querySelectorAll('.numopt').forEach(b => {
   b.addEventListener('click', () => applyNumerals(b.dataset.num));
 });
 
-/* كل عنصر يعرض رقمًا يعلن قيمته الخام هنا مرة واحدة */
-document.querySelectorAll('.appbar .nb, .numopt .digits').forEach(el => {
-  if (!el.hasAttribute('data-numeral')) el.setAttribute('data-numeral', el.textContent.trim());
-});
-
 let savedNum = 'arabic';
 try { savedNum = localStorage.getItem('odina.numerals') || 'arabic'; } catch (e) {}
 applyNumerals(savedNum);
@@ -1493,9 +1501,8 @@ themeBtn.addEventListener('click', ()=>{
   const root = document.documentElement;
   const dark = root.dataset.theme === 'dark';
   root.dataset.theme = dark ? 'light' : 'dark';
-  themeBtn.textContent = dark
-    ? (document.body.dataset.lang==='ar'?'الوضع الداكن':'Dark mode')
-    : (document.body.dataset.lang==='ar'?'الوضع الفاتح':'Light mode');
+  themeBtn.dataset.k = dark ? 'settings.theme_dark' : 'settings.theme_light';
+  themeBtn.textContent = window.ODINA_STRINGS[currentLang()][themeBtn.dataset.k];
   renderPalette();
 });
 
@@ -1571,7 +1578,9 @@ document.addEventListener('click', async (e)=>{
   }
 });
 
-applyLang('ar');
+let initialLang = 'ar';
+try { initialLang = localStorage.getItem('odina.lang') || 'ar'; } catch (e) {}
+applyLang(initialLang);
 </script>
 </body>
 </html>
