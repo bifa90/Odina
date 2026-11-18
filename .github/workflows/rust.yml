@@ -57,8 +57,8 @@ jobs:
           out=[]
           for f in ('clippy-1.txt','clippy-2.txt'):
               b=pathlib.Path(f).read_text(errors='replace').replace(chr(27),'')
-              out += [l for l in b.splitlines() if l.startswith(('error','warning')) or l.lstrip().startswith('-->')]
-          pathlib.Path('n.txt').write_text(' <<<NL>>> '.join(out[:10])[:1300] or 'EMPTY')
+              out += []
+          pathlib.Path('n.txt').write_text(' <<<NL>>> '.join(b.splitlines()[-18:])[:1400])
           "
             echo "::error::CLIPPY $(cat n.txt)"
             exit 1
