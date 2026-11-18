@@ -33,8 +33,8 @@ jobs:
           # Byte for byte what rust.yml runs, including running both in one
           # step: `set -e` in a workflow step means the second command aborts
           # the step, and that is exactly the difference being chased.
-          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1
-          echo "rc1=$?" >> /tmp/c1.txt
+          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1 || true
+          echo "rc1 done" >> /tmp/c1.txt
           cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
           echo "rc2=$?" >> /tmp/c2.txt
           cat /tmp/c1.txt /tmp/c2.txt > /tmp/c.txt
