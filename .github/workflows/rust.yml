@@ -36,7 +36,14 @@ jobs:
         with:
           components: clippy, rustfmt
 
+      # A key of its own: the default key is shared across every workflow on the
+      # same branch, so a cache written by an earlier run — including a run that
+      # has since been reverted — can be restored here and lint code that no
+      # longer exists. That is what made this job fail while an identical job
+      # passed in another workflow.
       - uses: Swatinem/rust-cache@v2
+        with:
+          key: rust-${{ matrix.os }}-v2
 
       - name: format
         if: matrix.os == 'ubuntu-latest'
