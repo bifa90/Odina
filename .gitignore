@@ -30,3 +30,7 @@ locales/qps/
 site/_build/
 .firebase/
 firebase.json.bak
+
+# Python bytecode (tools/ci/*.py is run by hand and by the gates)
+__pycache__/
+*.pyc

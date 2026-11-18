@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, public]
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, rust-syn, public]
 
     steps:
       - uses: actions/checkout@v4
@@ -74,6 +74,14 @@ jobs:
       - name: docs
         if: matrix.gate == 'docs'
         run: python3 tools/ci/check-docs.py
+
+      - name: exc-ui
+        if: matrix.gate == 'exc-ui'
+        run: python3 tools/ci/check-exception-ui.py
+
+      - name: rust-syn
+        if: matrix.gate == 'rust-syn'
+        run: python3 tools/check-rust-syntax.py
 
       # The only gate that needs cargo, because half its value is the real
       # dependency graph: `cargo tree` reports what would be linked, while the

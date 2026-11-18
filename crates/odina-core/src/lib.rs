@@ -14,10 +14,12 @@
 
 pub mod hashing;
 pub mod heuristics;
+pub mod policy;
 pub mod scoring;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};
 pub use heuristics::{guess_path_flags, name_shape, path_score, NameShape, PathFlags};
+pub use policy::{ConsentTier, Duration, Exception, Granted, Mode, Policy, Refusal, Rule, Target};
 pub use scoring::{
     banded_verdict, score, score_with_known_bad, Cap, Evidence, Indicator, Score, Thresholds,
     Verdict, Veto,
