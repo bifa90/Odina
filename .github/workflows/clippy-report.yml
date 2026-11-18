@@ -30,8 +30,14 @@ jobs:
 
       - name: collect
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c.txt 2>&1 || true
-          cargo clippy -p odina-cli --features instrument --all-targets --locked -- -D warnings >> /tmp/c.txt 2>&1 || true
+          # Byte for byte what rust.yml runs, including running both in one
+          # step: `set -e` in a workflow step means the second command aborts
+          # the step, and that is exactly the difference being chased.
+          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1
+          echo "rc1=$?" >> /tmp/c1.txt
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
+          echo "rc2=$?" >> /tmp/c2.txt
+          cat /tmp/c1.txt /tmp/c2.txt > /tmp/c.txt
           python3 - <<'PY'
           import pathlib
           body = pathlib.Path('/tmp/c.txt').read_text(errors='replace').replace('\x1b', '')
