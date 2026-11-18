@@ -51,7 +51,18 @@ jobs:
           b=$?
           echo "workspace exit $a · instrument exit $b"
           cat clippy-1.txt clippy-2.txt
-          if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then exit 1; fi
+          if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then
+            python3 -c "
+          import pathlib
+          out=[]
+          for f in ('clippy-1.txt','clippy-2.txt'):
+              b=pathlib.Path(f).read_text(errors='replace').replace(chr(27),'')
+              out += [l for l in b.splitlines() if l.startswith(('error','warning')) or l.lstrip().startswith('-->')]
+          pathlib.Path('n.txt').write_text(' <<<NL>>> '.join(out[:10])[:1300] or 'EMPTY')
+          "
+            echo "::error::CLIPPY $(cat n.txt)"
+            exit 1
+          fi
 
       - name: build
         run: cargo build --workspace --locked
