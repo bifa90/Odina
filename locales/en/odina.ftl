@@ -361,22 +361,22 @@ lvl.d30 = 30 min
 lvl.d60 = 1 hour
 lvl.dpeak = Until peak hour ends
 lvl.dreboot = Until I restart
-lvl.hint = You own your device · we inform and let you decide · the responsibility is yours
-lvl.no_permanent = There is no “permanent”. The longest option ends with a restart — the only limit we impose.
+lvl.hint = We tell you, and you decide.
+lvl.no_permanent = No permanent pause. The longest ends at restart.
 lvl.state_off = Protection is off
 lvl.state_off_sub = until 14:30 · by your decision
 lvl.title = Turning off — two levels, not one
 lvl.what_continues = What continues
 lvl.what_stops = What stops
 lvl1.app = runs · scans · blocks · asks nothing
-lvl1.body = No window, no notification, no sound. Scanning and blocking continue in the background: any infected file is isolated silently and shown to you when you return.
+lvl1.body = No window, no sound. Scanning and blocking continue.
 lvl1.cont = All three walls
-lvl1.name = Silence the alerts
+lvl1.name = Silence alerts
 lvl1.stops = The alerts only
-lvl2.body = No scanning, no blocking, no alerts. The service stays running but idle. Your device is completely unprotected.
-lvl2.name = Turn protection off
-lvl2.resp = The decision is yours, and so is the responsibility for that period.
-lvl2.warn = We do not stop alerting — we stop protecting. No file is scanned and no threat blocked.
+lvl2.body = No scanning, no blocking. Your device is unprotected.
+lvl2.name = Stop protection
+lvl2.resp = The responsibility is yours for that time.
+lvl2.warn = We stop protecting, not telling.
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
 notes.1b = changes direction and layout instantly; numbers stay Latin in ratios and hashes.
@@ -429,3 +429,32 @@ trust.sub = Every screen is measured against these four. On conflict: safety →
 
 ## ── USB ────────────────────────────
 usb.stage = P0 · dangerous files in root
+
+## ── Numerals ─────────────────────────────
+num.title = Numerals
+num.sub = The numbers in counters, alerts and the log.
+num.body = Choose the shape you read fastest. Every calculation is the same.
+num.arabic = 0 1 2 3 4 5 6 7 8 9
+num.hindi = ٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩
+num.arabic.name = Arabic numerals
+num.hindi.name = Eastern Arabic numerals
+num.sample = 3 alerts · 12 files
+num.note = The change is instant. No restart needed.
+
+## ── Pause tips — on demand ─────────────────────────────
+tip.lvl1 = No window, no notice, no sound, but scanning and blocking continue in the background: an infected file is isolated silently and shown when you return.
+tip.lvl2 = No scanning, no blocking, no alert. The service runs but does nothing, and your device is fully unprotected.
+tip.no_permanent = The longest pause ends at a restart, and that is the only limit we impose.
+
+## ── Rule four: visual first ─────────────────────────────
+visual.title = Visual first
+visual.rule = The picture before the sentence: what a screen does is seen, not explained.
+visual.why = Someone who reads slowly, or does not read your language, understands the icon and the colour before the line.
+visual.n1 = Every element carries shape, colour and place, so it never rests on a word.
+visual.n2 = The same shape means the same thing on every screen.
+visual.n3 = Colour separates safe from danger; text names the reason.
+visual.n4 = An icon without a word is a test: if it needs explaining, it is the wrong icon.
+visual.n5 = Text explains the picture, it does not repeat it.
+visual.sample = Hover the icon: one word. Click it: a full explanation in your language.
+trust.count = Five, not four.
+help.sample.title = A live example

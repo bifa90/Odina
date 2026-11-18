@@ -330,22 +330,22 @@ lvl.d30 = 30 min
 lvl.d60 = 1 hora
 lvl.dpeak = Hasta que acabe la hora punta
 lvl.dreboot = Hasta que reinicie
-lvl.hint = El dispositivo es tuyo · informamos y tú decides · la responsabilidad es tuya
-lvl.no_permanent = No existe «permanente». La opción más larga termina con un reinicio: el único límite que imponemos.
+lvl.hint = Te avisamos y tú decides.
+lvl.no_permanent = No hay pausa permanente. La más larga acaba al reiniciar.
 lvl.state_off = Protección desactivada
 lvl.state_off_sub = hasta las 14:30 · por tu decisión
 lvl.title = Desactivar — dos niveles, no uno
 lvl.what_continues = Qué continúa
 lvl.what_stops = Qué se detiene
 lvl1.app = funciona · analiza · bloquea · no pregunta
-lvl1.body = Sin ventanas, ni notificaciones, ni sonido. El análisis y el bloqueo continúan en segundo plano: cualquier archivo infectado se aísla en silencio y se te muestra al volver.
+lvl1.body = Sin ventana ni sonido. El análisis y el bloqueo siguen.
 lvl1.cont = Los tres muros
-lvl1.name = Silenciar los avisos
+lvl1.name = Silenciar avisos
 lvl1.stops = Solo los avisos
-lvl2.body = Sin análisis, sin bloqueo, sin avisos. El servicio sigue activo pero inactivo. Tu equipo queda sin protección total.
-lvl2.name = Desactivar la protección
-lvl2.resp = La decisión es tuya, y la responsabilidad también durante ese periodo.
-lvl2.warn = No dejamos de avisar: dejamos de proteger. No se analiza ningún archivo ni se bloquea ninguna amenaza.
+lvl2.body = Sin análisis ni bloqueo. Tu equipo queda desprotegido.
+lvl2.name = Detener la protección
+lvl2.resp = La responsabilidad es tuya durante ese tiempo.
+lvl2.warn = Dejamos de proteger, no de avisar.
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
 notes.1b = cambia dirección y diseño al instante; los números siguen en latino en ratios y hashes.
@@ -398,3 +398,32 @@ trust.sub = Cada pantalla se mide con estas cuatro. En conflicto: seguridad → 
 
 ## ── USB ────────────────────────────
 usb.stage = P0 · archivos peligrosos en la raíz
+
+## ── Cifras ─────────────────────────────
+num.title = Cifras
+num.sub = Los números de contadores, avisos y registro.
+num.body = Elige la forma que leas más rápido. Todo cálculo es el mismo.
+num.arabic = 0 1 2 3 4 5 6 7 8 9
+num.hindi = ٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩
+num.arabic.name = Cifras árabes
+num.hindi.name = Cifras árabes orientales
+num.sample = 3 avisos · 12 archivos
+num.note = El cambio es inmediato. No hace falta reiniciar.
+
+## ── Avisos de la pausa — a demanda ─────────────────────────────
+tip.lvl1 = Sin ventana, sin aviso, sin sonido, pero el análisis y el bloqueo siguen en segundo plano: un archivo infectado se aísla en silencio y se muestra al volver.
+tip.lvl2 = Sin análisis, sin bloqueo, sin aviso. El servicio funciona pero no hace nada, y tu equipo queda sin protección.
+tip.no_permanent = La pausa más larga termina al reiniciar, y ese es el único límite que imponemos.
+
+## ── Regla cuatro: visual primero ─────────────────────────────
+visual.title = Visual primero
+visual.rule = La imagen antes de la frase: lo que hace una pantalla se ve, no se explica.
+visual.why = Quien lee despacio, o no lee tu idioma, entiende la forma y el color antes que la línea.
+visual.n1 = Cada elemento lleva forma, color y lugar, así que nunca depende de una palabra.
+visual.n2 = La misma forma significa lo mismo en toda pantalla.
+visual.n3 = El color separa lo seguro de lo peligroso; el texto nombra el motivo.
+visual.n4 = Un icono sin palabra es una prueba: si hay que explicarlo, el icono está mal.
+visual.n5 = El texto explica la imagen, no la repite.
+visual.sample = Pasa sobre el icono: una palabra. Púlsalo: explicación completa en tu idioma.
+trust.count = Cinco, no cuatro.
+help.sample.title = Ejemplo real

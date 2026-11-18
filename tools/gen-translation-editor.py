@@ -58,11 +58,12 @@ SCREENS: list[tuple[str, str, tuple[str, ...]]] = [
     ("pause", "الإيقاف", ("pause.", "disable.", "lvl.", "lvl1.", "lvl2.")),
     ("exception", "الاستثناءات", ("exception.",)),
     ("proactive", "الحماية الاستباقية", ("proactive.", "home.")),
-    ("trust", "أسس الثقة", ("trust.", "notes.", "sec.")),
+    ("trust", "أسس الثقة", ("trust.", "notes.", "sec.", "visual.")),
     ("update", "التحديث", ("update.",)),
     ("signing", "سياسة التوقيع", ("signing.",)),
     ("map", "خريطة البرنامج", ("map.", "nav.", "back", "menu.")),
     ("help", "الشرح عند الطلب", ("help.", "tips.", "tip.")),
+    ("numbers", "الأرقام", ("num.",)),
     ("settings", "الإعدادات", ("settings.", "privacy.", "lang.")),
 ]
 

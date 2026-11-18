@@ -74,7 +74,10 @@ def check_tips(html: str, root: Path) -> list[str]:
     problems = []
     glossary = (root / "docs" / "spec" / "glossary-v1.md").read_text(encoding="utf-8")
     declared = set(re.findall(r"`(tip\.[A-Za-z0-9_]+)`", glossary))
+    # data-why carries the on-demand explanation, and it is a term like any
+    # other: a long text nobody declared is a text nobody reviewed.
     used = set(re.findall(r'data-tipkey="([^"]+)"', html))
+    used |= set(re.findall(r'data-why="([^"]+)"', html))
     for key in sorted(used - declared):
         problems.append(f"tooltip {key} is used but not in glossary-v1.md")
     return problems
@@ -127,6 +130,51 @@ def check_icons(html: str) -> list[str]:
     for button in re.findall(r"<button[^>]*>\s*<svg[^>]*>.*?</svg>\s*</button>", html, re.S):
         if "aria-label" not in button and "data-k" not in button and "title=" not in button:
             problems.append("an icon-only button has no accessible name")
+    return problems
+
+
+def check_visual_first(html: str) -> list[str]:
+    """Rule four: the picture before the sentence.
+
+    A screen that only works when its text is read fails the user who reads
+    slowly, or does not read the language yet. So: every navigable target on
+    the home screen carries an icon, and the app map is a diagram, not a list.
+    """
+    problems = []
+
+    home = re.search(r'<section[^>]*id="screen-home"[^>]*>(.*?)</section>', html, re.S)
+    if home:
+        body = home.group(1)
+        for m in re.finditer(r'<button([^>]*)>(.*?)</button>', body, re.S):
+            attrs, inner = m.group(1), m.group(2)
+            if "data-goto" not in attrs:
+                continue
+            if "<svg" not in inner:
+                label = re.search(r'data-k="([^"]+)"', attrs)
+                name = label.group(1) if label else inner.strip()[:30]
+                problems.append(
+                    f"home action {name!r} has no icon — it relies on the word alone"
+                )
+        # The drawer of destinations must be present on the screen itself,
+        # not only inside the diagram: a map you must open is not a map.
+        if 'class="appbar"' not in body:
+            problems.append("home has no visible navigation bar (.appbar)")
+
+    # Every counter on the screen must obey the user's numeral choice (§6أ.6).
+    for badge in re.findall(r'<span class="nb[^"]*"[^>]*>([^<]*)</span>', html):
+        if any(ch.isdigit() for ch in badge) and 'data-numeral' not in badge:
+            pass  # attribute checked below
+    for m in re.finditer(r'<span class="nb[^"]*"([^>]*)>', html):
+        if 'data-numeral' not in m.group(1):
+            problems.append("a counter shows a number that ignores the numeral setting")
+
+    # The numeral picker must exist and offer both systems.
+    if 'data-num="arabic"' not in html or 'data-num="hindi"' not in html:
+        problems.append("the numeral choice is missing (arabic + hindi)")
+
+    # Rule four must be stated in the constitution section of the page.
+    if 'data-k="visual.rule"' not in html:
+        problems.append("the fourth rule (visual first) is not on the page")
     return problems
 
 
@@ -215,6 +263,7 @@ def main() -> int:
         + check_icons(html)
         + check_search_engine(html)
         + check_editable(html, root)
+        + check_visual_first(html)
     )
 
     # The editor must be regenerated whenever a locale changes, or a reviewer

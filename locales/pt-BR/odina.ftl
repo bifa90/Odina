@@ -330,22 +330,22 @@ lvl.d30 = 30 minutos
 lvl.d60 = Uma hora
 lvl.dpeak = Até o fim do horário de pico
 lvl.dreboot = Até reiniciar
-lvl.hint = Você é dono do seu dispositivo · informamos e deixamos decidir
-lvl.no_permanent = Não existe duração “permanente”. A pausa mais longa termina ao reiniciar — esse é o único limite.
+lvl.hint = Avisamos, e você decide.
+lvl.no_permanent = Não há pausa permanente. A mais longa termina ao reiniciar.
 lvl.state_off = Proteção pausada
 lvl.state_off_sub = Até 14:30 · sua decisão
 lvl.title = Pausa — dois níveis, não um
 lvl.what_continues = O que continua
 lvl.what_stops = O que para
 lvl1.app = Roda · verifica · bloqueia · não pergunta
-lvl1.body = Sem janela, sem aviso, sem som. A verificação e o bloqueio continuam em segundo plano: um arquivo infectado é isolado em silêncio e mostrado quando você voltar.
+lvl1.body = Sem janela nem som. A verificação e o bloqueio continuam.
 lvl1.cont = Os três muros
-lvl1.name = Silenciar os avisos
+lvl1.name = Silenciar avisos
 lvl1.stops = Só os avisos
-lvl2.body = Sem verificação, sem bloqueio, sem aviso. O serviço roda, mas não faz nada. Seu dispositivo não está protegido.
+lvl2.body = Sem verificação nem bloqueio. Seu dispositivo fica desprotegido.
 lvl2.name = Parar a proteção
-lvl2.resp = A decisão é sua, e a responsabilidade também, enquanto durar.
-lvl2.warn = Não paramos de avisar — paramos de proteger. Nenhum arquivo é verificado, nenhuma ameaça bloqueada.
+lvl2.resp = A responsabilidade é sua durante esse tempo.
+lvl2.warn = Paramos de proteger, não de avisar.
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
 notes.1b = Um nome de muro é uma promessa, não um rótulo.
@@ -398,3 +398,32 @@ trust.sub = Cada tela é medida por estes quatro. Em conflito: segurança primei
 
 ## ── USB ────────────────────────────
 usb.stage = Fase
+
+## ── Algarismos ─────────────────────────────
+num.title = Algarismos
+num.sub = Os números dos contadores, avisos e registro.
+num.body = Escolha a forma que você lê mais rápido. Toda conta é a mesma.
+num.arabic = 0 1 2 3 4 5 6 7 8 9
+num.hindi = ٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩
+num.arabic.name = Algarismos árabes
+num.hindi.name = Algarismos árabes orientais
+num.sample = 3 avisos · 12 arquivos
+num.note = A mudança é imediata. Sem reiniciar.
+
+## ── Dicas da pausa — sob demanda ─────────────────────────────
+tip.lvl1 = Sem janela, sem aviso, sem som, mas a verificação e o bloqueio continuam em segundo plano: um arquivo infectado é isolado em silêncio e mostrado na volta.
+tip.lvl2 = Sem verificação, sem bloqueio, sem aviso. O serviço roda mas não faz nada, e seu dispositivo fica sem proteção.
+tip.no_permanent = A pausa mais longa termina ao reiniciar, e esse é o único limite que impomos.
+
+## ── Regra quatro: visual primeiro ─────────────────────────────
+visual.title = Visual primeiro
+visual.rule = A imagem antes da frase: o que a tela faz é visto, não explicado.
+visual.why = Quem lê devagar, ou não lê o seu idioma, entende a forma e a cor antes da linha.
+visual.n1 = Cada elemento carrega forma, cor e lugar, e nunca depende de uma palavra.
+visual.n2 = A mesma forma significa a mesma coisa em toda tela.
+visual.n3 = A cor separa o seguro do perigoso; o texto nomeia o motivo.
+visual.n4 = Um ícone sem palavra é um teste: se precisa de explicação, o ícone está errado.
+visual.n5 = O texto explica a imagem, não a repete.
+visual.sample = Passe o mouse no ícone: uma palavra. Clique: a explicação inteira no seu idioma.
+trust.count = Cinco, não quatro.
+help.sample.title = Um exemplo real

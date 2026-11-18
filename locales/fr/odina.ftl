@@ -330,22 +330,22 @@ lvl.d30 = 30 minutes
 lvl.d60 = Une heure
 lvl.dpeak = Jusqu'à la fin de l'heure de pointe
 lvl.dreboot = Jusqu’au redémarrage
-lvl.hint = Vous possédez votre appareil · nous informons et laissons décider
-lvl.no_permanent = Il n'y a pas de durée « permanente ». La plus longue pause se termine au redémarrage — c'est la seule limite.
+lvl.hint = Nous vous informons, vous décidez.
+lvl.no_permanent = Pas de pause permanente. La plus longue finit au redémarrage.
 lvl.state_off = Protection en pause
 lvl.state_off_sub = Jusqu'à 14:30 · votre décision
 lvl.title = Pause — deux niveaux, pas un
 lvl.what_continues = Ce qui continue
 lvl.what_stops = Ce qui s'arrête
 lvl1.app = Tourne · analyse · bloque · ne demande pas
-lvl1.body = Aucune fenêtre, aucune notification, aucun son. L'analyse et le blocage continuent en arrière-plan : un fichier infecté est isolé en silence et vous est montré à votre retour.
+lvl1.body = Ni fenêtre ni son. L’analyse et le blocage continuent.
 lvl1.cont = Les trois murs
 lvl1.name = Mettre les alertes en sourdine
 lvl1.stops = Seulement les alertes
-lvl2.body = Ni analyse, ni blocage, ni alerte. Le service tourne mais ne fait rien. Votre appareil n'est pas protégé.
+lvl2.body = Ni analyse ni blocage. Votre appareil est sans protection.
 lvl2.name = Arrêter la protection
-lvl2.resp = La décision est la vôtre, et la responsabilité vous revient pendant cette durée.
-lvl2.warn = Nous n'arrêtons pas d'avertir — nous arrêtons de protéger. Aucun fichier n'est analysé, aucune menace bloquée.
+lvl2.resp = La responsabilité vous revient pendant ce temps.
+lvl2.warn = Nous arrêtons de protéger, pas d’avertir.
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
 notes.1b = Un nom de mur est une promesse, pas une étiquette.
@@ -398,3 +398,32 @@ trust.sub = Chaque écran se mesure à ces quatre. En cas de conflit : la sécur
 
 ## ── USB ────────────────────────────
 usb.stage = Phase
+
+## ── Chiffres ─────────────────────────────
+num.title = Chiffres
+num.sub = Les nombres des compteurs, des alertes et du journal.
+num.body = Choisissez la forme que vous lisez le plus vite. Tout calcul reste le même.
+num.arabic = 0 1 2 3 4 5 6 7 8 9
+num.hindi = ٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩
+num.arabic.name = Chiffres arabes
+num.hindi.name = Chiffres arabes orientaux
+num.sample = 3 alertes · 12 fichiers
+num.note = Le changement est immédiat. Aucun redémarrage nécessaire.
+
+## ── Conseils de pause — à la demande ─────────────────────────────
+tip.lvl1 = Ni fenêtre, ni avis, ni son, mais l’analyse et le blocage continuent en arrière-plan : un fichier infecté est isolé en silence et montré à votre retour.
+tip.lvl2 = Ni analyse, ni blocage, ni alerte. Le service tourne mais ne fait rien, et votre appareil est sans protection.
+tip.no_permanent = La plus longue pause finit au redémarrage, et c’est la seule limite que nous posons.
+
+## ── Règle quatre : le visuel d’abord ─────────────────────────────
+visual.title = Le visuel d’abord
+visual.rule = L’image avant la phrase : ce que fait un écran se voit, ne s’explique pas.
+visual.why = Qui lit lentement, ou ne lit pas votre langue, comprend la forme et la couleur avant la ligne.
+visual.n1 = Chaque élément porte forme, couleur et place, et ne tient jamais à un mot.
+visual.n2 = La même forme veut dire la même chose sur chaque écran.
+visual.n3 = La couleur sépare le sûr du dangereux ; le texte nomme la raison.
+visual.n4 = Une icône sans mot est une épreuve : s’il faut l’expliquer, c’est la mauvaise icône.
+visual.n5 = Le texte explique l’image, il ne la répète pas.
+visual.sample = Survolez l’icône : un mot. Cliquez : l’explication entière dans votre langue.
+trust.count = Cinq, pas quatre.
+help.sample.title = Un exemple réel

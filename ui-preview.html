@@ -371,6 +371,57 @@ html[data-theme="dark"] .seg button[aria-pressed="true"]{color:#0B1416}
 body.real .screen{display:block}
 .screentag{display:inline-block;font-size:11px;color:var(--text3);font-family:ui-monospace,monospace;
   direction:ltr;margin-inline-start:6px}
+
+/* شريط تنقل الرئيسية: رمز + كلمة + عدد · الهدف 64px، لا أصغر */
+.appbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;
+  border-top:1px solid var(--border);padding-top:14px}
+.appbar .navcell{display:flex;flex-direction:column;align-items:center;gap:7px;
+  background:none;border:1px solid transparent;border-radius:var(--radius);
+  padding:12px 6px;font:inherit;color:var(--text2);cursor:pointer;
+  min-height:76px;justify-content:center;transition:background .15s,border-color .15s}
+.appbar .navcell:hover,.appbar .navcell:focus-visible{background:var(--surface2);
+  border-color:var(--border);color:var(--text)}
+.appbar .navcell[data-goto="quarantine"] .nb{}
+.appbar .ni{position:relative;display:inline-flex}
+.appbar .ni .i{width:26px;height:26px;stroke-width:1.7}
+.appbar .nl{font-size:12.5px;line-height:1.25;text-align:center;max-width:96px}
+/* العدد على الرمز، لا بجانبه: العين تجده قبل أن تقرأ (§6أ.4أ) */
+.appbar .nb{position:absolute;inset-inline-end:-11px;top:-8px;min-width:19px;height:19px;
+  border-radius:99px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;
+  display:grid;place-items:center;padding:0 5px;line-height:1}
+.appbar .nb.warn{background:var(--warn);color:#231A00}
+html[data-theme="dark"] .appbar .nb{color:#0B1416}
+
+/* نظام الأرقام: البديلان معًا، والمختار عليه الإطار (§6أ.6) */
+.numpick{display:flex;gap:10px;flex-wrap:wrap}
+.numopt{display:flex;flex-direction:column;gap:6px;align-items:flex-start;
+  border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
+  padding:14px 18px;font:inherit;cursor:pointer;min-width:168px;text-align:start}
+.numopt[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.numopt .digits{font-size:22px;letter-spacing:.06em;font-variant-numeric:normal}
+.numopt .nm{font-size:13px;color:var(--text2)}
+
+/* بطاقة القاعدة الرابعة: صورة + سطر واحد */
+.visualcard{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
+  padding:16px 18px;margin-top:12px}
+.visualcard .vt{font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px}
+.visualcard .vr{font-size:14px;color:var(--text2);margin-top:6px}
+
+/* سطر الحالة: جملة واحدة، وسهم واحد — لا بطاقة ولا شبكة */
+.statline{display:flex;align-items:center;gap:10px;width:100%;margin-top:14px;
+  background:var(--warn-bg,var(--surface2));border:1px solid var(--border);
+  border-inline-start:3px solid var(--warn);border-radius:var(--radius);
+  padding:12px 14px;font:inherit;font-size:14px;color:var(--text);cursor:pointer;text-align:start}
+.statline:hover{border-color:var(--warn)}
+.statline .i{width:18px;height:18px;color:var(--warn);flex:none}
+
+/* لماذا؟ — سطر واحد على الشاشة، والتفصيل يُفتح ويُغلق (§6أ.1) */
+.whybtn{display:inline-flex;align-items:center;gap:5px;background:none;border:0;
+  padding:4px 0;margin-top:4px;font:inherit;font-size:12.5px;color:var(--accent);cursor:pointer}
+.whybtn .i{width:14px;height:14px}
+.whytext{display:none;margin-top:8px;padding:10px 12px;border-inline-start:2px solid var(--accent);
+  background:var(--surface2);border-radius:var(--r-sm);font-size:13px;color:var(--text2);line-height:1.6}
+.whytext.open{display:block}
 </style>
 </head>
 <body data-lang="ar">
@@ -484,6 +535,9 @@ body.real .screen{display:block}
             <button class="linkish" data-goto="privacy" data-k="nav.privacy">الخصوصية</button>
           </li>
           <li>
+            <button class="linkish" data-goto="numbers" data-k="num.title">الأرقام</button>
+          </li>
+          <li>
             <button class="linkish" data-goto="home" data-k="map.node.home">الرئيسية</button>
           </li>
         </ul>
@@ -540,6 +594,31 @@ body.real .screen{display:block}
         <button class="btn primary" data-k="action.scan_now">افحص الآن</button>
         <button class="btn ghost" data-k="action.pause">إيقاف مؤقت</button>
       </div>
+
+      <!-- ══ شريط التنقل: أربعة رموز ظاهرة في الرئيسية نفسها (§6أ.3 + §6أ.4أ) ══
+           الرمز أولًا، والكلمة تحته، والعدد على الرمز. من لا يقرأ يجد طريقه. -->
+      <nav class="appbar" aria-label="navigation">
+        <button class="navcell" data-goto="quarantine" aria-pressed="false">
+          <span class="ni"><svg class="i"><use href="#i-folder"/></svg>
+            <span class="nb" data-numeral="2">٢</span></span>
+          <span class="nl" data-k="nav.quarantine">صندوق العزل</span>
+        </button>
+        <button class="navcell" data-goto="proactive" aria-pressed="false">
+          <span class="ni"><svg class="i"><use href="#i-pause"/></svg>
+            <span class="nb" data-numeral="6">٦</span></span>
+          <span class="nl" data-k="nav.proactive">الحماية الاستباقية</span>
+        </button>
+        <button class="navcell" data-goto="alerts" aria-pressed="false">
+          <span class="ni"><svg class="i"><use href="#i-alert"/></svg>
+            <span class="nb warn" data-numeral="1">١</span></span>
+          <span class="nl" data-k="nav.alerts">مركز التنبيهات</span>
+        </button>
+        <button class="navcell" data-goto="settings" aria-pressed="false">
+          <span class="ni"><svg class="i"><use href="#i-scale"/></svg></span>
+          <span class="nl" data-k="nav.settings">الإعدادات</span>
+        </button>
+      </nav>
+
     </div>
   </section>
 
@@ -547,6 +626,7 @@ body.real .screen{display:block}
   <section class="sec review-only">
     <h2 data-k="trust.title">أسس الثقة — دستور الواجهة</h2>
     <p class="hint" data-k="trust.sub">كل شاشة تُقاس على هذه الأربعة. وعند التعارض: الأمان أولًا.</p>
+    <p class="hint" data-k="trust.count">خمسة، لا أربعة.</p>
     <div class="trustgrid">
       <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-eye"/></svg></div><div class="tt" data-k="trust.1t">الوضوح</div>
         <div class="td" data-k="trust.1d">نقول ما حدث، لا ما هو التقنية. جملة واحدة. ولا «تمّ» بلا سبب.</div></div>
@@ -554,6 +634,11 @@ body.real .screen{display:block}
         <div class="td" data-k="trust.2d">زرّان كحد أقصى. خيار واحد أساسي. صفر إعداد مطلوب.</div></div>
       <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-calm"/></svg></div><div class="tt" data-k="trust.3t">الطمأنينة</div>
         <div class="td" data-k="trust.3d">بلا حدث = بلا نافذة. ≤ 3 إشعارات يوميًا. لا Modal أبدًا.</div></div>
+      <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-eye"/></svg></div>
+        <div class="tt" data-k="visual.title">التواصل البصري أولًا</div>
+        <div class="td" data-k="visual.rule">الصورة قبل الجملة: ما تفعله الشاشة يُرى، ولا يُشرح.</div>
+        <div class="why" style="font-size:12px;color:var(--text3);margin-top:6px"
+             data-k="visual.why">من يقرأ ببطء، أو لا يقرأ لغتك، يفهم الرمزَ واللون قبل السطر.</div></div>
       <div class="tcard"><div class="ticon"><svg class="i"><use href="#i-scale"/></svg></div><div class="tt" data-k="trust.4t">معرفة العواقب</div>
         <div class="td" data-k="trust.4d">عاقبة كل زر مكتوبة قبله لا بعده. والخيار الآمن هو الظاهر.</div></div>
     </div>
@@ -567,7 +652,9 @@ body.real .screen{display:block}
     <div class="lvlgrid">
       <div class="lvcard calm">
         <div class="lvhead"><svg class="i"><use href="#i-calm"/></svg><b data-k="lvl1.name">إسكات التنبيهات</b></div>
-        <div class="lvbody" data-k="lvl1.body">لا نافذة، لا إشعار، لا صوت. لكن الفحص والمنع يستمران في الخلفية: أي ملف مصاب يُعزل بصمت ويُعرض عليك عند العودة.</div>
+        <div class="lvbody" data-k="lvl1.body">لا نافذة ولا صوت. الفحص والمنع مستمران.</div>
+        <button class="whybtn" data-why="tip.lvl1" aria-expanded="false">
+          <svg class="i sm"><use href="#i-info"/></svg><span data-k="action.why">لماذا؟</span></button>
         <div class="lvrows">
           <div class="lvrow"><span data-k="lvl.what_stops">ما يتوقف</span><b data-k="lvl1.stops">التنبيهات فقط</b></div>
           <div class="lvrow"><span data-k="lvl.what_continues">ما يستمر</span><b data-k="lvl1.cont">الجدران الثلاثة</b></div>
@@ -584,36 +671,17 @@ body.real .screen{display:block}
         <div class="lvbody" data-k="lvl2.body">لا فحص، لا منع، لا تنبيه. الخدمة تبقى مشغّلة لكن خاملة. جهازك غير محمي تمامًا.</div>
         <div class="warnbox">
           <div class="wtitle"><svg class="i sm"><use href="#i-alert"/></svg><span data-k="disable.warning_title">خطر شديد</span></div>
-          <div data-k="lvl2.warn">لن نتوقف عن التنبيه — سنتوقف عن الحماية. لن يُفحص ملف ولن يُمنع تهديد.</div>
+          <div data-k="lvl2.warn">نتوقف عن الحماية، لا عن الإخبار.</div>
           <div class="resp" data-k="lvl2.resp">القرار قرارك، والمسؤولية عليك أثناء هذه المدة.</div>
         </div>
         <div class="chips">
           <span class="chip" data-k="lvl.d30">٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
           <span class="chip" data-k="lvl.dpeak">حتى نهاية ساعة الذروة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
-        <div class="note" style="margin-top:10px" data-k="lvl.no_permanent">لا توجد مدة «دائمة». أقصى إيقاف ينتهي بإعادة التشغيل — وهذا الحدّ الوحيد الذي نفرضه.</div>
+        <div class="note" style="margin-top:10px" data-k="lvl.no_permanent">لا إيقاف دائم. أقصاه إعادة تشغيل.</div>
+        <button class="whybtn" data-why="tip.no_permanent" aria-expanded="false">
+          <svg class="i sm"><use href="#i-info"/></svg><span data-k="action.why">لماذا؟</span></button>
       </div>
-    </div>
-
-    <!-- أربعة مداخل ظاهرة، وكلها بضغطة واحدة (§6أ.3) -->
-    <div class="counts">
-      <button class="count warn" data-goto="quarantine">
-        <svg class="i"><use href="#i-folder"/></svg>
-        <span><b data-k="home.goto.quarantine">صندوق العزل</b><br>
-          <span style="font-size:12px;color:var(--text2)" data-k="home.quarantine_count"
-                data-tmpl="home.quarantine_count" data-k-args='{"count":"2"}'>٢ ملفًا في العزل</span></span>
-      </button>
-      <button class="count" data-goto="alerts">
-        <svg class="i"><use href="#i-alert"/></svg>
-        <span><b data-k="home.goto.alerts">مركز التنبيهات</b><br>
-          <span style="font-size:12px;color:var(--text2)" data-k="home.alerts_count"
-                data-tmpl="home.alerts_count" data-k-args='{"count":"1"}'>تنبيه واحد يستحق النظر</span></span>
-      </button>
-      <button class="count" data-goto="proactive">
-        <svg class="i"><use href="#i-pause"/></svg>
-        <span><b data-k="home.goto.proactive">الحماية الاستباقية</b><br>
-          <span style="font-size:12px;color:var(--text2)" data-k="home.proactive_summary">ست قواعد · واحدة مستثناة</span></span>
-      </button>
     </div>
 
     <div class="app mt">
@@ -934,6 +1002,7 @@ body.real .screen{display:block}
             <div class="sep"></div>
             <button data-goto="privacy" data-k="nav.privacy">الخصوصية</button>
             <button data-goto="language" data-k="nav.language">اللهجة واللغة</button>
+            <button data-goto="numbers" data-k="num.title">الأرقام</button>
           </div>
         </div>
       </div>
@@ -1000,7 +1069,7 @@ body.real .screen{display:block}
     <h2><svg class="i"><use href="#i-info"/></svg><span data-k="lang.title">اللهجة واللغة</span></h2>
     <p class="hint" data-k="lang.sub">عشرة ألسنة. الترجمة تراها فورًا، والخط يتبع لغتك.</p>
     <div class="langs">
-      <button class="langcard" aria-pressed="true"><span class="nm">العربية<span class="code">ar</span></span><span class="smp" dir="rtl">أودينا — أنت محمي ١٢٣٤٥</span></button>
+      <button class="langcard" aria-pressed="true"><span class="nm">العربية<span class="code">ar</span></span><span class="smp" dir="rtl">عدينة — أنت محمي ١٢٣٤٥</span></button>
       <button class="langcard" aria-pressed="false"><span class="nm">English<span class="code">en</span></span><span class="smp" dir="ltr">Odina — you are protected</span></button>
       <button class="langcard" aria-pressed="false"><span class="nm">简体中文<span class="code">zh-Hans</span></span><span class="smp" dir="ltr">Odina — 你已受到保护</span></button>
       <button class="langcard" aria-pressed="false"><span class="nm">日本語<span class="code">ja</span></span><span class="smp" dir="ltr">Odina — 保護されています</span></button>
@@ -1011,6 +1080,8 @@ body.real .screen{display:block}
       <button class="langcard" aria-pressed="false"><span class="nm">Français<span class="code">fr</span></span><span class="smp" dir="ltr">Odina — vous êtes protégé</span><span class="st">مسودة</span></button>
       <button class="langcard" aria-pressed="false"><span class="nm">Português<span class="code">pt-BR</span></span><span class="smp" dir="ltr">Odina — você está protegido</span><span class="st">مسودة</span></button>
     </div>
+    <p style="margin-top:14px"><button class="btn ghost" data-goto="numbers">
+      <svg class="i sm"><use href="#i-db"/></svg><span data-k="num.title">الأرقام</span></button></p>
     <p style="font-size:13px;color:var(--text2);margin-top:12px" data-k="lang.review.body">اللغات التي لم يراجعها ناطق أصلي تُعلَّق، لا تُشحن.</p>
   </section>
 
@@ -1074,6 +1145,38 @@ body.real .screen{display:block}
        data-k="help.query.note">نُرسل المصطلح وحده. لا اسم ملف، ولا مسار، ولا معرّف جهاز.</p>
   </section>
 
+  <!-- ══════════ 13. الأرقام — نظامان، والاختيار للمستخدم (§6أ.6) ══════════ -->
+  <section class="sec screen review-only" id="screen-numbers" data-screen="numbers">
+    <div class="crumb">
+      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <span data-k="nav.settings">الإعدادات</span>
+      <span style="color:var(--text3)">/</span>
+      <span class="here" data-k="num.title">الأرقام</span>
+    </div>
+    <h2><svg class="i"><use href="#i-db"/></svg><span data-k="num.title">الأرقام</span></h2>
+    <p class="hint" data-k="num.sub">الأرقام في العدّاد والتنبيهات والسجل.</p>
+    <p style="font-size:14px;color:var(--text2)" data-k="num.body">اختر الشكل الذي تقرأه أسرع. كل الحسابات واحدة.</p>
+
+    <div class="numpick" role="group" aria-label="numerals">
+      <button class="numopt" data-num="arabic" aria-pressed="true">
+        <span class="digits">0 1 2 3 4 5 6 7 8 9</span>
+        <span class="nm" data-k="num.arabic.name">أرقام عربية</span>
+      </button>
+      <button class="numopt" data-num="hindi" aria-pressed="false">
+        <span class="digits">٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩</span>
+        <span class="nm" data-k="num.hindi.name">أرقام هندية</span>
+      </button>
+    </div>
+
+    <div class="setrows" style="margin-top:16px">
+      <div class="setrow">
+        <div class="txt"><div class="t" data-k="help.sample.title">مثال حيّ</div>
+          <div class="d" data-k="num.sample">٣ تنبيهات · ١٢ ملفًا</div></div>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text3);margin-top:10px" data-k="num.note">التغيير فوري. لا يحتاج إعادة تشغيل.</p>
+  </section>
+
   <!-- ══════════ 4. اللوحة اللونية ══════════ -->
   <section class="sec review-only">
     <h2 data-k="sec.color">4 · اللوحة اللونية (مقاسة WCAG)</h2>
@@ -1093,7 +1196,7 @@ body.real .screen{display:block}
       </div>
       <div class="fcard" style="font-family:'IBM Plex Sans Arabic',sans-serif">
         <div class="nm">IBM Plex Sans Arabic · ar</div>
-        <div class="smp" dir="rtl">أودينا — أنت محمي ١٢٣٤٥</div>
+        <div class="smp" dir="rtl">عدينة — أنت محمي ١٢٣٤٥</div>
         <span class="tag">bundled 0.08 MB</span>
       </div>
       <div class="fcard" style="font-family:'PT Sans',sans-serif">
@@ -1195,6 +1298,10 @@ function applyLang(code){
   });
   renderPalette();
   refreshTips();
+  document.querySelectorAll('.whytext.open').forEach(box => {
+    const key = box.previousElementSibling && box.previousElementSibling.getAttribute('data-why');
+    if (key) box.textContent = dict[key] || '';
+  });
   if (typeof setModeLabel==='function') setModeLabel();
 }
 document.getElementById('lang').addEventListener('change', e=>applyLang(e.target.value));
@@ -1267,6 +1374,59 @@ document.addEventListener('keydown', e => {
     window.scrollTo({ top: backStack.pop(), behavior: 'auto' });
   }
 });
+
+/* ══════════ «لماذا؟» — الشرح عند الطلب فقط (§6أ.1) ══════════
+   النص الطويل لا يُعرض إلا بعد ضغطة، ويُقرأ من locales.js لا من الصفحة. */
+function openWhy(btn) {
+  const key = btn.getAttribute('data-why');
+  const lang = document.body.dataset.lang || 'ar';
+  const dict = (window.ODINA_STRINGS || {})[lang] || {};
+  let box = btn.nextElementSibling;
+  if (!box || !box.classList.contains('whytext')) {
+    box = document.createElement('div');
+    box.className = 'whytext';
+    btn.after(box);
+  }
+  box.textContent = dict[key] || '';
+  const open = box.classList.toggle('open');
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.querySelectorAll('[data-why]').forEach(b => {
+  b.addEventListener('click', () => openWhy(b));
+});
+
+/* ══════════ نظام الأرقام (§6أ.6) ══════════
+   الشكل يتغيّر، والقيمة لا. كل رقم في الصفحة يمر من هنا،
+   فلا يوجد مكان يبقى بأرقام لم يخترها المستخدم. */
+const HINDI = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+let numeralStyle = 'arabic';
+
+function applyNumerals(style) {
+  numeralStyle = style;
+  document.querySelectorAll('[data-numeral]').forEach(el => {
+    const raw = el.getAttribute('data-numeral');
+    el.textContent = style === 'hindi'
+      ? raw.replace(/[0-9]/g, d => HINDI[+d])
+      : raw;
+  });
+  document.querySelectorAll('.numopt').forEach(b => {
+    b.setAttribute('aria-pressed', b.dataset.num === style ? 'true' : 'false');
+  });
+  try { localStorage.setItem('odina.numerals', style); } catch (e) {}
+}
+
+document.querySelectorAll('.numopt').forEach(b => {
+  b.addEventListener('click', () => applyNumerals(b.dataset.num));
+});
+
+/* كل عنصر يعرض رقمًا يعلن قيمته الخام هنا مرة واحدة */
+document.querySelectorAll('.appbar .nb, .numopt .digits').forEach(el => {
+  if (!el.hasAttribute('data-numeral')) el.setAttribute('data-numeral', el.textContent.trim());
+});
+
+let savedNum = 'arabic';
+try { savedNum = localStorage.getItem('odina.numerals') || 'arabic'; } catch (e) {}
+applyNumerals(savedNum);
 
 /* اللهجة: الإنترنت يعرف اللغة، والتلميح يشرح بلغة المستخدم */
 const SEARCH = { 'ar':'google', 'en':'google', 'de':'google', 'fr':'google', 'es':'google',

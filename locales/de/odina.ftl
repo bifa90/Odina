@@ -330,22 +330,22 @@ lvl.d30 = 30 Minuten
 lvl.d60 = Eine Stunde
 lvl.dpeak = Bis zum Ende der Stoßzeit
 lvl.dreboot = Bis zum Neustart
-lvl.hint = Sie besitzen Ihr Gerät · wir informieren und lassen Sie entscheiden
-lvl.no_permanent = Es gibt keine „dauerhafte“ Dauer. Die längste Pause endet mit einem Neustart — das ist die einzige Grenze.
+lvl.hint = Wir sagen es, Sie entscheiden.
+lvl.no_permanent = Keine dauerhafte Pause. Die längste endet beim Neustart.
 lvl.state_off = Schutz pausiert
 lvl.state_off_sub = Bis 14:30 · Ihre Entscheidung
 lvl.title = Pause — zwei Stufen, nicht eine
 lvl.what_continues = Was weiterläuft
 lvl.what_stops = Was stoppt
 lvl1.app = Läuft · prüft · blockt · fragt nicht
-lvl1.body = Kein Fenster, kein Hinweis, kein Ton. Prüfung und Blocken laufen im Hintergrund weiter: eine infizierte Datei wird still isoliert und Ihnen bei der Rückkehr gezeigt.
+lvl1.body = Kein Fenster, kein Ton. Prüfung und Blocken laufen weiter.
 lvl1.cont = Die drei Wände
-lvl1.name = Hinweise stumm schalten
+lvl1.name = Hinweise stumm
 lvl1.stops = Nur die Hinweise
-lvl2.body = Keine Prüfung, kein Blocken, kein Hinweis. Der Dienst läuft, tut aber nichts. Ihr Gerät ist ungeschützt.
+lvl2.body = Keine Prüfung, kein Blocken. Ihr Gerät ist ungeschützt.
 lvl2.name = Schutz anhalten
-lvl2.resp = Die Entscheidung ist Ihre, und die Verantwortung liegt bei Ihnen, solange sie gilt.
-lvl2.warn = Wir hören nicht auf zu warnen — wir hören auf zu schützen. Keine Datei wird geprüft, keine Bedrohung geblockt.
+lvl2.resp = Die Verantwortung liegt für diese Zeit bei Ihnen.
+lvl2.warn = Wir hören auf zu schützen, nicht auf zu sagen.
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
 notes.1b = Ein Wandname ist ein Versprechen, kein Etikett.
@@ -398,3 +398,32 @@ trust.sub = Jeder Bildschirm wird an diesen vier gemessen. Bei Konflikt: Sicherh
 
 ## ── USB ────────────────────────────
 usb.stage = Phase
+
+## ── Ziffern ─────────────────────────────
+num.title = Ziffern
+num.sub = Die Zahlen in Zählern, Hinweisen und Protokoll.
+num.body = Wählen Sie die Form, die Sie am schnellsten lesen. Jede Rechnung bleibt gleich.
+num.arabic = 0 1 2 3 4 5 6 7 8 9
+num.hindi = ٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩
+num.arabic.name = Arabische Ziffern
+num.hindi.name = Östliche arabische Ziffern
+num.sample = 3 Hinweise · 12 Dateien
+num.note = Die Änderung ist sofort. Kein Neustart nötig.
+
+## ── Pausen-Hinweise — auf Anfrage ─────────────────────────────
+tip.lvl1 = Kein Fenster, kein Hinweis, kein Ton, aber Prüfung und Blocken laufen im Hintergrund weiter: eine infizierte Datei wird still isoliert und bei der Rückkehr gezeigt.
+tip.lvl2 = Keine Prüfung, kein Blocken, kein Hinweis. Der Dienst läuft, tut aber nichts, und Ihr Gerät ist völlig ungeschützt.
+tip.no_permanent = Die längste Pause endet mit einem Neustart, und das ist die einzige Grenze, die wir setzen.
+
+## ── Vierte Regel: Bild zuerst ─────────────────────────────
+visual.title = Bild zuerst
+visual.rule = Das Bild vor dem Satz: Was ein Bildschirm tut, wird gesehen, nicht erklärt.
+visual.why = Wer langsam liest oder Ihre Sprache nicht liest, versteht Form und Farbe vor der Zeile.
+visual.n1 = Jedes Element trägt Form, Farbe und Ort und hängt nie an einem Wort.
+visual.n2 = Dieselbe Form bedeutet auf jedem Bildschirm dasselbe.
+visual.n3 = Farbe trennt sicher von gefährlich; der Text nennt den Grund.
+visual.n4 = Ein Icon ohne Wort ist ein Test: Muss es erklärt werden, ist es das falsche Icon.
+visual.n5 = Text erklärt das Bild, er wiederholt es nicht.
+visual.sample = Über das Icon fahren: ein Wort. Klicken: die ganze Erklärung in Ihrer Sprache.
+trust.count = Fünf, nicht vier.
+help.sample.title = Ein echtes Beispiel
