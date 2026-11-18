@@ -119,7 +119,7 @@ disable.reminder = Через { $minutes} мин. защита включитс�
 pause.resume_report = Пока уведомления были на паузе: изолировано { $count}
 
 ## ── Точечное исключение (D45 · §4.8) ─────────────────────────
-exception.title = Исключения — одно правило, а не все
+exception.title = Исключения
 exception.sub = Если для работы нужно ослабить одно правило, разрешите только его. Остальное остаётся как было.
 exception.rule.a1.wsh = Скрипты Windows
 exception.rule.a1.wsh.desc = Файлы .vbs и .js запускаются с ограничениями, если они не подписаны известным издателем.
@@ -132,7 +132,7 @@ exception.rule.a3.downloads.desc = Каждый новый файл в «Заг�
 exception.rule.a4.periodic = Периодическая проверка
 exception.rule.a4.periodic.desc = Тихая проверка элементов автозапуска и важных ключей каждые два часа.
 exception.rule.a6.doubt = Осторожность при сомнении
-exception.rule.a6.doubt.desc = При сомнении сначала блокирует, затем спрашивает. Можно ослабить, но не разрешить полностью.
+exception.rule.a6.doubt.desc = При сомнении блокирует, затем спрашивает. Правило можно смягчить, но не снять полностью.
 exception.state.on = Активно
 exception.state.relaxed_until = Ослаблено до { $until }
 exception.state.allowed_until = Разрешено до { $until }

@@ -119,7 +119,7 @@ disable.reminder = 保護が自動で戻るまで残り { $minutes} 分。
 pause.resume_report = 通知を止めていた間に { $count} 件を隔離しました
 
 ## ── 外科的例外 (D45 · §4.8) ─────────────────────────
-exception.title = 例外 — すべてではなく、1 つのルール
+exception.title = 例外
 exception.sub = 業務で 1 つのルールを緩める必要があるなら、その 1 つだけを許可します。他はそのままです。
 exception.rule.a1.wsh = Windows スクリプト
 exception.rule.a1.wsh.desc = .vbs と .js は、既知の発行者の署名がない限り制限付きで実行されます。

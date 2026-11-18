@@ -119,7 +119,7 @@ disable.reminder = 距保护自动恢复还有 { $minutes} 分钟。
 pause.resume_report = 暂停提示期间：已隔离 { $count} 个文件
 
 ## ── 精准例外 (D45 · §4.8) ─────────────────────────
-exception.title = 例外 —— 一条规则，而非全部
+exception.title = 例外
 exception.sub = 如果你的工作需要放宽某一条规则，只放宽那一条。其余保持不变。
 exception.rule.a1.wsh = Windows 脚本
 exception.rule.a1.wsh.desc = .vbs 和 .js 文件在受限模式下运行，除非由已知发布者签名。

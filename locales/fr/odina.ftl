@@ -119,20 +119,20 @@ disable.reminder = Encore { $minutes} minutes avant le retour automatique de la 
 pause.resume_report = Pendant la pause des alertes : { $count} fichier(s) isolé(s)
 
 ## ── Exception chirurgicale (D45 · §4.8) ─────────────────────────
-exception.title = Exceptions — une règle, pas toutes
+exception.title = Exceptions
 exception.sub = Si votre travail exige qu'une règle cède, autorisez seulement celle-là. Le reste ne bouge pas.
 exception.rule.a1.wsh = Scripts Windows
-exception.rule.a1.wsh.desc = Les fichiers .vbs et .js s'exécutent en mode restreint sauf s'ils sont signés par un éditeur connu.
+exception.rule.a1.wsh.desc = Les .vbs et .js s’exécutent en mode restreint sauf si un éditeur connu les a signés.
 exception.rule.a1.powershell = Commandes PowerShell
 exception.rule.a1.powershell.desc = PowerShell s'exécute en mode restreint. L'autoriser n'ouvre pas Windows Script Host.
 exception.rule.a1.macros = Macros Office
-exception.rule.a1.macros.desc = Les documents non signés ne peuvent pas exécuter de macros. L'autoriser ne touche pas aux scripts.
+exception.rule.a1.macros.desc = Un document non signé ne peut pas lancer de macros. L’exception ne touche pas aux scripts.
 exception.rule.a3.downloads = Soupçon dans Téléchargements
 exception.rule.a3.downloads.desc = Chaque nouveau fichier dans Téléchargements est suspect jusqu'à preuve du contraire.
 exception.rule.a4.periodic = Analyse périodique
-exception.rule.a4.periodic.desc = Toutes les deux heures, une analyse silencieuse des éléments de démarrage et des clés sensibles.
+exception.rule.a4.periodic.desc = Analyse en silence les éléments de démarrage et les clés sensibles toutes les deux heures.
 exception.rule.a6.doubt = Prudence en cas de doute
-exception.rule.a6.doubt.desc = En cas de doute, il bloque d'abord puis demande. Peut être assoupli, jamais autorisé totalement.
+exception.rule.a6.doubt.desc = En cas de doute, la règle bloque puis demande. On peut l’assouplir, jamais tout autoriser.
 exception.state.on = Active
 exception.state.relaxed_until = Assouplie jusqu'à { $until }
 exception.state.allowed_until = Autorisée jusqu'à { $until }

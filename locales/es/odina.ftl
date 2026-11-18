@@ -119,10 +119,10 @@ disable.reminder = Quedan { $minutes} minutos para que la protección vuelva sol
 pause.resume_report = Mientras los avisos estaban en pausa: { $count} archivo(s) aislado(s)
 
 ## ── Excepción quirúrgica (D45 · §4.8) ─────────────────────────
-exception.title = Excepciones — una regla, no todas
+exception.title = Excepciones
 exception.sub = Si tu trabajo necesita que una regla ceda, permite solo esa. El resto queda igual.
 exception.rule.a1.wsh = Scripts de Windows
-exception.rule.a1.wsh.desc = Los archivos .vbs y .js se ejecutan restringidos salvo que estén firmados por un editor conocido.
+exception.rule.a1.wsh.desc = Los .vbs y .js se ejecutan con límites salvo que los firme un editor conocido.
 exception.rule.a1.powershell = Comandos de PowerShell
 exception.rule.a1.powershell.desc = PowerShell se ejecuta en modo restringido. Permitirlo no abre Windows Script Host.
 exception.rule.a1.macros = Macros de Office

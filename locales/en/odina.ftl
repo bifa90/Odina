@@ -150,7 +150,7 @@ disable.reminder = { $minutes} minutes left before protection comes back automat
 pause.resume_report = While alerts were paused: { $count} file(s) isolated
 
 ## ── Surgical exception (D45 · §4.8) ─────────────────────────
-exception.title = Exceptions — one rule, not all of them
+exception.title = Exceptions
 exception.sub = If your work needs one rule to bend, allow just that one. The rest stays as it was.
 exception.rule.a1.wsh = Windows scripts
 exception.rule.a1.wsh.desc = .vbs and .js files run restricted unless signed by a known publisher.

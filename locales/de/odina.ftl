@@ -119,10 +119,10 @@ disable.reminder = Noch { $minutes} Minuten, dann kommt der Schutz automatisch z
 pause.resume_report = Während die Hinweise pausiert waren: { $count} Datei(en) isoliert
 
 ## ── Gezielte Ausnahme (D45 · §4.8) ─────────────────────────
-exception.title = Ausnahmen — eine Regel, nicht alle
+exception.title = Ausnahmen
 exception.sub = Wenn Ihre Arbeit eine Ausnahme bei einer Regel braucht, erlauben Sie nur diese. Der Rest bleibt, wie er ist.
 exception.rule.a1.wsh = Windows-Skripte
-exception.rule.a1.wsh.desc = .vbs- und .js-Dateien laufen eingeschränkt, sofern sie nicht von einem bekannten Herausgeber signiert sind.
+exception.rule.a1.wsh.desc = Ohne Signatur eines bekannten Herausgebers laufen .vbs und .js nur eingeschränkt.
 exception.rule.a1.powershell = PowerShell-Befehle
 exception.rule.a1.powershell.desc = PowerShell läuft im eingeschränkten Modus. Das Erlauben öffnet Windows Script Host nicht.
 exception.rule.a1.macros = Office-Makros

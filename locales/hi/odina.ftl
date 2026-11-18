@@ -119,10 +119,10 @@ disable.reminder = { $minutes } मिनट बाद सुरक्षा अ
 pause.resume_report = सूचनाएँ रुकी रहने के दौरान: { $count } फ़ाइल अलग की गई
 
 ## ── सटीक अपवाद (D45 · §4.8) ─────────────────────────
-exception.title = अपवाद — एक नियम, सभी नहीं
+exception.title = अपवाद
 exception.sub = अगर काम के लिए एक नियम ढीला करना पड़े, तो सिर्फ़ वही अनुमति दें। बाकी सब वैसा ही रहेगा।
 exception.rule.a1.wsh = Windows स्क्रिप्ट
-exception.rule.a1.wsh.desc = .vbs और .js फ़ाइलें प्रतिबंधित रूप में चलती हैं, जब तक किसी ज्ञात प्रकाशक द्वारा हस्ताक्षरित न हों।
+exception.rule.a1.wsh.desc = ज्ञात प्रकाशक के हस्ताक्षर न हों तो .vbs और .js फ़ाइलें सीमित मोड में चलती हैं।
 exception.rule.a1.powershell = PowerShell कमांड
 exception.rule.a1.powershell.desc = PowerShell प्रतिबंधित मोड में चलता है। अनुमति देने से Windows Script Host नहीं खुलता।
 exception.rule.a1.macros = Office मैक्रो

@@ -38,6 +38,93 @@ def check_picker(page: Page, picker: str, sample: str, langs: list[str]) -> None
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), lang
         if picker == "#langsel":
             assert not page.evaluate("window.ODINA_MISSING"), lang
+        else:
+            entry = page.locator('.appmap [data-goto="exception"]')
+            label, scope = page.evaluate("""l => {
+                const d = window.ODINA_STRINGS[l]; return [d['exception.title'], d['tip.exception']];
+            }""", lang)
+            assert "—" not in label and (lang != "ar" or label == "الاستثناءات"), (lang, label)
+            expect(entry).to_have_accessible_name(label)
+            expect(entry).to_have_accessible_description(scope)
+            assert page.locator('.list-tip [role="tooltip"]').evaluate_all("""(tips, l) =>
+                tips.every(t => t.textContent && t.textContent === window.ODINA_STRINGS[l][t.dataset.k])
+            """, lang), lang
+
+
+def check_list_help(page: Page) -> None:
+    entry = page.locator('.appmap [data-goto="exception"]')
+    row = entry.locator("..")
+    tip = row.locator('[role="tooltip"]')
+    info = row.locator("summary")
+    initial_url = page.url
+    expect(tip).to_be_hidden()
+    entry.hover()
+    expect(tip).to_be_visible()
+    tip.hover()  # The explanation must remain readable when the pointer moves onto it.
+    expect(tip).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(tip).to_be_hidden()
+
+    entry.focus()
+    page.keyboard.press("Tab")
+    expect(info).to_be_focused()
+    expect(tip).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(tip).to_be_hidden()
+    expect(info).to_be_focused()
+    info.press("Enter")
+    expect(tip).to_be_visible()
+    expect(page).to_have_url(initial_url)
+    page.keyboard.press("Shift+Tab")
+    expect(entry).to_be_focused()
+    entry.press("Enter")  # The name navigates even while its description is open.
+    screen = page.locator("#screen-exception")
+    expect(screen).to_be_focused()
+    expect(screen.locator("h2")).to_have_text("الاستثناءات")
+    expect(tip).to_be_hidden()
+    expect(screen.locator(".excbadge")).to_contain_text("14:30")
+    for card in screen.locator(".exccard").all():
+        expect(card.locator("[role=tooltip]")).to_be_hidden()
+        expect(card.locator(".st")).to_be_visible()
+        expect(card.locator(".conseq")).to_be_visible()
+    expect(screen.locator(".exccard.live .st")).to_contain_text("14:30")
+    expect(screen.locator('.exccard.live [data-k="exception.action.revoke"]')).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(entry).to_be_focused()
+    expect(page).to_have_url(initial_url)
+
+
+def check_touch_help(page: Page, base: str) -> None:
+    page.goto(base + "index.html")
+    entry = page.locator('#screen-proactive [data-goto="exception"]')
+    row = entry.locator("..")
+    info, tip = row.locator("summary"), row.locator("[role=tooltip]")
+    # A tooltip above this entry would be outside the viewport.
+    entry.evaluate("el => window.scrollBy(0, el.getBoundingClientRect().top - 8)")
+    info.tap()
+    expect(tip).to_be_visible()
+    expect(page).to_have_url(base + "index.html")
+    rect = tip.bounding_box()
+    view = page.viewport_size
+    assert rect and view and 0 <= rect["x"] <= view["width"] - rect["width"], rect
+    assert 0 <= rect["y"] <= view["height"] - rect["height"], rect
+    info.tap()
+    expect(tip).to_be_hidden()
+    entry.tap()
+    screen = page.locator("#screen-exception")
+    expect(screen).to_be_focused()
+    card = screen.locator(".exccard.live")
+    card.locator("summary").tap()
+    expect(card.get_by_role("tooltip")).to_be_visible()
+    assert card.evaluate("""c => c.querySelector('[role=tooltip]').getBoundingClientRect().bottom
+        <= c.querySelector('.st').getBoundingClientRect().top"""), "help covers the rule state"
+    card.locator(".conseq").tap()  # Outside tap dismisses, without changing the rule.
+    expect(card.locator("[role=tooltip]")).to_be_hidden()
+    expect(card.locator(".st")).to_contain_text("14:30")
+    screen.locator("[data-back]").tap()
+    expect(entry).to_be_focused()
+    expect(page).to_have_url(base + "index.html")
+    assert len(page.context.pages) == 1, "local help opened another tab"
 
 
 def review(page: Page, base: str) -> None:
@@ -57,10 +144,26 @@ def review(page: Page, base: str) -> None:
     page.locator('.langcard[value="ar"]').click()
     expect(page.locator("#lang")).to_have_value("ar")
     expect(page.locator('[data-k="alert.confirmed.body"]')).to_contain_text("PhotoTool.exe")
+    check_list_help(page)
     page.locator('.appbar [data-goto="settings"]').click()
+    appearance = page.locator('#screen-settings summary[data-k="settings.appearance"]')
+    hint = appearance.locator("..").locator('[role="tooltip"]')
+    expect(hint).to_be_hidden()
+    appearance.hover()
+    expect(hint).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(hint).to_be_hidden()
     menu = page.locator("[data-menu]")
     menu.click()
-    page.locator('.menu [data-goto="numbers"]').click()
+    numbers = page.locator('.menu [data-goto="numbers"]')
+    info = numbers.locator("..").locator("summary")
+    info.click()
+    expect(numbers.locator("..").get_by_role("tooltip")).to_be_visible()
+    page.keyboard.press("Escape")  # Dismiss help first; do not leave the menu or the screen.
+    expect(menu).to_have_attribute("aria-expanded", "true")
+    expect(info).to_be_focused()
+    expect(numbers.locator("..").locator("[role=tooltip]")).to_be_hidden()
+    numbers.click()
     expect(page.locator("#screen-numbers")).to_be_focused()
     page.locator('[data-num="hindi"]').click()
     expect(page.locator('[data-k="shield.sub"]')).to_contain_text("٣")
@@ -103,12 +206,17 @@ def main() -> None:
             with sync_playwright() as pw:
                 chrome = os.environ.get("CHROME_BIN") or shutil.which("google-chrome")
                 browser = pw.chromium.launch(executable_path=chrome)
-                page = browser.new_page(viewport={"width": 360, "height": 800}, reduced_motion="reduce")
-                review(page, f"http://127.0.0.1:{server.server_port}/")
+                base = f"http://127.0.0.1:{server.server_port}/"
+                viewport = {"width": 360, "height": 800}
+                page = browser.new_page(viewport=viewport, reduced_motion="reduce")
+                review(page, base)
+                assert len(page.context.pages) == 1, "local help opened another tab"
+                touch = browser.new_page(viewport=viewport, reduced_motion="reduce", has_touch=True, is_mobile=True)
+                check_touch_help(touch, base)
                 browser.close()
         finally:
             server.shutdown()
-    print("site smoke: staged preview and signing page, 10 locales, alert → quarantine → back")
+    print("site smoke: 10 locales on both pages · list help (hover, keyboard, touch) · alert → quarantine → back")
 
 
 if __name__ == "__main__":

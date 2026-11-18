@@ -119,7 +119,7 @@ disable.reminder = Faltam { $minutes} minutos para a proteção voltar sozinha.
 pause.resume_report = Enquanto os avisos estavam pausados: { $count} arquivo(s) isolado(s)
 
 ## ── Exceção cirúrgica (D45 · §4.8) ─────────────────────────
-exception.title = Exceções — uma regra, não todas
+exception.title = Exceções
 exception.sub = Se o seu trabalho precisa que uma regra ceda, permita apenas essa. O resto fica como está.
 exception.rule.a1.wsh = Scripts do Windows
 exception.rule.a1.wsh.desc = Arquivos .vbs e .js rodam restritos, a menos que assinados por um editor conhecido.
@@ -130,9 +130,9 @@ exception.rule.a1.macros.desc = Documentos não assinados não podem executar ma
 exception.rule.a3.downloads = Suspeita em Downloads
 exception.rule.a3.downloads.desc = Cada novo arquivo em Downloads é suspeito até ser liberado.
 exception.rule.a4.periodic = Verificação periódica
-exception.rule.a4.periodic.desc = A cada duas horas, uma verificação silenciosa de itens de inicialização e chaves sensíveis.
+exception.rule.a4.periodic.desc = Verificação silenciosa de itens de inicialização e chaves sensíveis a cada duas horas.
 exception.rule.a6.doubt = Cautela na dúvida
-exception.rule.a6.doubt.desc = Na dúvida, bloqueia primeiro e pergunta depois. Pode ser flexibilizada, nunca permitida por completo.
+exception.rule.a6.doubt.desc = Na dúvida, bloqueia e só depois pergunta. A regra pode ser relaxada, nunca liberada.
 exception.state.on = Ativa
 exception.state.relaxed_until = Flexibilizada até { $until }
 exception.state.allowed_until = Permitida até { $until }
