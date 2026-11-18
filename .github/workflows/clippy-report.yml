@@ -1,0 +1,61 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# TEMPORARY. The sandbox writing this branch has no Rust toolchain and cannot
+# read job logs. Check-run annotations are the one readable channel; they
+# truncate at a newline and cap at 10 per step, so the report is newline-joined
+# with a marker and split across steps. Deleted as soon as this is green.
+
+name: clippy-report
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  report:
+    name: clippy
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: collect
+        run: |
+          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c.txt 2>&1 || true
+          cargo clippy -p odina-cli --features instrument --all-targets --locked -- -D warnings >> /tmp/c.txt 2>&1 || true
+          python3 - <<'PY'
+          import pathlib
+          body = pathlib.Path('/tmp/c.txt').read_text(errors='replace').replace('\x1b', '')
+          keep = [l for l in body.splitlines() if l.startswith(('error', 'warning')) or l.lstrip().startswith('-->')]
+          joined = ' <<<NL>>> '.join(keep) if keep else 'CLEAN'
+          out = pathlib.Path('/tmp/chunks'); out.mkdir(exist_ok=True)
+          for i in range(0, max(len(joined), 1), 1100):
+              (out / ('%03d' % (i // 1100))).write_text(joined[i:i+1100], encoding='utf-8')
+          print(len(keep), 'lines')
+          PY
+
+      - name: emit 0
+        continue-on-error: true
+        run: echo "::error::P000 $(cat /tmp/chunks/000)"
+
+      - name: emit 1
+        continue-on-error: true
+        run: |
+          for i in 001 002 003 004 005 006 007 008 009; do
+            [ -f /tmp/chunks/$i ] && echo "::error::P$i $(cat /tmp/chunks/$i)" || true
+          done
+
+      - name: emit 2
+        continue-on-error: true
+        run: |
+          for i in 010 011 012 013 014 015 016 017 018 019; do
+            [ -f /tmp/chunks/$i ] && echo "::error::P$i $(cat /tmp/chunks/$i)" || true
+          done
