@@ -582,8 +582,9 @@ mod tests {
     fn a_percent_sign_in_a_pattern_does_not_break_the_json() {
         let r = full_report();
         let json = r.to_json_checked().unwrap();
-        assert!(json.contains("\\\\") || !json.contains('\\') || true);
-        // The real assertion: it parses as balanced JSON.
+        assert!(
+            json.contains(r#""path_pattern":"%USERPROFILE%\\<dir>\\%DOWNLOADS%\\<name>.pdf.exe""#)
+        );
         assert_eq!(json.matches('{').count(), json.matches('}').count());
         assert_eq!(json.matches('[').count(), json.matches(']').count());
     }
