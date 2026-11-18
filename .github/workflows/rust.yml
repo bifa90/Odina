@@ -44,16 +44,22 @@ jobs:
 
       - name: clippy
         run: |
-          # Both crates, both feature sets, and every diagnostic printed whether
-          # or not the run succeeds. An earlier version of this step swallowed
-          # its own output and failed for four runs with nothing to read.
+          # Both crates, both feature sets, one log file. The log exists because
+          # a failing step whose output cannot be read costs a whole CI cycle:
+          # the diagnostics step below turns it into annotations.
           set +e
-          cargo clippy --workspace --all-targets --locked -- -D warnings
+          cargo clippy --workspace --all-targets --locked -- -D warnings > clippy.log 2>&1
           a=$?
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings >> clippy.log 2>&1
           b=$?
-          echo "clippy: workspace=$a instrument=$b"
+          echo "WORKSPACE_EXIT=$a" >> clippy.log
+          echo "INSTRUMENT_EXIT=$b" >> clippy.log
+          cat clippy.log
           if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then exit 1; fi
+
+      - name: clippy diagnostics
+        if: failure()
+        run: python3 tools/ci/clippy-why.py
 
       - name: build
         run: cargo build --workspace --locked
