@@ -178,6 +178,98 @@ def check_visual_first(html: str) -> list[str]:
     return problems
 
 
+def check_reachability(html: str) -> list[str]:
+    """A screen nobody can open is not a screen (§6أ.3).
+
+    Two failures this catches, both of which shipped once:
+      · a data-goto pointing at an id that does not exist — a dead link
+      · a screen with an id and no entry — a page behind a wall
+    """
+    problems = []
+    screens = set(re.findall(r'data-screen="([^"]+)"', html))
+    ids = set(re.findall(r'id="screen-([^"]+)"', html))
+    gotos = set(re.findall(r'data-goto="([^"]+)"', html))
+
+    for target in sorted(gotos - ids):
+        problems.append(f"data-goto={target!r} points at no screen — a dead link")
+    for screen in sorted(screens - gotos - {"home"}):
+        problems.append(f"screen {screen!r} has no entry — nobody can open it")
+    for screen in sorted(ids - screens):
+        problems.append(f"id=screen-{screen!r} has no data-screen — half a screen")
+    return problems
+
+
+def check_templates(html: str) -> list[str]:
+    """A placeholder that no code fills is printed to the user verbatim.
+
+    data-tmpl + data-k-args only work because renderString() exists; if that
+    function is gone, every { $n } on the page becomes visible text.
+    """
+    problems = []
+    # renaming the definition leaves the call behind: a call with no body is
+    # how the { $n } bug actually looks.
+    if 'data-tmpl=' in html:
+        # The definition is the only occurrence followed by a parameter list.
+        defined = re.search(r'function\s+renderString\s*\(', html) is not None
+        if not defined:
+            problems.append("data-tmpl is used but renderString() is missing — { $var } would show")
+    if 'data-tmpl=' in html and 'formatNumber' not in html:
+        problems.append("templated numbers bypass the numeral choice")
+    # every templated element must carry its arguments
+    for m in re.finditer(r'<[^>]*data-tmpl="([^"]+)"[^>]*>', html):
+        if 'data-k-args' not in m.group(0):
+            problems.append(f"templated {m.group(1)!r} has no data-k-args — it would render empty")
+    return problems
+
+
+def check_markup(html: str, page: str) -> list[str]:
+    """Balanced tags — because a nested <section> renders as chaos, not an error.
+
+    This shipped once: a second <section> opened inside the alerts screen,
+    every gate passed, and the page was structurally wrong. A browser hides
+    the damage; a parser does not.
+    """
+    from html.parser import HTMLParser
+
+    void = {"br", "img", "meta", "link", "input", "hr", "use", "path", "circle",
+            "rect", "source", "area", "base", "col", "embed", "param", "track", "wbr"}
+
+    class Checker(HTMLParser):
+        def __init__(self) -> None:
+            super().__init__()
+            self.stack: list[tuple[str, int]] = []
+            self.errors: list[str] = []
+
+        def handle_starttag(self, tag, attrs):
+            if tag not in void:
+                self.stack.append((tag, self.getpos()[0]))
+
+        def handle_endtag(self, tag):
+            if tag in void:
+                return
+            if not self.stack:
+                self.errors.append(f"stray </{tag}> on line {self.getpos()[0]}")
+                return
+            if self.stack[-1][0] != tag:
+                self.errors.append(
+                    f"line {self.getpos()[0]}: </{tag}> closes "
+                    f"<{self.stack[-1][0]}> opened on line {self.stack[-1][1]}"
+                )
+                for i in range(len(self.stack) - 1, -1, -1):
+                    if self.stack[i][0] == tag:
+                        del self.stack[i:]
+                        break
+            else:
+                self.stack.pop()
+
+    checker = Checker()
+    checker.feed(html)
+    problems = [f"{page}: {e}" for e in checker.errors[:3]]
+    for tag, line in checker.stack[:3]:
+        problems.append(f"{page}: <{tag}> opened on line {line} is never closed")
+    return problems
+
+
 def check_editable(html: str, root: Path) -> list[str]:
     """Every string on the page must be editable per language.
 
@@ -264,6 +356,9 @@ def main() -> int:
         + check_search_engine(html)
         + check_editable(html, root)
         + check_visual_first(html)
+        + check_reachability(html)
+        + check_templates(html)
+        + check_markup(preview.read_text(encoding="utf-8"), "ui-preview.html")
     )
 
     # The editor must be regenerated whenever a locale changes, or a reviewer

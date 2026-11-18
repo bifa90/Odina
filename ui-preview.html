@@ -498,6 +498,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
             <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
           </li>
           <li>
+            <button class="linkish" data-goto="pause" data-k="pause.title">الإيقاف المؤقت</button>
+            <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
+          </li>
+          <li>
             <button class="linkish" data-goto="proactive" data-k="nav.proactive">الحماية الاستباقية</button>
             <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
           </li>
@@ -538,6 +542,9 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
             <button class="linkish" data-goto="numbers" data-k="num.title">الأرقام</button>
           </li>
           <li>
+            <button class="linkish" data-goto="help" data-k="help.title">الشرح عند الطلب</button>
+          </li>
+          <li>
             <button class="linkish" data-goto="home" data-k="map.node.home">الرئيسية</button>
           </li>
         </ul>
@@ -552,6 +559,9 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <section class="sec screen" id="screen-home" data-screen="home">
     <div class="crumb">
       <span class="here" data-k="nav.home">الرئيسية</span>
+      <button class="back" data-goto="map" style="margin-inline-start:auto">
+        <svg class="i sm" style="width:15px;height:15px"><use href="#i-folder"/></svg>
+        <span data-k="map.title">خريطة البرنامج</span></button>
       <span class="screentag">screen-home</span>
     </div>
     <h2><svg class="i"><use href="#i-shield"/></svg><span data-k="sec.main">1 · الشاشة الرئيسية</span></h2>
@@ -566,7 +576,8 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
                 stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
         <div class="label" data-k="state.protected">أنت محمي</div>
-        <div class="sub" data-k="shield.sub">3 جدران فعّالة · قاعدة التهديدات محدّثة</div>
+        <div class="sub" data-k="shield.sub" data-tmpl="shield.sub"
+             data-k-args='{"n":"3"}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
       </div>
 
       <div class="walls">
@@ -592,7 +603,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
       <div class="actions">
         <button class="btn primary" data-k="action.scan_now">افحص الآن</button>
-        <button class="btn ghost" data-k="action.pause">إيقاف مؤقت</button>
+        <button class="btn ghost" data-goto="pause"><svg class="i sm"><use href="#i-pause"/></svg><span data-k="action.pause">إيقاف مؤقت</span></button>
       </div>
 
       <!-- ══ شريط التنقل: أربعة رموز ظاهرة في الرئيسية نفسها (§6أ.3 + §6أ.4أ) ══
@@ -645,7 +656,13 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   </section>
 
   <!-- ══════════ 1c. الإيقاف: مستويان ══════════ -->
-  <section class="sec review-only">
+  <section class="sec screen" id="screen-pause" data-screen="pause">
+    <div class="crumb">
+      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <span data-k="nav.home">الرئيسية</span>
+      <span style="color:var(--text3)">/</span>
+      <span class="here" data-k="pause.title">الإيقاف المؤقت</span>
+    </div>
     <h2><svg class="i"><use href="#i-pause"/></svg><span data-k="lvl.title">الإيقاف — مستويان لا مستوى واحد</span></h2>
     <p class="hint" data-k="lvl.hint">المستخدم يملك جهازه · نُخبره ونتركه يقرر · والمسؤولية عليه</p>
 
@@ -661,7 +678,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="lvrow"><span data-k="lvl.app">التطبيق</span><b data-k="lvl1.app">يعمل · يفحص · يمنع · لا يسأل</b></div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d10">١٠ دقائق</span><span class="chip" data-k="lvl.d30">٣٠ دقيقة</span>
+          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":"10"}'>١٠ دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":"30"}'>٣٠ دقيقة</span>
           <span class="chip" data-k="lvl.d60">ساعة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
       </div>
@@ -675,7 +692,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="resp" data-k="lvl2.resp">القرار قرارك، والمسؤولية عليك أثناء هذه المدة.</div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d30">٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
+          <span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":"30"}'>٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
           <span class="chip" data-k="lvl.dpeak">حتى نهاية ساعة الذروة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
         <div class="note" style="margin-top:10px" data-k="lvl.no_permanent">لا إيقاف دائم. أقصاه إعادة تشغيل.</div>
@@ -807,7 +824,13 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   </section>
 
   <!-- ══════════ 2. التنبيهات ══════════ -->
-  <section class="sec review-only">
+  <section class="sec screen" id="screen-alerts" data-screen="alerts">
+    <div class="crumb">
+      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <span data-k="nav.home">الرئيسية</span>
+      <span style="color:var(--text3)">/</span>
+      <span class="here" data-k="nav.alerts">مركز التنبيهات</span>
+    </div>
     <h2 data-k="sec.alerts">2 · التنبيهات</h2>
     <p class="hint" data-k="sec.alerts.hint">نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب</p>
 
@@ -940,20 +963,6 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <h2><svg class="i"><use href="#i-pause"/></svg><span data-k="proactive.title">الحماية الاستباقية</span></h2>
     <p class="hint" data-k="proactive.sub">ست قواعد. لكل واحدة مفتاحها، ولا واحدة تفتح الأخرى.</p>
     <p><button class="btn primary" data-goto="exception"><svg class="i sm"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات — قاعدة واحدة، لا الكل</span></button></p>
-  </section>
-
-  <!-- ══════════ 7. مركز التنبيهات ══════════ -->
-  <section class="sec screen review-only" id="screen-alerts" data-screen="alerts">
-    <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
-      <span data-k="nav.home">الرئيسية</span>
-      <span style="color:var(--text3)">/</span>
-      <span class="here" data-k="nav.alerts">مركز التنبيهات</span>
-    </div>
-    <h2><svg class="i"><use href="#i-alert"/></svg><span data-k="alerts.title">مركز التنبيهات</span></h2>
-    <p class="hint" data-k="alerts.sub">كل ما يستحق النظر في مكان واحد. لا نوافذ منبثقة.</p>
-    <p style="color:var(--text2)" data-k="alerts.empty">لا شيء يستحق النظر الآن.</p>
-    <p><button class="btn ghost" data-goto="quarantine"><svg class="i sm"><use href="#i-folder"/></svg><span data-k="home.goto.quarantine">صندوق العزل</span></button></p>
   </section>
 
   <!-- ══════════ 8. صندوق العزل — الشاشة، لا البطاقة ══════════ -->
@@ -1294,7 +1303,8 @@ function applyLang(code){
   const dict = (window.ODINA_STRINGS || {})[code] || {};
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k = el.dataset.k;
-    if (dict[k]) el.textContent = dict[k];
+    if (!dict[k]) return;
+    el.textContent = renderString(dict[k], el);
   });
   renderPalette();
   refreshTips();
@@ -1395,6 +1405,27 @@ document.querySelectorAll('[data-why]').forEach(b => {
   b.addEventListener('click', () => openWhy(b));
 });
 
+/* ══════════ ملء المتغيّرات ({ $n }) مرة واحدة ══════════
+   كل نص فيه { $var } يمر من هنا. القيمة تُقرأ من data-k-args،
+   وتُنسَّق بأرقام المستخدم قبل أن تدخل الجملة — لا بعدها. */
+function formatNumber(value) {
+  const s = String(value);
+  /* الوقت والتاريخ لا يتبعان نظام الأرقام: «١٤:٣٠» تُقرأ خطأً كـ«١٤ و٣٠»,
+     بينما «14:30» تُقرأ كساعة في كل مكان. العدّادات تتبعه، واللحظة لا. */
+  if (s.indexOf(':') !== -1 || s.indexOf('/') !== -1 || s.indexOf('-') !== -1) return s;
+  return numeralStyle === 'hindi' ? s.replace(/[0-9]/g, d => HINDI[+d]) : s;
+}
+
+function renderString(template, el) {
+  if (!template || template.indexOf('{') === -1) return template;
+  let args = {};
+  try { args = JSON.parse(el.getAttribute('data-k-args') || '{}'); } catch (e) {}
+  return template.replace(/\{\s*\$(\w+)\s*\}/g, (whole, name) => {
+    if (!(name in args)) return whole;
+    return formatNumber(args[name]);
+  });
+}
+
 /* ══════════ نظام الأرقام (§6أ.6) ══════════
    الشكل يتغيّر، والقيمة لا. كل رقم في الصفحة يمر من هنا،
    فلا يوجد مكان يبقى بأرقام لم يخترها المستخدم. */
@@ -1403,6 +1434,14 @@ let numeralStyle = 'arabic';
 
 function applyNumerals(style) {
   numeralStyle = style;
+  // a sentence that carries a number is re-rendered, so the form and the
+  // choice never drift apart
+  const lang = document.body.dataset.lang || 'ar';
+  const dict = (window.ODINA_STRINGS || {})[lang] || {};
+  document.querySelectorAll('[data-tmpl]').forEach(el => {
+    const k = el.getAttribute('data-tmpl');
+    if (dict[k]) el.textContent = renderString(dict[k], el);
+  });
   document.querySelectorAll('[data-numeral]').forEach(el => {
     const raw = el.getAttribute('data-numeral');
     el.textContent = style === 'hindi'

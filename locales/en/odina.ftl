@@ -356,8 +356,8 @@ button.on = On
 
 ## ── الإيقاف المؤقت ────────────────────────────
 lvl.app = The app
-lvl.d10 = 10 min
-lvl.d30 = 30 min
+lvl.d10 = { $n } min
+lvl.d30 = { $n } min
 lvl.d60 = 1 hour
 lvl.dpeak = Until peak hour ends
 lvl.dreboot = Until I restart
@@ -410,7 +410,7 @@ sec.usb = 3 · USB alert
 sec.usb.hint = one progress bar · one stage · RTL-aware
 
 ## ── الهوية ────────────────────────────
-shield.sub = 3 walls active · threat list up to date
+shield.sub = { $n } walls active · threat list up to date
 
 ## ── الشرح عند الطلب ────────────────────────────
 tips.body = Hover the underlined word for one line · click it to open an explaining search in your language (Google · Baidu · Yahoo Japan · Yandex).

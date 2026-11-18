@@ -325,8 +325,8 @@ button.on = Ativado
 
 ## ── الإيقاف المؤقت ────────────────────────────
 lvl.app = O aplicativo
-lvl.d10 = 10 minutos
-lvl.d30 = 30 minutos
+lvl.d10 = { $n } minutos
+lvl.d30 = { $n } minutos
 lvl.d60 = Uma hora
 lvl.dpeak = Até o fim do horário de pico
 lvl.dreboot = Até reiniciar
@@ -379,7 +379,7 @@ sec.usb = 6 · USB
 sec.usb.hint = Uma barra de progresso + uma fase · nada mais
 
 ## ── الهوية ────────────────────────────
-shield.sub = 3 muros ativos · base de ameaças atualizada
+shield.sub = { $n } muros ativos · base de ameaças atualizada
 
 ## ── الشرح عند الطلب ────────────────────────────
 tips.body = Passe o mouse na palavra <u>sublinhada</u> para uma linha · clique nela para uma busca explicativa no seu idioma (Google · Baidu · Yahoo Japan · Yandex).
