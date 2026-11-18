@@ -58,110 +58,125 @@ footer{max-width:860px;margin:0 auto;padding:0 22px 48px;color:var(--text2);font
 footer a{color:var(--accent)}
 </style>
 </head>
-<body>
+<body data-page="signing">
 
 <header>
   <div class="bar">
     <div class="mark" aria-hidden="true">O</div>
     <div class="brand">Odina</div>
     <div class="spacer"></div>
-    <a href="index.html">معاينة الواجهة</a>
+    <a href="index.html" data-k="nav.preview">معاينة الواجهة</a>
   </div>
 </header>
 
+<!-- كل نص في هذه الصفحة مفاتيح Fluent. لا نص مكتوب هنا:
+     بدّله في locale-selector أعلاه، أو حرّره في docs/design/translate.html. -->
+<div class="localebar" role="group" aria-label="language">
+  <span data-k="lang.current">اللغة الحالية</span>
+  <select id="langsel">
+    <option value="ar" selected>العربية · ar</option>
+    <option value="en">English · en</option>
+    <option value="zh-Hans">简体中文 · zh-Hans</option>
+    <option value="ja">日本語 · ja</option>
+    <option value="es">Español · es</option>
+    <option value="ru">Русский · ru</option>
+    <option value="hi">हिन्दी · hi</option>
+    <option value="de">Deutsch · de</option>
+    <option value="fr">Français · fr</option>
+    <option value="pt-BR">Português · pt-BR</option>
+  </select>
+  <span class="stale" id="draftflag" hidden data-k="lang.review">مراجعة ناطق أصلي</span>
+</div>
+
 <main>
-  <h1>سياسة توقيع الشيفرة</h1>
-  <p class="sub">ما نُوقّعه، وما لا نُوقّعه، وأين يُحفظ المفتاح، وكيف تتحقق بنفسك.</p>
+  <h1 data-k="signing.title">سياسة توقيع الشيفرة</h1>
+  <p class="sub" data-k="signing.sub"></p>
 
   <div class="status">
-    <b>الحالة اليوم — 2026-11-16</b>
-    هذه السياسة <strong>منشورة قبل بدء التوقيع</strong>، ولم يُوقَّع أي ملف بعد. أول ملف موقّع سيُعلن في صفحة الإصدار
-    مع بصمة SHA-256 الخاصة به. وحتى ذلك الحين يُوزَّع البرنامج كأرشيف ZIP محمول، لا كمثبّت بلا توقيع.
+    <b><span data-k="signing.status_title">الحالة اليوم</span> — <time>2026-11-16</time></b>
+    <span data-k="signing.status_body"></span>
+    <span data-k="signing.status_until"></span>
   </div>
 
-  <p>نُوقّع ملفات Windows التنفيذية فقط، ولا نُوقّع أي شيء لم يُبنَ من هذا المستودع.</p>
+  <h2 data-k="signing.build_title">البناء</h2>
+  <p data-k="signing.build_body"></p>
 
-  <h2>البناء</h2>
-  <p>كل توقيع يحدث على عدّاد GitHub Actions من الالتزام المُعلَن في سجل التغييرات؛ لا بناء محلي، ولا إعادة بناء قبل التوقيع.</p>
+  <h2 data-k="signing.key_title">المفتاح</h2>
+  <p data-k="signing.key_body"></p>
 
-  <h2>المفتاح</h2>
-  <p>لا نحتفظ بأي مفتاح توقيع. المفتاح في وحدة أمنية معزولة (HSM) لدى SignPath Foundation، ولكل عملية توقيع موافقةُ مشرف صريحة.</p>
-
-  <h2>ما يُوقَّع</h2>
+  <h2 data-k="signing.signed_title">ما يُوقَّع</h2>
   <ul>
-    <li>المثبّت: <code>Odina-Setup-x.y.z.exe</code></li>
-    <li>حزمة المتجر: <code>Odina-x.y.z.msix</code></li>
+    <li><span data-k="signing.signed_installer"></span>: <code dir="ltr">Odina-Setup-x.y.z.exe</code></li>
+    <li><span data-k="signing.signed_store"></span>: <code dir="ltr">Odina-x.y.z.msix</code></li>
   </ul>
 
-  <h2>ما لا يُوقَّع</h2>
+  <h2 data-k="signing.unsigned_title">ما لا يُوقَّع</h2>
   <ul>
-    <li>قواعد البصمات — تُوقَّع بمفتاح Ed25519 منفصل، لأنها تُحدَّث أكثر من البرنامج.</li>
-    <li>الأدوات في مجلد <code>tools/</code> — تُوزَّع بترخيص MIT كنص مصدري، لا كملفات تنفيذية.</li>
+    <li data-k="signing.unsigned_db"></li>
+    <li data-k="signing.unsigned_tools"></li>
   </ul>
 
-  <h2>التحقق</h2>
-  <p>بصمة SHA-256 لكل ملف تُنشر في صفحة الإصدار قبل التوقيع وبعده. ويمكنك التحقق من التوقيع بنفسك على ويندوز:</p>
-  <pre><code>Get-AuthenticodeSignature .\Odina-Setup-x.y.z.exe | Format-List Status, SignerCertificate</code></pre>
-  <p>يجب أن يكون الحالة <code>Valid</code>، وأن يكون الناشر <strong>SignPath Foundation</strong>. وإن اختلفت البصمة عن المنشورة، فلا تشغّل الملف.</p>
+  <h2 data-k="signing.verify_title">التحقق</h2>
+  <p data-k="signing.verify_body"></p>
+  <pre dir="ltr"><code>Get-AuthenticodeSignature .\Odina-Setup-x.y.z.exe | Format-List Status, SignerCertificate</code></pre>
+  <p data-k="signing.verify_must"></p>
 
-  <h2>الإلغاء</h2>
-  <p>إن بُني إصدار من شيفرة غير مُراجَعة، نُلغيه ونُعلن الإلغاء قبل أي شيء آخر.</p>
+  <h2 data-k="signing.revoke_title">الإلغاء</h2>
+  <p data-k="signing.revoke_body"></p>
 
-  <div class="credit">
-    التوقيع المجاني مقدَّم من SignPath.io، والشهادة من SignPath Foundation.
-    <span>Free code signing provided by SignPath.io, certificate by SignPath Foundation.</span>
-  </div>
-
-  <hr>
-
-  <section class="en" lang="en" dir="ltr">
-    <h1>Code signing policy</h1>
-    <p class="sub">What we sign, what we never sign, where the key lives, and how to verify it yourself.</p>
-
-    <div class="status">
-      <b>Status — 2026-11-16</b>
-      This policy is <strong>published before signing begins</strong>. No build has been signed yet. The first signed
-      build will be announced on its release page together with its SHA-256. Until then the program ships as a portable
-      ZIP archive, never as an unsigned installer.
-    </div>
-
-    <p>Only Windows binaries built from this repository are signed. Nothing else is.</p>
-
-    <h2>Build</h2>
-    <p>Builds run on GitHub Actions from the commit named in the release notes. There is no local build, and a binary is never rebuilt before signing.</p>
-
-    <h2>Key</h2>
-    <p>We hold no signing key. The key lives in SignPath Foundation's HSM, and every signing request requires explicit maintainer approval.</p>
-
-    <h2>Signed</h2>
-    <ul>
-      <li>The installer: <code>Odina-Setup-x.y.z.exe</code></li>
-      <li>The Store package: <code>Odina-x.y.z.msix</code></li>
-    </ul>
-
-    <h2>Not signed</h2>
-    <ul>
-      <li>Signature databases — signed with a separate Ed25519 key, because they update far more often than the program.</li>
-      <li>Everything under <code>tools/</code> — MIT-licensed and distributed as source, never as binaries.</li>
-    </ul>
-
-    <h2>Verification</h2>
-    <p>A SHA-256 for every artefact is published on the release page, before and after signing. You can verify the signature yourself on Windows:</p>
-    <pre><code>Get-AuthenticodeSignature .\Odina-Setup-x.y.z.exe | Format-List Status, SignerCertificate</code></pre>
-    <p><code>Status</code> must read <code>Valid</code> and the publisher must be <strong>SignPath Foundation</strong>. If the hash differs from the published one, do not run the file.</p>
-
-    <h2>Revocation</h2>
-    <p>If a build is ever produced from unreviewed code, it is revoked and the revocation is announced before anything else.</p>
-
-    <div class="credit">
-      Free code signing provided by SignPath.io, certificate by SignPath Foundation.
-    </div>
-  </section>
+  <div class="credit" data-k="signing.credit"></div>
 </main>
 
 <footer>
-  <p>التفاصيل الكاملة وقائمة الشروط: <a href="https://github.com/bifa90/Odina/blob/main/docs/code-signing.md">docs/code-signing.md</a> · آخر تحديث 2026-11-16</p>
+  <p><span data-k="signing.updated">آخر تحديث</span> 2026-11-16 ·
+    <a href="https://github.com/bifa90/Odina/blob/main/docs/code-signing.md">docs/code-signing.md</a></p>
 </footer>
+
+<script src="locales.js"></script>
+<script>
+/* الصفحة تقرأ نفس الملفات التي يحرّرها المراجع: locales/<lang>/odina.ftl.
+   locales.js يُولَّد من تلك الملفات بـ `python3 tools/gen-locale-js.py`،
+   فما تراه هنا هو ما سيُشحن، لا نسخة ثانية تنسخ منه. */
+(function () {
+  var STR = window.ODINA_STRINGS || {};
+  var RTL = { ar: 1, he: 1, fa: 1, ur: 1 };
+
+  function setLang(lang) {
+    var table = STR[lang] || {};
+    document.documentElement.lang = lang;
+    document.documentElement.dir = RTL[lang] ? 'rtl' : 'ltr';
+
+    document.querySelectorAll('[data-k]').forEach(function (el) {
+      var v = table[el.getAttribute('data-k')];
+      if (typeof v === 'string' && v.length) el.textContent = v;
+    });
+    // A language no native speaker has reviewed is shown, never hidden:
+    // the reviewer can read it and decide, but the badge says what it is.
+    var flag = document.getElementById('draftflag');
+    if (flag) flag.hidden = !(window.ODINA_DRAFT || {})[lang];
+
+    document.getElementById('langsel').value = lang;
+    try { localStorage.setItem('odina.lang', lang); } catch (e) {}
+    // A page whose strings are missing is a broken page, not a translated one.
+    var missing = Object.keys(document.querySelectorAll('[data-k]').length ? {} : {});
+    var absent = [];
+    document.querySelectorAll('[data-k]').forEach(function (el) {
+      var k = el.getAttribute('data-k');
+      if (!table[k]) absent.push(k);
+    });
+    window.ODINA_MISSING = absent;
+  }
+
+  var saved = null;
+  try { saved = localStorage.getItem('odina.lang'); } catch (e) {}
+  var start = saved && STR[saved] ? saved : (document.documentElement.lang || 'ar');
+  setLang(start);
+
+  document.getElementById('langsel').addEventListener('change', function (e) {
+    setLang(e.target.value);
+  });
+})();
+</script>
 
 </body>
 </html>

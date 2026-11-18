@@ -165,3 +165,265 @@ exception.refused.veto_stands = O arquivo está confirmado. Uma exceção flexib
 exception.live_note = sua decisão · todo o resto continua ativo · você pode revogar a qualquer momento
 exception.lines_title = Quatro coisas nunca são excetuadas:
 exception.lines_body = o veredito do primeiro muro (um arquivo confirmado é isolado mesmo sob exceção) · a proteção contra adulteração · a segunda regra (uma exceção de WSH não abre o PowerShell) · “risco alto” e acima. Revogar é sempre um clique, sem senha.
+
+## ── Mapa do aplicativo e navegação (constituição §6أ.3) ─────────────────
+nav.home = Início
+nav.quarantine = Quarentena
+nav.proactive = Proteção proativa
+nav.alerts = Central de avisos
+nav.settings = Configurações
+nav.language = Idioma
+nav.privacy = Privacidade
+back = Voltar
+menu.more = Mais
+menu.advanced = Opções avançadas
+map.title = Mapa do aplicativo
+map.hint = Como cada tela é alcançada · no máximo três níveis
+
+## ── Política de assinatura de código (página pública) ─────────────────────────
+signing.title = Política de assinatura de código
+signing.sub = O que assinamos, o que nunca assinamos, onde fica a chave e como verificar você mesmo.
+signing.status_title = Situação hoje
+signing.status_body = Esta política é publicada antes do início da assinatura, e nenhuma compilação foi assinada ainda. A primeira compilação assinada será anunciada na página da versão junto com o hash.
+signing.status_until = Até então o programa é distribuído como arquivo ZIP portátil, nunca como instalador sem assinatura.
+signing.build_title = Compilação
+signing.build_body = As compilações rodam no GitHub Actions a partir do commit indicado nas notas da versão. Não há compilação local, e um binário nunca é recompilado antes da assinatura.
+signing.key_title = A chave
+signing.key_body = Não guardamos nenhuma chave de assinatura. A chave fica no HSM da SignPath Foundation, e cada pedido de assinatura exige aprovação explícita de um mantenedor.
+signing.signed_title = Assinado
+signing.signed_installer = O instalador
+signing.signed_store = O pacote da loja
+signing.unsigned_title = Não assinado
+signing.unsigned_db = As bases de assinaturas — assinadas com uma chave Ed25519 separada, porque são atualizadas muito mais que o programa.
+signing.unsigned_tools = Tudo em tools — licenciado em MIT e distribuído como código-fonte, nunca como binário.
+signing.verify_title = Verificação
+signing.verify_body = Um SHA-256 de cada artefato é publicado na página da versão, antes e depois da assinatura. Você pode verificar no Windows:
+signing.verify_must = O status precisa ser Valid e o editor precisa ser SignPath Foundation. Se o hash diferir do publicado, não execute o arquivo.
+signing.revoke_title = Revogação
+signing.revoke_body = Se alguma compilação vier de código não revisado, ela é revogada e a revogação é anunciada antes de qualquer outra coisa.
+signing.credit = Assinatura de código gratuita fornecida pela SignPath.io, certificado pela SignPath Foundation.
+signing.updated = Última atualização
+
+## ── Glossário — uma linha por termo ─────────────
+tip.confirmed = O hash dele está na base de ameaças. Não é um palpite.
+tip.high_risk = Sinais fortes de perigo, e o hash ainda não foi confirmado.
+tip.suspicious = Parece estranho: o nome, o lugar ou o comportamento. Não verificado.
+tip.pua = Não é um vírus, mas contorna a proteção de outro programa.
+tip.signature = Hashes de arquivos conhecidos. Atualizá-los mantém a proteção em dia.
+tip.behavior = Observa o que o programa faz, não como ele se chama.
+tip.proactive = Impede o ato antes que aconteça, em vez de achá-lo depois.
+tip.pause = Silenciamos apenas as janelas. A verificação e o bloqueio continuam.
+tip.turn_off = Sem verificação e sem bloqueio. Seu dispositivo fica desprotegido nesse tempo.
+tip.exception = Flexibilizar uma regra pela sua decisão. Nada mais muda.
+tip.expert_mode = Revela as opções permanente e de regra inteira. Sem senha nem perguntas.
+tip.wsh = O host de scripts do Windows. Um caminho comum para malwares.
+tip.powershell = Uma ferramenta de comandos no Windows. Restrita por padrão a partir de fontes de risco.
+tip.macros = Comandos dentro de um documento do Office. Não rodam em arquivos sem assinatura.
+tip.amsi = Uma interface do Windows que nos deixa ver um script antes de ele rodar.
+tip.wdac = Uma política do Windows que impede um arquivo específico de rodar.
+tip.usb_trust = A primeira vez que o vemos. Verificado antes de ser aberto.
+tip.tamper = O Odina não pode ser desligado editando seus arquivos ou encerrando seu serviço.
+tip.hash = Uma string que representa o arquivo inteiro. Um byte muda tudo.
+tip.heuristic = Um sinal medido e ponderado. Nunca basta sozinho.
+
+## ── Configurações, privacidade e idioma ─────────────────────────────
+settings.title = Configurações
+settings.sub = Quatro seções. Nada escondido atrás de “avançado” além do raro.
+settings.appearance = Aparência
+settings.appearance.body = Claro ou escuro. Segue o sistema por padrão.
+settings.theme_light = Claro
+settings.theme_dark = Escuro
+settings.theme_system = Seguir o sistema
+settings.behavior = Comportamento
+settings.startup = Inicia com o Windows
+settings.startup.body = Roda em segundo plano desde a inicialização. Você pode desligar.
+settings.notifications = Avisos
+settings.notifications.body = Três por dia no máximo. O mais importante primeiro.
+settings.updates = Atualizações
+settings.updates.body = Automáticas para a base de ameaças, manuais para o programa.
+settings.about = Sobre
+settings.version = Versão
+settings.database = Base de ameaças
+settings.database.date = Última atualização
+
+privacy.title = Privacidade
+privacy.sub = O que sai do seu dispositivo e o que nunca sai. Sem exceções.
+privacy.telemetry = Zero telemetria
+privacy.telemetry.body = Sem estatísticas, sem id de dispositivo, sem impressão digital. Nada é enviado sozinho.
+privacy.local = Tudo local
+privacy.local.body = Análise, decisão e registro ficam no seu disco.
+privacy.report = O relatório é sua decisão
+privacy.report.body = Um relatório só é enviado se você escolher enviá-lo.
+privacy.search = Busca sob demanda
+privacy.search.body = Abre um buscador no seu idioma. Enviamos só o termo, nunca seus arquivos.
+privacy.log = O registro
+privacy.log.body = Local e legível no seu idioma. Você pode apagá-lo quando quiser.
+privacy.log_clear = Apagar o registro
+
+lang.title = Idioma
+lang.sub = Dez idiomas. A tradução aparece na hora e a fonte segue o seu idioma.
+lang.current = Idioma atual
+lang.rtl = Escrito da direita para a esquerda
+lang.ltr = Escrito da esquerda para a direita
+lang.review = Revisão nativa
+lang.review.body = Um idioma sem revisor nativo é suspenso, não publicado.
+
+home.walls = Os três muros
+home.action.scan = Verificar agora
+home.action.pause = Pausar
+home.action.expert = Modo especialista
+home.action.why = Por quê?
+home.goto.quarantine = Quarentena
+home.goto.alerts = Central de avisos
+home.goto.settings = Configurações
+home.goto.proactive = Proteção proativa
+home.quarantine_count = { $count } arquivo(s) em quarentena
+home.alerts_count = { $count } aviso(s) que merecem um olhar
+home.proactive_summary = Seis regras · uma excetuada
+proactive.title = Proteção proativa
+proactive.sub = Seis regras. Cada uma com seu interruptor, e nenhuma abre outra.
+alerts.title = Central de avisos
+alerts.sub = Tudo o que merece um olhar em um só lugar. Sem janelas surgindo.
+alerts.empty = Nada que mereça um olhar agora.
+exception.detail.title = Exceção — uma regra
+exception.detail.sub = O que muda, por quanto tempo e como volta.
+map.node.home = Início
+map.node.quarantine = Quarentena
+map.node.proactive = Proativa
+map.edge.from_home = do Início
+map.edge.from_alert = de um aviso
+map.legend = Linha cheia é entrada permanente · pontilhada precisa de contexto
+
+## ── Explicação sob demanda ─────────────────────────────
+help.title = Explicação sob demanda
+help.hint = Uma linha ao passar · uma busca completa ao clicar, no seu idioma.
+help.tip.title = Dica imediata
+help.tip.body = Uma palavra sublinhada e uma linha de no máximo 90 caracteres.
+help.guide.title = Um guia mais longo
+help.guide.body = Abre por um botão dentro da dica e se lê num buscador que você conhece.
+help.guide.cta = Abrir a busca
+help.engine.title = O buscador segue idioma e lugar
+help.col.lang = Idioma
+help.col.engine = Buscador
+help.col.why = Motivo
+help.why.default = A maior cobertura para este idioma
+help.why.zh = A referência dentro da China, onde o Google é limitado
+help.why.ja = Prioriza páginas japonesas, não traduzidas
+help.why.ru = Entende melhor a morfologia russa que os demais
+help.query.note = Enviamos só o termo. Sem nome de arquivo, sem caminho, sem id de dispositivo.
+path.copy_hint = copiar
+nav.preview = Prévia da interface
+
+## ── التنبيهات والشارات ────────────────────────────
+alert.confirmed.cta = Abrir a quarentena
+badge.confirmed = Confirmado
+badge.high = Risco alto
+badge.low = Suspeito
+badge.pua = Risco médio
+button.off = Desativado
+button.on = Ativado
+
+## ── الإيقاف المؤقت ────────────────────────────
+lvl.app = O aplicativo
+lvl.d10 = { $n } minutos
+lvl.d30 = { $n } minutos
+lvl.d60 = Uma hora
+lvl.dpeak = Até o fim do horário de pico
+lvl.dreboot = Até reiniciar
+lvl.hint = Avisamos, e você decide.
+lvl.no_permanent = Não há pausa permanente. A mais longa termina ao reiniciar.
+lvl.state_off = Proteção pausada
+lvl.state_off_sub = Até 14:30 · sua decisão
+lvl.title = Pausa — dois níveis, não um
+lvl.what_continues = O que continua
+lvl.what_stops = O que para
+lvl1.app = Roda · verifica · bloqueia · não pergunta
+lvl1.body = Sem janela nem som. A verificação e o bloqueio continuam.
+lvl1.cont = Os três muros
+lvl1.name = Silenciar avisos
+lvl1.stops = Só os avisos
+lvl2.body = Sem verificação nem bloqueio. Seu dispositivo fica desprotegido.
+lvl2.name = Parar a proteção
+lvl2.resp = A responsabilidade é sua durante esse tempo.
+lvl2.warn = Paramos de proteger, não de avisar.
+
+## ── دستور الواجهة — القواعد الخمس ────────────────────────────
+notes.1b = Um nome de muro é uma promessa, não um rótulo.
+notes.1t = Três muros, três promessas
+notes.2b = O caminho seguro é o visível, nunca o escondido.
+notes.2t = Uma decisão recomendada
+notes.3b = Um ícone sem palavra é um enigma; uma frase abaixo o resolve.
+notes.3t = Os ícones se explicam
+notes.4b = Nenhuma janela que toma a tela. O aviso vive na central.
+notes.4t = Nunca um modal
+notes.5b = Uma frase de estado. Dois números. Um botão.
+notes.5t = O Início se lê em dez segundos
+
+## ── صندوق العزل ────────────────────────────
+q.reason1 = Ameaça confirmada
+q.reason2 = Ferramenta de crack
+quarantine.opened_from = Abre de um aviso e do contador do Início — nunca de um menu escondido.
+quarantine.restore = Restaurar
+
+## ── دستور الواجهة — القواعد الخمس ────────────────────────────
+sec.alerts = 2 · Avisos
+sec.alerts.hint = Menos texto · nunca um botão excluir · explicação sob demanda
+sec.color = 4 · Paleta de cores
+sec.color.hint = Contraste medido na página, não afirmado
+sec.fonts = 5 · Fontes
+sec.fonts.hint = Uma fonte por família de idiomas · sem download, sem custo
+sec.main = 1 · A tela inicial
+sec.main.hint = ≤ 8 elementos · 3 muros · dois botões · sem termos técnicos
+sec.notes = Regras que transformam ideias em portas
+sec.usb = 6 · USB
+sec.usb.hint = Uma barra de progresso + uma fase · nada mais
+
+## ── الهوية ────────────────────────────
+shield.sub = { $n } muros ativos · base de ameaças atualizada
+
+## ── الشرح عند الطلب ────────────────────────────
+tips.body = Passe o mouse na palavra <u>sublinhada</u> para uma linha · clique nela para uma busca explicativa no seu idioma (Google · Baidu · Yahoo Japan · Yandex).
+tips.legend = Explicação sob demanda:
+
+## ── دستور الواجهة — القواعد الخمس ────────────────────────────
+trust.1d = Dizemos o que aconteceu, não a técnica. Uma frase.
+trust.1t = Clareza
+trust.2d = No máximo dois botões. Uma opção principal. Zero configuração obrigatória.
+trust.2t = Simplicidade
+trust.3d = Sem evento = sem janela. ≤ 3 avisos por dia. Nunca um modal.
+trust.3t = Tranquilidade
+trust.4d = A consequência de cada botão vem antes, não depois. E o caminho seguro é o visível.
+trust.4t = Conhecer as consequências
+trust.sub = Cada tela é medida por estes quatro. Em conflito: segurança primeiro.
+
+## ── USB ────────────────────────────
+usb.stage = Fase
+
+## ── Algarismos ─────────────────────────────
+num.title = Algarismos
+num.sub = Os números dos contadores, avisos e registro.
+num.body = Escolha a forma que você lê mais rápido. Toda conta é a mesma.
+num.arabic = 0 1 2 3 4 5 6 7 8 9
+num.hindi = ٠ ١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩
+num.arabic.name = Algarismos árabes
+num.hindi.name = Algarismos árabes orientais
+num.sample = 3 avisos · 12 arquivos
+num.note = A mudança é imediata. Sem reiniciar.
+
+## ── Dicas da pausa — sob demanda ─────────────────────────────
+tip.lvl1 = Sem janela, sem aviso, sem som, mas a verificação e o bloqueio continuam em segundo plano: um arquivo infectado é isolado em silêncio e mostrado na volta.
+tip.lvl2 = Sem verificação, sem bloqueio, sem aviso. O serviço roda mas não faz nada, e seu dispositivo fica sem proteção.
+tip.no_permanent = A pausa mais longa termina ao reiniciar, e esse é o único limite que impomos.
+
+## ── Regra quatro: visual primeiro ─────────────────────────────
+visual.title = Visual primeiro
+visual.rule = A imagem antes da frase: o que a tela faz é visto, não explicado.
+visual.why = Quem lê devagar, ou não lê o seu idioma, entende a forma e a cor antes da linha.
+visual.n1 = Cada elemento carrega forma, cor e lugar, e nunca depende de uma palavra.
+visual.n2 = A mesma forma significa a mesma coisa em toda tela.
+visual.n3 = A cor separa o seguro do perigoso; o texto nomeia o motivo.
+visual.n4 = Um ícone sem palavra é um teste: se precisa de explicação, o ícone está errado.
+visual.n5 = O texto explica a imagem, não a repete.
+visual.sample = Passe o mouse no ícone: uma palavra. Clique: a explicação inteira no seu idioma.
+trust.count = Cinco, não quatro.
+help.sample.title = Um exemplo real

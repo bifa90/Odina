@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, rust-syn, public]
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, ui-law, loc-js, rust-syn, public]
 
     steps:
       - uses: actions/checkout@v4
@@ -78,6 +78,18 @@ jobs:
       - name: exc-ui
         if: matrix.gate == 'exc-ui'
         run: python3 tools/ci/check-exception-ui.py
+
+      # The UI constitution is enforced on the page, not in the spec: a rule
+      # that only lives in prose is a rule nobody can fail.
+      - name: ui-law
+        if: matrix.gate == 'ui-law'
+        run: python3 tools/ci/check-ui-constitution.py
+
+      # locales.js is generated from the .ftl files; a stale copy would show a
+      # reviewer strings that are no longer what ships.
+      - name: loc-js
+        if: matrix.gate == 'loc-js'
+        run: python3 tools/gen-locale-js.py --check
 
       - name: rust-syn
         if: matrix.gate == 'rust-syn'
