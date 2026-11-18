@@ -43,6 +43,10 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: clippy
+        # Windows defaults to pwsh, where `$?` and `[ ]` are not what this
+        # script means. Each runner has bash; say so instead of writing the
+        # same logic twice.
+        shell: bash
         run: |
           # Both crates, both feature sets, one log file. The log exists because
           # a failing step whose output cannot be read costs a whole CI cycle:
@@ -59,6 +63,7 @@ jobs:
 
       - name: clippy diagnostics
         if: failure()
+        shell: bash
         run: python3 tools/ci/clippy-why.py
 
       - name: build
