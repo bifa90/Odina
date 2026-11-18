@@ -759,7 +759,7 @@ odina/
 ### Phase 0 — التأسيس (أسبوع 1)
 - [x] ✅ إنشاء المستودع + الهيكل
 - [x] ✅ **الوثائق الست الملزمة** — `docs/spec/`: protection-policy · scoring-spec · report-schema · usb-security-spec · localization-spec · design-system (2026-11-16)
-- [x] ✅ **CI/CD** — سبع بوابات في `.github/workflows/gates.yml` + `tools/ci/run-all.sh` (2026-11-16، `docs/ci.md`)
+- [x] ✅ **CI/CD** — سبع بوابات في `.github/workflows/gates.yml` + `tools/ci/run-all.sh` (2026-11-16، `docs/ci.md`) — و`public` ثامنة (2026-11-18) · 99 اختبارًا
 - [ ] إعداد Golden Set (5,500 عينة)
 - [ ] قالب التقرير + سكربت التوقيع
 - [x] ✅ اعتماد **الموجّه الحالي** (`docs/odina-agent-prompt-v17.md`) كملف مرجعي في المستودع
