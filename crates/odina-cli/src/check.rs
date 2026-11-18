@@ -252,7 +252,7 @@ pub fn walk(dir: &Path) -> Walked {
             }
         };
 
-        let mut paths: Vec<PathBuf> = Vec::new();
+        let mut paths: Vec<(bool, PathBuf)> = Vec::new();
         for entry in entries.take(MAX_ENTRIES_PER_DIR) {
             let Ok(entry) = entry else {
                 read_errors += 1;
@@ -269,18 +269,20 @@ pub fn walk(dir: &Path) -> Walked {
                 continue;
             }
             if kind.is_dir() {
-                paths.push(entry.path());
+                paths.push((true, entry.path()));
             } else if kind.is_file() {
-                paths.push(entry.path());
+                paths.push((false, entry.path()));
             } else {
                 // A pipe, a socket, a device: opening it can block forever.
                 links_skipped += 1;
             }
         }
-        paths.sort();
-        for path in paths {
-            // `is_dir` here is safe: the entry was not a symlink above.
-            if path.is_dir() {
+        // Sorted by path, and the `is_dir` flag rides along so the loop below
+        // does not have to ask the filesystem a second time — asking again is
+        // what followed the link in the first place.
+        paths.sort_by(|a, b| a.1.cmp(&b.1));
+        for (is_dir, path) in paths {
+            if is_dir {
                 stack.push(path);
             } else {
                 files.push(path);
