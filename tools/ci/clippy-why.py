@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
 """Turn a failed clippy run into annotations.
 
 The clippy step writes `clippy.log`. Job logs are not always retrievable (they
