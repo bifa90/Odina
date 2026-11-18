@@ -44,25 +44,16 @@ jobs:
 
       - name: clippy
         run: |
+          # Both crates, both feature sets, and every diagnostic printed whether
+          # or not the run succeeds. An earlier version of this step swallowed
+          # its own output and failed for four runs with nothing to read.
           set +e
-          cargo clippy --workspace --all-targets --locked -- -D warnings > clippy-1.txt 2>&1
+          cargo clippy --workspace --all-targets --locked -- -D warnings
           a=$?
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > clippy-2.txt 2>&1
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings
           b=$?
-          echo "::error::RC workspace=$a instrument=$b sizes=$(wc -c < clippy-1.txt)/$(wc -c < clippy-2.txt)"
-          cat clippy-1.txt clippy-2.txt
-          if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then
-            python3 -c "
-          import pathlib
-          out=[]
-          for f in ('clippy-1.txt','clippy-2.txt'):
-              b=pathlib.Path(f).read_text(errors='replace').replace(chr(27),'')
-              out += []
-          pathlib.Path('n.txt').write_text(' <<<NL>>> '.join(b.splitlines()[-18:])[:1400])
-          "
-            echo "::error::CLIPPY $(cat n.txt)"
-            exit 1
-          fi
+          echo "clippy: workspace=$a instrument=$b"
+          if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then exit 1; fi
 
       - name: build
         run: cargo build --workspace --locked

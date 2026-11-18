@@ -496,9 +496,11 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
 mod tests {
     use super::*;
 
-    /// `mkfifo(3)`. Declared here rather than pulled in as a dependency: one
-    /// test needs one call, and a crate for a fixture is not a trade worth
-    /// making in a build that is checked for every dependency it links.
+    // `mkfifo(3)`. Declared here rather than pulled in as a dependency: one
+    // test needs one call, and a crate for a fixture is not a trade worth
+    // making in a build that is checked for every dependency it links.
+    // A `///` comment would be wrong here: rustdoc does not document extern
+    // blocks, so the doc comment itself is the warning.
     #[cfg(unix)]
     extern "C" {
         #[link_name = "mkfifo"]
