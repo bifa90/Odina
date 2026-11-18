@@ -51,8 +51,22 @@ jobs:
 
       - name: clippy
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings
+          cargo clippy --workspace --all-targets --locked -- -D warnings > /tmp/c1.txt 2>&1 || true
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > /tmp/c2.txt 2>&1 || true
+          python3 -c "
+          import pathlib
+          out=[]
+          for f in ('/tmp/c1.txt','/tmp/c2.txt'):
+              b=pathlib.Path(f).read_text(errors='replace').replace(chr(27),'')
+              out += [l for l in b.splitlines() if l.startswith(('error','warning')) or l.lstrip().startswith('-->')]
+          print(' <<<NL>>> '.join(out[:10]) if out else 'CLEAN')
+          pathlib.Path('/tmp/n.txt').write_text(' <<<NL>>> '.join(out[:10])[:1400] or 'CLEAN')
+          "
+          cat /tmp/n.txt
+          if grep -qE '^error' /tmp/c1.txt /tmp/c2.txt; then
+            echo "::error::CLIPPY $(cat /tmp/n.txt)"
+            exit 1
+          fi
 
       - name: build
         run: cargo build --workspace --locked
