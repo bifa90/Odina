@@ -195,6 +195,11 @@ pub struct Walked {
     /// whose real content lives elsewhere is not a folder we measured.
     pub links_skipped: u64,
     /// Folders the walk could not read, split by whether anyone could have.
+    ///
+    /// The public build writes this and prints nothing: the number exists for
+    /// the instrumented report and for the tests. Saying so here is narrower
+    /// than a crate-wide `allow`, which would hide the next field nobody reads.
+    #[cfg_attr(not(feature = "instrument"), allow(dead_code))]
     pub read_errors: u64,
     /// True if the walk stopped early because it hit a limit.
     pub truncated: bool,
@@ -597,8 +602,50 @@ mod tests {
         assert_eq!(first.files, second.files);
         assert!(first.files.len() >= 4);
         assert_eq!(first.links_skipped, 0);
+        assert_eq!(first.read_errors, 0, "a folder we own is fully readable");
         assert!(!first.truncated);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// A folder that exists but cannot be listed is counted, not thrown away.
+    /// Without this the field is only written by the instrumented build, and
+    /// the public one carries a number nobody ever checks.
+    #[test]
+    #[cfg(unix)]
+    fn an_unreadable_folder_is_counted_rather_than_skipped_silently() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let root = std::env::temp_dir().join("odina-check-unreadable");
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("locked")).unwrap();
+        std::fs::create_dir_all(root.join("open")).unwrap();
+        std::fs::write(root.join("open").join("a.txt"), b"x").unwrap();
+        std::fs::write(root.join("locked").join("b.txt"), b"x").unwrap();
+        std::fs::set_permissions(root.join("locked"), std::fs::Permissions::from_mode(0o000))
+            .unwrap();
+
+        // Running as root defeats the permission bit; the test then has nothing
+        // to prove and says so instead of passing for the wrong reason.
+        if std::fs::read_dir(root.join("locked")).is_ok() {
+            let _ = std::fs::set_permissions(
+                root.join("locked"),
+                std::fs::Permissions::from_mode(0o755),
+            );
+            let _ = std::fs::remove_dir_all(&root);
+            return;
+        }
+
+        let walked = walk(&root);
+        let _ =
+            std::fs::set_permissions(root.join("locked"), std::fs::Permissions::from_mode(0o755));
+        let _ = std::fs::remove_dir_all(&root);
+
+        assert_eq!(walked.read_errors, 1, "the unreadable folder is counted");
+        assert_eq!(
+            walked.files.len(),
+            1,
+            "and the readable one is still walked"
+        );
     }
 
     /// The defect that stopped the first real run: a link that points at an
