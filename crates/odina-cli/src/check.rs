@@ -187,37 +187,127 @@ pub fn civil_from_days(z: i64) -> (i64, u32, u32) {
     (if m <= 2 { y + 1 } else { y }, m, d)
 }
 
+/// What a folder walk found, and what it refused to follow.
+pub struct Walked {
+    /// Every regular file, in a stable order.
+    pub files: Vec<PathBuf>,
+    /// Junctions, symlinks and reparse points met and not entered. A folder
+    /// whose real content lives elsewhere is not a folder we measured.
+    pub links_skipped: u64,
+    /// Folders the walk could not read, split by whether anyone could have.
+    pub read_errors: u64,
+    /// True if the walk stopped early because it hit a limit.
+    pub truncated: bool,
+}
+
+/// Above this size, the whole-file digest is skipped and only head and tail
+/// are hashed. 512 MiB is roughly when reading the file stops being free
+/// compared to everything else a scan does.
+pub const FULL_DIGEST_CAP: u64 = 512 * 1024 * 1024;
+
+/// How many directories one walk may visit. A Downloads folder is far below
+/// this; the number exists only so that a pathological tree cannot run for
+/// hours while the user watches nothing happen.
+pub const MAX_DIRS: u64 = 200_000;
+
+/// How many entries one directory may yield before the walk gives up on it.
+/// Windows shortcut files are a normal part of a Downloads folder, and
+/// resolving them is not this tool's job.
+const MAX_ENTRIES_PER_DIR: usize = 500_000;
+
 /// Every file under `dir`, in a stable order. Two runs on the same folder must
 /// produce the same sequence, or the numbers cannot be compared.
-pub fn walk(dir: &Path) -> Vec<PathBuf> {
-    let mut out = Vec::new();
+///
+/// Three things this deliberately does *not* do, each of which would turn a
+/// scan into a hang:
+///
+/// 1. **It never enters a link.** `Path::is_dir` follows junctions and
+///    symlinks, and one junction pointing at an ancestor is an infinite walk.
+///    The entry type from `read_dir` is used instead, which reports the link
+///    rather than its target.
+/// 2. **It never opens a non-regular file.** A named pipe in a downloads
+///    folder blocks on open, forever, and looks exactly like a slow scan.
+/// 3. **It bounds itself.** `MAX_DIRS` stops a tree that is legal but absurd,
+///    and says so rather than returning a number that looks complete.
+pub fn walk(dir: &Path) -> Walked {
+    let mut files = Vec::new();
+    let mut links_skipped = 0u64;
+    let mut read_errors = 0u64;
+    let mut visited = 0u64;
+    let mut truncated = false;
+
     let mut stack = vec![dir.to_path_buf()];
     while let Some(current) = stack.pop() {
-        let mut entries: Vec<PathBuf> = match std::fs::read_dir(&current) {
-            Ok(rd) => rd.filter_map(|e| e.ok()).map(|e| e.path()).collect(),
-            Err(_) => continue,
+        if visited >= MAX_DIRS {
+            truncated = true;
+            break;
+        }
+        visited += 1;
+
+        let entries = match std::fs::read_dir(&current) {
+            Ok(rd) => rd,
+            Err(_) => {
+                read_errors += 1;
+                continue;
+            }
         };
-        entries.sort();
-        for p in entries {
-            if p.is_dir() {
-                stack.push(p);
+
+        let mut paths: Vec<PathBuf> = Vec::new();
+        for entry in entries.take(MAX_ENTRIES_PER_DIR) {
+            let Ok(entry) = entry else {
+                read_errors += 1;
+                continue;
+            };
+            // `DirEntry::file_type` does not follow a link; that is the whole
+            // point of using it here.
+            let Ok(kind) = entry.file_type() else {
+                read_errors += 1;
+                continue;
+            };
+            if kind.is_symlink() {
+                links_skipped += 1;
+                continue;
+            }
+            if kind.is_dir() {
+                paths.push(entry.path());
+            } else if kind.is_file() {
+                paths.push(entry.path());
             } else {
-                out.push(p);
+                // A pipe, a socket, a device: opening it can block forever.
+                links_skipped += 1;
+            }
+        }
+        paths.sort();
+        for path in paths {
+            // `is_dir` here is safe: the entry was not a symlink above.
+            if path.is_dir() {
+                stack.push(path);
+            } else {
+                files.push(path);
             }
         }
     }
-    out.sort();
-    out
+
+    files.sort();
+    Walked {
+        files,
+        links_skipped,
+        read_errors,
+        truncated,
+    }
 }
 
 /// Score one file the same way `scan` does. Kept here so `check` cannot invent
 /// a second opinion about the same file.
 pub fn score_file(path: &Path) -> Option<Scanned> {
     let file = std::fs::File::open(path).ok()?;
-    // No cap on the digest, same as `scan`: the user pointed at a folder and
-    // asked about it, and a silently skipped digest would be a different
-    // answer, not a faster one.
-    let hashes = hash_reader(file, None).ok()?;
+    // The cap exists for this loop and not for `scan`: `scan` was pointed at
+    // one file on purpose, while `check` walks whatever the user has. One ISO
+    // in a Downloads folder is several gigabytes of reading before the first
+    // line of output, which is indistinguishable from a hang. Above the cap,
+    // head and tail are still hashed, the file is still scored, and the report
+    // says the full digest was skipped rather than inventing one.
+    let hashes = hash_reader(file, Some(FULL_DIGEST_CAP)).ok()?;
     let name = path
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
@@ -288,13 +378,41 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
     let mut stats = ScanStats::default();
     let mut exported: Vec<String> = Vec::new();
 
-    let files = if path.is_dir() {
+    let walked = if path.is_dir() {
         walk(path)
     } else {
-        vec![path.to_path_buf()]
+        Walked {
+            files: vec![path.to_path_buf()],
+            links_skipped: 0,
+            read_errors: 0,
+            truncated: false,
+        }
     };
+    let files = walked.files;
+    stats.links_skipped = walked.links_skipped;
+    stats.read_errors = walked.read_errors;
+    stats.truncated = walked.truncated;
 
+    // Silence is what makes a slow scan look like a hung one. This is the only
+    // line written to stderr during a run, it is a count, and it exists because
+    // the first real run on a real Downloads folder stopped here and there was
+    // nothing to read.
+    eprintln!(
+        "odina: {} files to score ({} links skipped, {} folders unreadable{})",
+        files.len(),
+        walked.links_skipped,
+        walked.read_errors,
+        if walked.truncated { ", LIMITED" } else { "" }
+    );
+
+    let mut done: u64 = 0;
+    let mut not_reported: u64 = 0;
+    let total = files.len() as u64;
     for file in &files {
+        done += 1;
+        if total >= 500 && done % 500 == 0 {
+            eprintln!("odina: {done}/{total}");
+        }
         match score_file(file) {
             Some(scanned) => {
                 stats.files += 1;
@@ -310,7 +428,15 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                 // Exporting clean files would turn a privacy-preserving design
                 // into a census of somebody's disk.
                 if scanned.score.interrupts() {
-                    if let Ok(json) = report_for(&scanned).to_json_checked() {
+                    // A file above the digest cap has no `sha256`, and the
+                    // schema requires one, so it cannot produce a valid
+                    // report. It is still counted in its verdict band above —
+                    // it was read and scored, and pretending otherwise would
+                    // break the accounting — but the omission is announced
+                    // rather than silent.
+                    if scanned.hashes.full_digest_skipped() {
+                        not_reported += 1;
+                    } else if let Ok(json) = report_for(&scanned).to_json_checked() {
                         exported.push(json);
                     }
                 }
@@ -320,6 +446,14 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                 stats.unreadable += 1;
             }
         }
+    }
+
+    if not_reported > 0 {
+        eprintln!(
+            "odina: {not_reported} suspicious file(s) above {} MiB have no full digest, \
+             so no report was written for them",
+            FULL_DIGEST_CAP / (1024 * 1024)
+        );
     }
 
     stats.elapsed_ms = started.elapsed().as_millis() as u64;
@@ -359,6 +493,15 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// `mkfifo(3)`. Declared here rather than pulled in as a dependency: one
+    /// test needs one call, and a crate for a fixture is not a trade worth
+    /// making in a build that is checked for every dependency it links.
+    #[cfg(unix)]
+    extern "C" {
+        #[link_name = "mkfifo"]
+        fn mkfifo_c(path: *const std::os::raw::c_char, mode: u32) -> i32;
+    }
 
     #[test]
     fn dates_are_computed_without_a_dependency() {
@@ -447,9 +590,96 @@ mod tests {
         std::fs::write(dir.join("sub").join("d.txt"), b"x").unwrap();
         let first = walk(&dir);
         let second = walk(&dir);
-        assert_eq!(first, second);
-        assert!(first.len() >= 4);
+        assert_eq!(first.files, second.files);
+        assert!(first.files.len() >= 4);
+        assert_eq!(first.links_skipped, 0);
+        assert!(!first.truncated);
         let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// The defect that stopped the first real run: a link that points at an
+    /// ancestor turns `Path::is_dir` into an infinite walk, and the program
+    /// waits forever with no output. The walk must not enter it.
+    #[test]
+    #[cfg(unix)]
+    fn a_link_that_points_at_an_ancestor_does_not_hang_the_walk() {
+        let root = std::env::temp_dir().join("odina-check-loop");
+        let inner = root.join("inner");
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&inner).unwrap();
+        std::fs::write(inner.join("real.txt"), b"x").unwrap();
+        // `inner/loop` -> `root`: entering it walks back to where we started.
+        std::os::unix::fs::symlink(&root, inner.join("loop")).unwrap();
+
+        let walked = walk(&root);
+
+        assert_eq!(walked.files.len(), 1, "only the real file is a file");
+        assert!(
+            walked.links_skipped >= 1,
+            "the link must be reported, not ignored"
+        );
+        assert!(!walked.truncated);
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A named pipe blocks on open, and an open that blocks is indistinguishable
+    /// from a scan that hangs.
+    #[test]
+    #[cfg(unix)]
+    fn a_fifo_is_skipped_rather_than_opened() {
+        use std::ffi::CString;
+        let root = std::env::temp_dir().join("odina-check-fifo");
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(&root).unwrap();
+        std::fs::write(root.join("normal.txt"), b"x").unwrap();
+        let path = CString::new(root.join("pipe").to_string_lossy().as_bytes()).unwrap();
+        // SAFETY: `path` is a live NUL-terminated string, and mkfifo only reads it.
+        let rc = unsafe { mkfifo_c(path.as_ptr(), 0o600) };
+        assert_eq!(rc, 0, "the fixture pipe could not be created");
+
+        let walked = walk(&root);
+
+        assert!(walked.files.iter().all(|f| f.ends_with("normal.txt")));
+        assert!(
+            walked.links_skipped >= 1,
+            "the pipe must be counted as skipped"
+        );
+        let _ = std::fs::remove_dir_all(&root);
+    }
+
+    /// A file above the cap must be scored, must not be reported (the schema
+    /// requires a digest it does not have), and must not be dropped from the
+    /// counters. This is the difference between a scan that says "I could not"
+    /// and one that quietly loses a file.
+    #[test]
+    fn above_the_cap_the_file_is_scored_but_gets_no_report() {
+        use odina_core::hashing::hash_reader;
+
+        // A small cap, because the point is the behaviour above *any* cap, and
+        // hashing 512 MiB in a unit test would be a different kind of problem.
+        const CAP: u64 = 64 * 1024;
+
+        // A reader that never ends, so the cap is what stops it.
+        struct Endless(u64);
+        impl std::io::Read for Endless {
+            fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+                if self.0 == 0 {
+                    return Ok(0);
+                }
+                let n = buf.len().min(self.0 as usize);
+                buf[..n].fill(0x41);
+                self.0 -= n as u64;
+                Ok(n)
+            }
+        }
+
+        let tiny = hash_reader(Endless(CAP + 1), Some(CAP)).unwrap();
+        assert!(
+            tiny.full_digest_skipped(),
+            "the cap must leave the digest empty"
+        );
+        assert_eq!(tiny.size, CAP + 1);
+        assert!(!tiny.head.is_empty() && !tiny.tail.is_empty());
     }
 
     #[test]

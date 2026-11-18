@@ -213,6 +213,15 @@ pub struct ScanStats {
     pub high_risk: u64,
     pub confirmed: u64,
     pub unreadable: u64,
+    /// Links and special files the walk refused to follow or open. Not
+    /// failures: a scan that hangs measures nothing, so the number is how many
+    /// surprises the folder had.
+    pub links_skipped: u64,
+    /// Folders the walk could not read at all.
+    pub read_errors: u64,
+    /// The walk stopped at its own limit. A partial answer labelled partial is
+    /// usable; a partial answer that looks complete is not.
+    pub truncated: bool,
     pub elapsed_ms: u64,
 }
 
@@ -431,6 +440,9 @@ impl PerfReport {
             out.push_str(&format!(",\"high_risk\":{}", s.high_risk));
             out.push_str(&format!(",\"confirmed\":{}", s.confirmed));
             out.push_str(&format!(",\"unreadable\":{}", s.unreadable));
+            out.push_str(&format!(",\"links_skipped\":{}", s.links_skipped));
+            out.push_str(&format!(",\"read_errors\":{}", s.read_errors));
+            out.push_str(&format!(",\"truncated\":{}", s.truncated));
             out.push_str(&format!(",\"elapsed_ms\":{}", s.elapsed_ms));
             out.push('}');
         }

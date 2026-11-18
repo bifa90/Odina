@@ -226,21 +226,39 @@ fn scan_dir(dir: &Path, json: bool, recursive: bool) -> ExitCode {
     }
 }
 
+/// Every file under `dir`, skipping anything that could make the walk hang or
+/// run forever.
+///
+/// The rules are the ones `odina check` uses (see `check::walk`), applied here
+/// so both commands agree: a link is never entered — `Path::is_dir` follows
+/// junctions and one of them pointing at an ancestor is an infinite walk — and
+/// a non-regular file is never opened, because a named pipe blocks on open.
 fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
     let mut files = Vec::new();
     let mut stack = vec![dir.to_path_buf()];
+    let mut visited: u64 = 0;
     while let Some(current) = stack.pop() {
+        if visited >= 200_000 {
+            break;
+        }
+        visited += 1;
         let mut entries: Vec<_> = std::fs::read_dir(&current)?
             .filter_map(|e| e.ok())
-            .map(|e| e.path())
+            .filter_map(|e| {
+                let kind = e.file_type().ok()?;
+                if kind.is_symlink() {
+                    return None;
+                }
+                Some((kind, e.path()))
+            })
             .collect();
         entries.sort();
-        for path in entries {
-            if path.is_dir() {
+        for (kind, path) in entries {
+            if kind.is_dir() {
                 if recursive {
                     stack.push(path);
                 }
-            } else {
+            } else if kind.is_file() {
                 files.push(path);
             }
         }
