@@ -44,25 +44,14 @@ jobs:
 
       - name: clippy
         run: |
-          # Output goes to files first, then both files are shown. Twice now a
-          # `cargo clippy ... -- -D warnings` line has failed this step while
-          # reporting nothing, because everything it printed went to a stream
-          # nothing was reading. A command whose output nobody sees cannot be
-          # debugged, and "it passed on my machine" is not a diagnosis.
-          rc=0
+          set +e
           cargo clippy --workspace --all-targets --locked -- -D warnings > clippy-1.txt 2>&1
-          echo "workspace rc=$?" > clippy-rc.txt || true
+          a=$?
           cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings > clippy-2.txt 2>&1
-          echo "instrument rc=$?" >> clippy-rc.txt || true
-          cat clippy-rc.txt clippy-1.txt clippy-2.txt > everything.txt 2>&1 || true
-          python3 -c "
-          import pathlib
-          b = pathlib.Path('everything.txt').read_text(errors='replace').replace(chr(27),'')
-          keep = [l for l in b.splitlines() if 'rc=' in l or l.startswith(('error','warning')) or l.lstrip().startswith('-->')]
-          pathlib.Path('summary.txt').write_text(' <<<NL>>> '.join(keep[:12]) or 'EMPTY')
-          " || true
-          echo "::error::SUM $(cat summary.txt 2>/dev/null || echo none)"
-          true
+          b=$?
+          echo "workspace exit $a · instrument exit $b"
+          cat clippy-1.txt clippy-2.txt
+          if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then exit 1; fi
 
       - name: build
         run: cargo build --workspace --locked
