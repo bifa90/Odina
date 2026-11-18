@@ -271,6 +271,35 @@ body.real .sec + .sec{margin-top:26px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
   clip-path:inset(50%);white-space:nowrap;border:0}
 
+/* Wall 3: the state stays in the row; only the activity scope is a tooltip. */
+.surface-intro,.demo-notice{font-size:13px;color:var(--text2);margin:6px 0 12px}
+.remediation-box{padding:12px 14px;border:1px solid var(--border);border-inline-start:3px solid var(--accent);
+  border-radius:var(--radius);background:var(--surface)}
+.remediation-box .demo-notice{margin:0 0 4px}
+#remediation-status{margin:0;font-size:14px;font-weight:600}
+#remediation-demo{margin-top:9px;font-size:14px}
+#remediation-demo summary{width:fit-content;cursor:pointer;color:var(--text2)}
+.demo-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.demo-controls :is(select,button){max-width:100%;flex:0 1 auto}
+.demo-controls button[hidden]{display:none}
+.surface-heading{font-size:15px;margin:18px 0 6px}
+.surface-list{list-style:none;margin:0 0 14px;padding:0 12px;border:1px solid var(--border);
+  border-radius:var(--radius);background:var(--surface)}
+.surface-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;
+  padding:9px 0;align-items:center;font-size:14px;overflow-wrap:anywhere}
+.surface-list li+li{border-top:1px solid var(--border)}
+.surface-list[data-tier="mandatory"] li{grid-template-columns:minmax(0,1fr) auto}
+.surface-list .list-tip[open] [role="tooltip"]{position:static;display:block;margin-top:2px}
+.surface-state{font-size:12px;color:var(--text2)}
+[data-effective="contained"] .surface-state{color:var(--warn);font-weight:600}
+#screen-proactive :disabled{cursor:not-allowed;opacity:.65}
+@media(max-width:600px){
+  .surface-list li{grid-template-columns:minmax(0,1fr) auto;gap:3px 10px}
+  .surface-list .surface-state{grid-column:1}
+  .surface-list[data-tier="mandatory"] .surface-state{grid-column:2;grid-row:1}
+  .surface-list button{grid-column:2;grid-row:1 / span 2}
+}
+
 /* ═══ صندوق العزل ═══ */
 .qitem{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--border)}
 .qitem:last-child{border-bottom:0}
@@ -642,7 +671,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         </button>
         <button class="navcell" data-goto="proactive" aria-pressed="false">
           <span class="ni"><svg class="i"><use href="#i-pause"/></svg>
-            <span class="nb" data-numeral="6">٦</span></span>
+            <span class="nb" data-numeral="9">٩</span></span>
           <span class="nl" data-k="nav.proactive">الحماية الاستباقية</span>
         </button>
         <button class="navcell" data-goto="alerts" aria-pressed="false">
@@ -768,7 +797,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <summary class="nm"><svg class="i"><use href="#i-pause"/></svg><span data-k="exception.rule.a1.wsh">تشغيل سكربتات Windows</span></summary>
           <span role="tooltip" data-k="exception.rule.a1.wsh.desc">ملفات .vbs و .js تعمل مقيّدة ما لم تكن موقّعة من ناشر معروف.</span>
         </details>
-        <div class="st" data-k="exception.state.allowed_until" data-tmpl="exception.state.allowed_until" data-k-args='{"until":"14:30"}'>مسموحة حتى 14:30</div>
+        <div class="st" data-k="exception.state.allowed_until" data-tmpl="exception.state.allowed_until" data-k-args='{"rule":"Windows Script Host","until":"14:30"}'>مسموحة حتى 14:30</div>
         <div class="conseq" data-k="exception.consequence.allow" data-tmpl="exception.consequence.allow" data-k-args='{"rule":"Windows Script Host","until":"14:30"}'>ستعمل Windows Script Host بلا قيد حتى 14:30 ثم تعود. الباقي لا يتغيّر.</div>
         <div class="row">
           <button class="btn ghost sm" data-k="exception.action.revoke">أبطِل</button>
@@ -1007,7 +1036,103 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
       <span class="here" data-k="nav.proactive">الحماية الاستباقية</span>
     </div>
     <h2><svg class="i"><use href="#i-pause"/></svg><span data-k="proactive.title">الحماية الاستباقية</span></h2>
-    <p class="hint" data-k="proactive.sub">ست قواعد. لكل واحدة مفتاحها، ولا واحدة تفتح الأخرى.</p>
+    <p class="surface-intro" data-k="proactive.sub">السماح بنشاط هنا لا يلغي فحص الملفات أو قواعد جدار الحماية.</p>
+    <div class="remediation-box">
+      <p class="demo-notice" data-k="proactive.demo.note">هذه تجربة محلية. لا تُفحص ملفاتك ولا تتغيّر إعدادات ويندوز.</p>
+      <p id="remediation-status" role="status" data-k="proactive.demo.ready">عند فحص إصابة مؤكدة، تُمنع الأنشطة التسعة حتى ينجح الإصلاح.</p>
+      <p id="remediation-error" role="status" hidden data-k="proactive.demo.failed">لم تنجح الخطوة. يبقى المنع حتى تنجح المعالجة.</p>
+      <details id="remediation-demo">
+        <summary data-k="proactive.demo.title">محاكاة الاحتواء</summary>
+        <div class="demo-controls">
+          <label for="demo-mode" data-k="proactive.demo.mode">وضع الحماية في التجربة</label>
+          <select id="demo-mode">
+            <option value="on" data-k="wall.proactive.on">فعّال</option>
+            <option value="muted" data-k="lvl1.name">إسكات التنبيهات</option>
+            <option value="off" data-k="lvl2.name">إيقاف الحماية</option>
+          </select>
+          <button type="button" class="btn ghost sm" id="demo-next" data-k="proactive.demo.start">حاكِ إصابة مؤكدة</button>
+          <button type="button" class="btn ghost sm" id="demo-fail" hidden data-k="proactive.demo.fail">تعذّرت الخطوة</button>
+        </div>
+      </details>
+    </div>
+    <h3 class="surface-heading" id="tier-mandatory" data-k="proactive.tier.mandatory">خطورة شديدة · منع تلقائي</h3>
+    <ul class="surface-list" data-tier="mandatory" aria-labelledby="tier-mandatory">
+      <li data-surface="office_child">
+        <details class="list-tip">
+          <summary id="surface-office_child" data-k="proactive.surface.office_child">مفسّرات الأوامر من Office</summary>
+          <span role="tooltip" data-k="proactive.surface.office_child.tip">بدء cmd أو PowerShell أو mshta من Word أو Excel، وليس كل عمليات Office الفرعية.</span>
+        </details>
+        <span class="surface-state" id="state-office_child" data-k="proactive.state.blocked">ممنوع</span>
+      </li>
+      <li data-surface="wmi_subscription">
+        <details class="list-tip">
+          <summary id="surface-wmi_subscription" data-k="proactive.surface.wmi_subscription">اشتراكات WMI الدائمة</summary>
+          <span role="tooltip" data-k="proactive.surface.wmi_subscription.tip">إنشاء اشتراك أحداث دائم من مصدر غير موثوق، لا استعلامات WMI العادية.</span>
+        </details>
+        <span class="surface-state" id="state-wmi_subscription" data-k="proactive.state.blocked">ممنوع</span>
+      </li>
+      <li data-surface="system_tools">
+        <details class="list-tip">
+          <summary id="surface-system_tools" data-k="proactive.surface.system_tools">أدوات النظام مع محتوى غير موثوق</summary>
+          <span role="tooltip" data-k="proactive.surface.system_tools.tip">استخدام mshta أو certutil أو regsvr32 مع مدخل غير موثوق من مجلد مؤقت أو الإنترنت.</span>
+        </details>
+        <span class="surface-state" id="state-system_tools" data-k="proactive.state.blocked">ممنوع</span>
+      </li>
+    </ul>
+    <h3 class="surface-heading" id="tier-recommended" data-k="proactive.tier.recommended">خطورة متوسطة · يُنصح بالمنع</h3>
+    <ul class="surface-list" data-tier="recommended" aria-labelledby="tier-recommended">
+      <li data-surface="scheduled_task">
+        <details class="list-tip">
+          <summary id="surface-scheduled_task" data-k="proactive.surface.scheduled_task">المهام المجدولة</summary>
+          <span role="tooltip" data-k="proactive.surface.scheduled_task.tip">إنشاء مهمة أو تعديلها؛ لا تتوقف المهام القائمة بمجرد اختيار المنع.</span>
+        </details>
+        <span class="surface-state" id="state-scheduled_task" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-scheduled_task surface-scheduled_task" aria-describedby="state-scheduled_task"><span id="action-scheduled_task" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="com_registration">
+        <details class="list-tip">
+          <summary id="surface-com_registration" data-k="proactive.surface.com_registration">تسجيل مكوّنات COM</summary>
+          <span role="tooltip" data-k="proactive.surface.com_registration.tip">تغيير تسجيل مكوّن COM للمستخدم الحالي، لا تعطيل COM في ويندوز.</span>
+        </details>
+        <span class="surface-state" id="state-com_registration" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-com_registration surface-com_registration" aria-describedby="state-com_registration"><span id="action-com_registration" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="registry_autorun">
+        <details class="list-tip">
+          <summary id="surface-registry_autorun" data-k="proactive.surface.registry_autorun">مفاتيح بدء التشغيل</summary>
+          <span role="tooltip" data-k="proactive.surface.registry_autorun.tip">إضافة إدخال إلى Run أو RunOnce في السجل أو تغييره.</span>
+        </details>
+        <span class="surface-state" id="state-registry_autorun" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-registry_autorun surface-registry_autorun" aria-describedby="state-registry_autorun"><span id="action-registry_autorun" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="service_driver">
+        <details class="list-tip">
+          <summary id="surface-service_driver" data-k="proactive.surface.service_driver">تثبيت الخدمات والتعريفات</summary>
+          <span role="tooltip" data-k="proactive.surface.service_driver.tip">إنشاء خدمة أو تثبيت تعريف جديد؛ لا تُوقَف الخدمات والتعريفات العاملة.</span>
+        </details>
+        <span class="surface-state" id="state-service_driver" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-service_driver surface-service_driver" aria-describedby="state-service_driver"><span id="action-service_driver" data-k="button.block">المنع</span></button>
+      </li>
+    </ul>
+    <h3 class="surface-heading" id="tier-optional" data-k="proactive.tier.optional">خطورة أقل · منع اختياري</h3>
+    <ul class="surface-list" data-tier="optional" aria-labelledby="tier-optional">
+      <li data-surface="inbound_smb_rdp">
+        <details class="list-tip">
+          <summary id="surface-inbound_smb_rdp" data-k="proactive.surface.inbound_smb_rdp">اتصالات SMB وRDP الواردة</summary>
+          <span role="tooltip" data-k="proactive.surface.inbound_smb_rdp.tip">اتصالات واردة جديدة للمشاركة أو سطح المكتب البعيد؛ السماح لا يفتح منفذًا.</span>
+        </details>
+        <span class="surface-state" id="state-inbound_smb_rdp" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-inbound_smb_rdp surface-inbound_smb_rdp" aria-describedby="state-inbound_smb_rdp"><span id="action-inbound_smb_rdp" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="wsh_script">
+        <details class="list-tip">
+          <summary id="surface-wsh_script" data-k="proactive.surface.wsh_script">سكربتات ويندوز</summary>
+          <span role="tooltip" data-k="proactive.surface.wsh_script.tip">تشغيل ملفات ‎.js و‎.vbs و‎.wsf عبر WSH. تبقى فحوص السكربت سارية.</span>
+        </details>
+        <span class="surface-state" id="state-wsh_script" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-wsh_script surface-wsh_script" aria-describedby="state-wsh_script"><span id="action-wsh_script" data-k="button.block">المنع</span></button>
+      </li>
+    </ul>
     <div><button class="btn primary" data-goto="exception" data-list-tip="tip.exception"><svg class="i sm"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات</span></button></div>
   </section>
 
@@ -1410,7 +1535,7 @@ function closeListTip() {
 // Keep the explanation on screen, including under the sticky desktop toolbar.
 function placeListTip() {
   const bubble = activeListTip?.querySelector('[role="tooltip"]');
-  if (!bubble?.offsetParent || activeListTip.closest('.exccard')) return;
+  if (!bubble?.offsetParent || activeListTip.closest('.exccard,.surface-list')) return;
   const row = bubble.offsetParent.getBoundingClientRect();
   const above = row.top - Math.max(0, topbar.getBoundingClientRect().bottom);
   activeListTip.classList.toggle('below', above < bubble.offsetHeight && innerHeight - row.bottom > above);
@@ -1700,5 +1825,6 @@ let initialLang = 'ar';
 try { initialLang = localStorage.getItem('odina.lang') || 'ar'; } catch (e) {}
 applyLang(initialLang);
 </script>
+<script src="proactive-preview.js"></script>
 </body>
 </html>

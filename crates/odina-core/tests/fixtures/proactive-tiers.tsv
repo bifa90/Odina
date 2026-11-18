@@ -1,0 +1,9 @@
+office_child	mandatory
+wmi_subscription	mandatory
+system_tools	mandatory
+scheduled_task	recommended
+com_registration	recommended
+registry_autorun	recommended
+service_driver	recommended
+inbound_smb_rdp	optional
+wsh_script	optional

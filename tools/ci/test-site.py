@@ -17,7 +17,8 @@ from threading import Thread
 
 from playwright.sync_api import Page, expect, sync_playwright
 
-STAGE = Path(__file__).resolve().parents[2] / "site" / "_build"
+ROOT = Path(__file__).resolve().parents[2]
+STAGE = ROOT / "site" / "_build"
 DRAFT = {"de", "fr", "pt-BR"}
 
 
@@ -127,6 +128,72 @@ def check_touch_help(page: Page, base: str) -> None:
     assert len(page.context.pages) == 1, "local help opened another tab"
 
 
+def check_proactive(page: Page) -> None:
+    page.locator('.appbar [data-goto="proactive"]').click()
+    root = page.locator('#screen-proactive')
+    expect(root).to_be_focused()
+    rows = root.locator('[data-surface]')
+    fixture = ROOT / "crates/odina-core/tests/fixtures/proactive-tiers.tsv"
+    tiers = dict(line.split('\t') for line in fixture.read_text().splitlines())
+    assert rows.evaluate_all('rs => Object.fromEntries(rs.map(r => [r.dataset.surface, r.parentElement.dataset.tier]))') == tiers
+    assert rows.count() == len(tiers) == 9
+
+    def states():
+        return rows.evaluate_all('rs => Object.fromEntries(rs.map(r => [r.dataset.surface, r.dataset.effective]))')
+
+    baseline = {k: 'blocked' if v == 'mandatory' else 'allowed' for k, v in tiers.items()}
+    assert states() == baseline
+    assert root.locator('[data-tier="mandatory"] button').count() == 0
+    for key in ['scheduled_task', 'wsh_script']:
+        root.locator(f'[data-surface="{key}"] button').click()
+        baseline[key] = 'blocked'
+    assert states() == baseline
+    saved = page.evaluate("localStorage.getItem('odina.preview.surface-blocks.v1')")
+    expect(page.locator('.exccard.live .conseq')).to_have_attribute('data-k', 'proactive.user_wsh_block')
+    expect(page.locator('.exccard.live .st')).to_contain_text('14:30')
+
+    demo = root.locator('#remediation-demo')
+    demo.locator('summary').click()
+    mode, advance = demo.locator('select'), demo.locator('#demo-next')
+    mode.select_option('off')
+    expect(advance).to_be_disabled()
+    assert set(states().values()) == {'off'}
+    mode.select_option('muted')  # Silenced alerts are NOT disabled protection.
+    assert states() == baseline
+    advance.click()
+    for phase in ['scan', 'clean', 'repair']:
+        expect(root).to_have_attribute('data-phase', phase)
+        assert set(states().values()) == {'contained'}
+        expect(root.locator('[data-set-block]:disabled')).to_have_count(6)
+        expect(mode.locator('option[value="off"]')).to_be_disabled()
+        expect(page.locator('.exccard.live .conseq')).to_have_attribute('data-k', 'proactive.demo.' + phase)
+        demo.locator('#demo-fail').click()
+        expect(root.locator('#remediation-error')).to_be_visible()
+        if phase == 'clean':
+            page.reload()  # A refresh must neither release a hold nor commit nine permanent blocks.
+            expect(root).to_have_attribute('data-phase', phase)
+            expect(root.locator('#remediation-error')).to_be_visible()
+            if not advance.is_visible():
+                demo.locator('summary').click()
+            page.select_option('#lang', 'en')
+            expect(root.locator('.surface-state').first).to_have_text('Temporarily blocked')
+            expect(page.locator('.exccard.live .st')).to_contain_text('14:30')
+        assert set(states().values()) == {'contained'}
+        assert page.evaluate("localStorage.getItem('odina.preview.surface-blocks.v1')") == saved
+        advance.click()
+    expect(root).to_have_attribute('data-phase', 'restored')
+    expect(mode).to_have_value('muted')
+    assert states() == baseline
+    expect(page.locator('.exccard.live .conseq')).to_have_attribute('data-k', 'proactive.user_wsh_block')
+    root.locator('[data-surface="wsh_script"] button').click()
+    expect(page.locator('.exccard.live .conseq')).to_have_attribute('data-k', 'exception.consequence.allow')
+    mode.select_option('off')
+    page.reload()
+    expect(mode).to_have_value('off')
+    assert set(states().values()) == {'off'}
+    expect(advance).to_be_disabled()
+
+
 def review(page: Page, base: str) -> None:
     errors = []
     page.on("pageerror", lambda exc: errors.append(str(exc)))
@@ -186,6 +253,7 @@ def review(page: Page, base: str) -> None:
     page.keyboard.press("Escape")
     expect(alerts).to_be_focused()
 
+    check_proactive(page)
     page.select_option("#lang", "de")
     page.locator('a[href="signing.html"]').click()
     expect(page.locator("#langsel")).to_have_value("de")
@@ -216,7 +284,7 @@ def main() -> None:
                 browser.close()
         finally:
             server.shutdown()
-    print("site smoke: 10 locales on both pages · list help (hover, keyboard, touch) · alert → quarantine → back")
+    print("site smoke: 10 locales · list help · alert → quarantine → back · nine surfaces, containment and restoration")
 
 
 if __name__ == "__main__":

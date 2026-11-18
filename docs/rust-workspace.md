@@ -9,13 +9,15 @@
 ## 1. ما بُني الآن — وحدوده
 
 ```
-Cargo.toml                 # مساحة العمل: عضوان
+Cargo.toml                 # مساحة العمل: أربعة أعضاء
 crates/odina-core/
   Cargo.toml               # تبعية واحدة: sha2
   src/lib.rs               # السطح العام
   src/hashing.rs           # SHA-256 كامل + رأس 4KB + ذيل 4KB
   src/scoring.rs           # المؤشرات العشرة + السقوف + Veto (V1–V5) + العتبات
   src/heuristics.rs        # شكل الاسم · مصفوفة المسارات · ضمان §2.1
+  src/policy.rs            # منح الاستثناءات وانتهاؤها (D45)
+  src/proactive.rs         # الأنشطة التسعة، تفضيلات المستخدم، ومهام الاحتواء (D46)
   tests/eicar.rs           # المتجه المعروف + مسار القرار كاملًا
 crates/odina-cli/
   src/main.rs              # `odina scan <path> [--json] [-r]` — بوابة G1
@@ -36,6 +38,8 @@ crates/odina-instrument/
 
 وحزمتا القياس **اختياريتان في الرابط**: `odina-cli` لا تعتمد عليهما إلا مع `--features instrument`،
 فالبناء العام لا يحتوي كودًا للقياس أصلًا — لا يستدعيه فحسب. وبوابة `public` تُثبت ذلك بـ`cargo tree`.
+
+**تكامل D46:** تُمرَّر نتيجة الفحص إلى `policy.surfaces.observe_scan` مع وضع الحماية ومعرّف مهمة مستقل. قبل نشاط يصنّفه الموصل، يحسم `policy.evaluate_activity` كل الأسطح المطابقة معًا. لا تعني `ContinueChecks` السماح لملف أو فتح منفذ. يبلّغ منسق المعالجة `finish_stage` بنتيجة الفحص والتنظيف والإصلاح بالترتيب. لا تكتب هذه الدوال إعدادًا للنظام. لإعادة اختبارات هذه الوحدة: `cargo test --locked -p odina-core proactive::`.
 
 **وما الغائب عمدًا:**
 

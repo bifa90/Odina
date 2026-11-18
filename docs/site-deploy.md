@@ -33,6 +33,7 @@ site/
 └── _build/          ← مخرج البناء (مُستثنى من git)
     ├── index.html           (من ui-preview.html)
     ├── locales.js           (القاموس المُولّد من ملفات Fluent)
+    ├── proactive-preview.js (محاكاة محلية لسياسة الاحتواء)
     ├── signing.html
     ├── logo-review.html
     └── assets/logo/…
@@ -46,6 +47,7 @@ site/
     "ui-preview.html",
     "signing.html",
     "locales.js",
+    "proactive-preview.js",
     "logo-review.html",
     "assets/logo/svg/*.svg",
     "assets/logo/png/*/*.png",

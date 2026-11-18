@@ -314,6 +314,9 @@ impl Granted {
 #[derive(Debug, Clone, Default)]
 pub struct Policy {
     exceptions: Vec<Exception>,
+    /// Baseline surface choices and outstanding remediation jobs (§2.3.1).
+    /// Evaluate a surface through `evaluate_activity`, not a D45 grant alone.
+    pub surfaces: crate::proactive::SurfacePolicy,
 }
 
 impl Policy {
