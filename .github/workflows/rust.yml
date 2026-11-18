@@ -43,9 +43,28 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: clippy
+        # Windows defaults to pwsh, where `$?` and `[ ]` are not what this
+        # script means. Each runner has bash; say so instead of writing the
+        # same logic twice.
+        shell: bash
         run: |
-          cargo clippy --workspace --all-targets --locked -- -D warnings
-          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings
+          # Both crates, both feature sets, one log file. The log exists because
+          # a failing step whose output cannot be read costs a whole CI cycle:
+          # the diagnostics step below turns it into annotations.
+          set +e
+          cargo clippy --workspace --all-targets --locked -- -D warnings > clippy.log 2>&1
+          a=$?
+          cargo clippy --package odina-cli --features instrument --all-targets --locked -- -D warnings >> clippy.log 2>&1
+          b=$?
+          echo "WORKSPACE_EXIT=$a" >> clippy.log
+          echo "INSTRUMENT_EXIT=$b" >> clippy.log
+          cat clippy.log
+          if [ "$a" -ne 0 ] || [ "$b" -ne 0 ]; then exit 1; fi
+
+      - name: clippy diagnostics
+        if: failure()
+        shell: bash
+        run: python3 tools/ci/clippy-why.py
 
       - name: build
         run: cargo build --workspace --locked

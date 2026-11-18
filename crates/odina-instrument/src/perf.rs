@@ -41,6 +41,10 @@ pub enum Gate {
     ThroughputFilesPerSec,
     /// Extra time AMSI adds per script, ms. `< 15`.
     AmsiMs,
+    /// Time for a WDAC policy update to take effect, ms. Recorded, not gated:
+    /// §34.2 says "تُسجَّل" — there is no line to pass or fail, only a number
+    /// worth knowing before promising a user that a block is instant.
+    WdacPolicyMs,
     /// Time to switch interface language, ms. `< 100`.
     LanguageSwitchMs,
     /// Memory per loaded language pack, MB. `<= 3`.
@@ -51,7 +55,7 @@ pub enum Gate {
 
 impl Gate {
     /// Every gate, in the order §34.2 lists them.
-    pub const ALL: [Gate; 13] = [
+    pub const ALL: [Gate; 14] = [
         Gate::RamIdleMb,
         Gate::RamUsbMb,
         Gate::CpuIdlePercent,
@@ -62,6 +66,7 @@ impl Gate {
         Gate::P1Ms,
         Gate::ThroughputFilesPerSec,
         Gate::AmsiMs,
+        Gate::WdacPolicyMs,
         Gate::LanguageSwitchMs,
         Gate::LanguageMemoryMb,
         Gate::IdleIoOpsPerMin,
@@ -79,6 +84,7 @@ impl Gate {
             Gate::P1Ms => "p1_ms",
             Gate::ThroughputFilesPerSec => "throughput_files_per_sec",
             Gate::AmsiMs => "amsi_ms",
+            Gate::WdacPolicyMs => "wdac_policy_ms",
             Gate::LanguageSwitchMs => "language_switch_ms",
             Gate::LanguageMemoryMb => "language_memory_mb",
             Gate::IdleIoOpsPerMin => "idle_io_ops_per_min",
@@ -89,9 +95,12 @@ impl Gate {
         match self {
             Gate::RamIdleMb | Gate::RamUsbMb | Gate::LanguageMemoryMb => "MB",
             Gate::CpuIdlePercent | Gate::CpuScanAvgPercent | Gate::CpuScanPeakPercent => "%",
-            Gate::UsbWakeMs | Gate::P0Ms | Gate::P1Ms | Gate::AmsiMs | Gate::LanguageSwitchMs => {
-                "ms"
-            }
+            Gate::UsbWakeMs
+            | Gate::P0Ms
+            | Gate::P1Ms
+            | Gate::AmsiMs
+            | Gate::WdacPolicyMs
+            | Gate::LanguageSwitchMs => "ms",
             Gate::ThroughputFilesPerSec => "files/s",
             Gate::IdleIoOpsPerMin => "ops/min",
         }
@@ -110,7 +119,7 @@ impl Gate {
             Gate::UsbWakeMs => Below(50.0),
             Gate::P0Ms => Below(3000.0),
             Gate::P1Ms => Below(15000.0),
-            Gate::ThroughputFilesPerSec => return None,
+            Gate::ThroughputFilesPerSec | Gate::WdacPolicyMs => return None,
             Gate::AmsiMs => Below(15.0),
             Gate::LanguageSwitchMs => Below(100.0),
             Gate::LanguageMemoryMb => AtMost(3.0),
@@ -131,6 +140,7 @@ impl Gate {
             Gate::P1Ms => "§34.2 زمن P1 < 15000ms",
             Gate::ThroughputFilesPerSec => "§34.2 خط أساس الإنتاجية",
             Gate::AmsiMs => "§34.2 AMSI < 15ms",
+            Gate::WdacPolicyMs => "§34.2 زمن تحديث سياسة WDAC (يُسجَّل)",
             Gate::LanguageSwitchMs => "§34.2 تبديل اللغة < 100ms",
             Gate::LanguageMemoryMb => "§34.2 ذاكرة اللغة ≤ 3MB",
             Gate::IdleIoOpsPerMin => "§34.2 I/O خمول = 0",
@@ -213,6 +223,15 @@ pub struct ScanStats {
     pub high_risk: u64,
     pub confirmed: u64,
     pub unreadable: u64,
+    /// Links and special files the walk refused to follow or open. Not
+    /// failures: a scan that hangs measures nothing, so the number is how many
+    /// surprises the folder had.
+    pub links_skipped: u64,
+    /// Folders the walk could not read at all.
+    pub read_errors: u64,
+    /// The walk stopped at its own limit. A partial answer labelled partial is
+    /// usable; a partial answer that looks complete is not.
+    pub truncated: bool,
     pub elapsed_ms: u64,
 }
 
@@ -344,6 +363,10 @@ impl PerfReport {
             "needs the AMSI provider (C5)",
         ));
         self.push(Measurement::unmeasured(
+            Gate::WdacPolicyMs,
+            "needs WDAC policy publishing (F4); nothing deploys a policy yet",
+        ));
+        self.push(Measurement::unmeasured(
             Gate::LanguageSwitchMs,
             "needs the UI (B1); switching a CLI language is not the measured path",
         ));
@@ -431,6 +454,9 @@ impl PerfReport {
             out.push_str(&format!(",\"high_risk\":{}", s.high_risk));
             out.push_str(&format!(",\"confirmed\":{}", s.confirmed));
             out.push_str(&format!(",\"unreadable\":{}", s.unreadable));
+            out.push_str(&format!(",\"links_skipped\":{}", s.links_skipped));
+            out.push_str(&format!(",\"read_errors\":{}", s.read_errors));
+            out.push_str(&format!(",\"truncated\":{}", s.truncated));
             out.push_str(&format!(",\"elapsed_ms\":{}", s.elapsed_ms));
             out.push('}');
         }
@@ -516,6 +542,53 @@ mod tests {
         let m = Measurement::unmeasured(Gate::P0Ms, "needs C1");
         assert!(m.value.is_none());
         assert!(matches!(m.status, Status::Unmeasured(_)));
+    }
+
+    /// §34.2 lists thirteen metrics. A gate that exists in the enum but is
+    /// never emitted is invisible — which is exactly what happened: the report
+    /// from the first real run carried twelve gates and nobody noticed the
+    /// thirteenth was missing. This asserts the *set*, not the count, so a gate
+    /// cannot quietly replace another one.
+    #[test]
+    fn every_gate_in_the_spec_is_emitted() {
+        let expected = [
+            "ram_idle_mb",
+            "ram_usb_mb",
+            "cpu_idle_percent",
+            "cpu_scan_avg_percent",
+            "cpu_scan_peak_percent",
+            "usb_wake_ms",
+            "p0_ms",
+            "p1_ms",
+            "throughput_files_per_sec",
+            "amsi_ms",
+            "wdac_policy_ms",
+            "language_switch_ms",
+            "language_memory_mb",
+            "idle_io_ops_per_min",
+        ];
+        let mut r = PerfReport::new("2026-11-16", "0.1.0", "cpu · 8 cores", "linux · x86_64");
+        let stats = ScanStats {
+            files: 10,
+            elapsed_ms: 1000,
+            clean: 10,
+            ..ScanStats::default()
+        };
+        let idle = Meter::now();
+        r.fill_from_scan(stats, &idle, None);
+
+        let emitted: Vec<&str> = r.metrics.iter().map(|m| m.gate.key()).collect();
+        for key in expected {
+            assert!(
+                emitted.contains(&key),
+                "§34.2 lists {key} but the report never emits it; emitted: {emitted:?}"
+            );
+        }
+        assert_eq!(
+            emitted.len(),
+            expected.len(),
+            "the report emits {emitted:?}"
+        );
     }
 
     #[test]
