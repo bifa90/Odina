@@ -27,6 +27,9 @@ jobs:
         with:
           components: clippy
 
+      - name: format
+        run: cargo fmt --all -- --check
+
       - name: clippy workspace
         continue-on-error: true
         run: |
