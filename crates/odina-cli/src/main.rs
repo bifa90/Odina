@@ -242,25 +242,31 @@ fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
             break;
         }
         visited += 1;
-        let mut entries: Vec<_> = std::fs::read_dir(&current)?
-            .filter_map(|e| e.ok())
-            .filter_map(|e| {
-                let kind = e.file_type().ok()?;
-                if kind.is_symlink() {
-                    return None;
-                }
-                Some((kind, e.path()))
-            })
-            .collect();
-        entries.sort();
-        for (kind, path) in entries {
-            if kind.is_dir() {
-                if recursive {
-                    stack.push(path);
-                }
-            } else if kind.is_file() {
-                files.push(path);
+        // Kept as two separate lists rather than one list of pairs: a
+        // `FileType` has no ordering, and sorting a tuple that contains one
+        // does not compile. Splitting also says what the loop means — these
+        // are folders, these are files, and a link is neither.
+        let mut dirs: Vec<PathBuf> = Vec::new();
+        let mut plain: Vec<PathBuf> = Vec::new();
+        for entry in std::fs::read_dir(&current)?.filter_map(|e| e.ok()) {
+            let Ok(kind) = entry.file_type() else {
+                continue;
+            };
+            if kind.is_symlink() {
+                continue;
             }
+            let path = entry.path();
+            if kind.is_dir() {
+                dirs.push(path);
+            } else if kind.is_file() {
+                plain.push(path);
+            }
+        }
+        dirs.sort();
+        plain.sort();
+        files.extend(plain);
+        if recursive {
+            stack.extend(dirs);
         }
     }
     files.sort();
