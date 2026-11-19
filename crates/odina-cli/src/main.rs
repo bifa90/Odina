@@ -279,7 +279,16 @@ fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
 /// One decision path for both commands. `check` caps the full digest; a
 /// skipped digest is never a V5 match. `scan` hashes the whole input.
 fn scan(path: &Path, max_full_digest: Option<u64>) -> std::io::Result<Report> {
-    let file = std::fs::File::open(path)?;
+    scan_opened(path, &mut std::fs::File::open(path)?, max_full_digest)
+}
+
+/// The caller owns the handle so report-only measurements need not reopen a
+/// potentially different file at the same path after hashing.
+fn scan_opened(
+    path: &Path,
+    file: &mut std::fs::File,
+    max_full_digest: Option<u64>,
+) -> std::io::Result<Report> {
     let hashes = hash_reader(file, max_full_digest)?;
 
     let file_name = path
