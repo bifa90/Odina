@@ -529,6 +529,42 @@ mod tests {
     }
 
     #[test]
+    fn cpu_scan_gate_uses_one_core_not_whole_machine_capacity() {
+        use std::time::{Duration, Instant};
+
+        let t0 = Instant::now();
+        let initial_cpu = Duration::from_secs(7);
+        let before = Meter {
+            at: Some(t0),
+            cpu: Some(initial_cpu),
+            ..Meter::default()
+        };
+        // Ten wall seconds, synthetic process CPU (user + kernel). A label
+        // with eight logical processors must not divide the gate value by 8.
+        for (cpu_ms, expected, status) in [
+            (250, 2.5, Status::Pass),
+            (300, 3.0, Status::Fail), // strictly below 3, not at most 3
+            (2799, 27.99, Status::Fail),
+            (20_000, 200.0, Status::Fail), // summed threads; do not clamp at 100
+        ] {
+            let after = Meter {
+                at: Some(t0 + Duration::from_secs(10)),
+                cpu: Some(initial_cpu + Duration::from_millis(cpu_ms)),
+                ..Meter::default()
+            };
+            let mut r = PerfReport::new("2026-11-18", "0.1.0", "synthetic · 8 cores", "test");
+            r.fill_from_scan(ScanStats::default(), &before, Some(&after));
+            let m = r
+                .metrics
+                .iter()
+                .find(|m| m.gate == Gate::CpuScanAvgPercent)
+                .unwrap();
+            assert_eq!(m.value, Some(expected));
+            assert_eq!(m.status, status);
+        }
+    }
+
+    #[test]
     fn throughput_has_no_threshold_and_is_not_a_failure() {
         assert!(Gate::ThroughputFilesPerSec.threshold().is_none());
         assert_eq!(

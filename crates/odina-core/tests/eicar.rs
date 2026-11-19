@@ -69,6 +69,21 @@ fn eicar_through_the_streaming_reader_is_identical() {
 }
 
 #[test]
+fn g1_requires_the_exact_full_digest_even_if_both_windows_match() {
+    use odina_core::g1_reference::matches;
+
+    let mut bytes = eicar();
+    assert!(matches(&hash_reader(&bytes[..], Some(68)).unwrap()));
+    let capped = hash_reader(&bytes[..], Some(67)).unwrap();
+    assert!(capped.full_digest_skipped());
+    assert_eq!(capped.head, EICAR_SHA256);
+    assert_eq!(capped.tail, EICAR_SHA256);
+    assert!(!matches(&capped));
+    bytes[0] = b'Y'; // same size, different full digest
+    assert!(!matches(&hash_bytes(&bytes)));
+}
+
+#[test]
 fn a_known_sample_without_a_fingerprint_match_is_not_reported_as_a_threat() {
     // This is the honest case: recognising EICAR is a *database* lookup, not a
     // guess from the name. With no fingerprint in the evidence the engine must

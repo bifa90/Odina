@@ -10,14 +10,14 @@
 //!
 //!   * hashes the file (full, first 4 KB, last 4 KB) and prints the hashes;
 //!   * measures name shape and path flags;
-//!   * scores them with the spec's weights;
+//!   * looks up the full digest in the local EICAR-only reference (V5);
+//!   * scores the other evidence with the spec's weights;
 //!   * prints the verdict, the reason, and every cap that applied.
 //!
 //! What it does **not** do, and says so in its own output:
 //!
-//!   * there is no signature database yet, so a known-bad hash cannot be
-//!     recognised — the "database" line is printed as empty rather than
-//!     implied to have been consulted;
+//!   * no production threat database ships; the single test signature proves
+//!     the path to V5, not detection coverage;
 //!   * there is no publisher signature check, so indicator 9 stays at zero;
 //!   * nothing is blocked, isolated, or deleted. This command only looks.
 //!
@@ -44,6 +44,7 @@ mod repair;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use odina_core::g1_reference;
 use odina_core::hashing::{hash_bytes, hash_reader, FileHashes};
 use odina_core::heuristics::{guess_path_flags, name_shape, path_score};
 use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds};
@@ -74,8 +75,6 @@ one local JSON file of measurements, and sends nothing anywhere.";
 struct Report {
     path: PathBuf,
     hashes: FileHashes,
-    /// False until a signature database ships. Printed, never implied.
-    database_present: bool,
     known_bad: bool,
     score: Score,
     name_score: f32,
@@ -135,7 +134,7 @@ fn main() -> ExitCode {
                 return scan_dir(path, json, recursive);
             }
 
-            match scan(path) {
+            match scan(path, None) {
                 Ok(report) => {
                     if json {
                         println!("{}", report_to_json(&report));
@@ -181,7 +180,7 @@ fn scan_dir(dir: &Path, json: bool, recursive: bool) -> ExitCode {
     let mut unreadable: Vec<(PathBuf, String)> = Vec::new();
 
     for path in entries {
-        match scan(&path) {
+        match scan(&path, None) {
             Ok(report) => reports.push(report),
             Err(err) => unreadable.push((path, err.to_string())),
         }
@@ -217,7 +216,7 @@ fn scan_dir(dir: &Path, json: bool, recursive: bool) -> ExitCode {
             interrupting,
             unreadable.len()
         );
-        println!("قاعدة البصمات: غير موجودة بعد — لم يُقارن أي ملف بأي قاعدة");
+        println!("مرجع البصمات: بصمة EICAR الاختبارية فقط، وليست قاعدة تهديدات إنتاجية");
         println!("هذه الأداة تقرأ فقط: لا تمنع، ولا تعزل، ولا تحذف.");
     }
 
@@ -277,11 +276,11 @@ fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-fn scan(path: &Path) -> std::io::Result<Report> {
+/// One decision path for both commands. `check` caps the full digest; a
+/// skipped digest is never a V5 match. `scan` hashes the whole input.
+fn scan(path: &Path, max_full_digest: Option<u64>) -> std::io::Result<Report> {
     let file = std::fs::File::open(path)?;
-    // No cap on the full digest: this is a one-file tool and the user asked
-    // about this exact file. The app applies the cap for large files.
-    let hashes = hash_reader(file, None)?;
+    let hashes = hash_reader(file, max_full_digest)?;
 
     let file_name = path
         .file_name()
@@ -297,17 +296,13 @@ fn scan(path: &Path) -> std::io::Result<Report> {
     // Indicators 5-8 and 10 need a database or a parser that does not exist
     // yet. They stay at zero — an unmeasured indicator is not evidence.
 
-    // No signature database ships yet, so nothing can be recognised as
-    // known-bad. This flag is the honest false, not an optimistic one.
-    let database_present = false;
-    let known_bad = false;
+    let known_bad = g1_reference::matches(&hashes);
 
     let score = score_with_known_bad(&evidence, &Thresholds::default(), None, known_bad);
 
     Ok(Report {
         path: path.to_path_buf(),
         hashes,
-        database_present,
         known_bad,
         score,
         name_score,
@@ -329,8 +324,8 @@ fn verdict_label(score: &Score) -> (&'static str, &'static str) {
 /// The one-line reason a user would see in an alert. The spec (§8) forbids
 /// percentages in the alert; this line is what replaces them.
 fn reason(report: &Report) -> &'static str {
-    if report.score.veto.is_some() {
-        return "بصمتها مطابقة لعيّنة خبيثة معروفة";
+    if report.known_bad {
+        return "بصمتها الكاملة تطابق ملف اختبار EICAR";
     }
     if report.name_score >= 0.40 && report.path_score >= 0.60 {
         return "اسمها خادع ومكانها غير معتاد";
@@ -358,15 +353,11 @@ fn report_to_text(report: &Report) -> String {
     out.push_str(&format!("بصمة الذيل:  {}\n", or_dash(&report.hashes.tail)));
     out.push('\n');
     out.push_str(&format!(
-        "قاعدة البصمات: {}\n",
-        if report.database_present {
-            if report.known_bad {
-                "مطابقة معروفة الخبث"
-            } else {
-                "موجودة، بلا مطابقة"
-            }
+        "مرجع البصمات: EICAR الاختباري فقط — {}\n",
+        if report.known_bad {
+            "مطابقة"
         } else {
-            "غير موجودة بعد — لم يُقارن الملف بأي قاعدة"
+            "بلا مطابقة"
         }
     ));
     out.push_str(&format!("الحكم: {ar} ({en})\n"));
@@ -421,7 +412,7 @@ fn report_to_json(report: &Report) -> String {
             "\"path\":{path},",
             "\"size\":{size},",
             "\"hashes\":{{\"full\":{full},\"head\":{head},\"tail\":{tail}}},",
-            "\"database_present\":{db},",
+            "\"database_present\":true,\"db_version\":\"{db_version}\",",
             "\"known_bad\":{bad},",
             "\"score\":{score:.4},",
             "\"verdict\":\"{verdict_en}\",",
@@ -441,7 +432,7 @@ fn report_to_json(report: &Report) -> String {
         full = json_string(or_dash(&report.hashes.full)),
         head = json_string(or_dash(&report.hashes.head)),
         tail = json_string(or_dash(&report.hashes.tail)),
-        db = report.database_present,
+        db_version = g1_reference::VERSION,
         bad = report.known_bad,
         score = report.score.value,
         verdict_en = en,
@@ -499,7 +490,7 @@ fn json_string(value: &str) -> String {
 /// A real file path is still exercised by `odina scan` and by the CLI tests
 /// that scan ordinary folders.
 fn selftest() -> ExitCode {
-    const EXPECTED: &str = "275a021bbfb6489e54d471899f7db9d1663fc695ec2fe2a2c4538aabf651fd0f";
+    use g1_reference::EICAR_SHA256 as EXPECTED;
     let payload: Vec<u8> = [
         "X5O!P%@AP[4\\PZX54(P^)7CC)7}$",
         "EICAR-STANDARD-ANTIVIRUS-",
@@ -556,7 +547,6 @@ mod tests {
         let r = Report {
             path: PathBuf::from("sample.dat"),
             hashes: FileHashes::default(),
-            database_present: true,
             known_bad: true,
             score: score_with_known_bad(&Evidence::new(), &Thresholds::default(), None, true),
             name_score: 0.0,
@@ -574,7 +564,6 @@ mod tests {
         let r = Report {
             path: PathBuf::from("/home/u/x.pdf.exe"),
             hashes: FileHashes::default(),
-            database_present: false,
             known_bad: false,
             score: score_with_known_bad(&e, &Thresholds::default(), None, false),
             name_score: 0.45,

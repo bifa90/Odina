@@ -21,19 +21,13 @@
 
 use std::path::{Path, PathBuf};
 
-use odina_core::hashing::{hash_reader, FileHashes};
-use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds, Verdict};
+use odina_core::hashing::FileHashes;
+use odina_core::scoring::{Score, Verdict};
 use odina_report::report::Report;
 use odina_report::{measure, pe};
 
 /// The app version written into every exported report.
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
-
-/// No threat database ships yet, so the field carries the version of the
-/// built-in heuristic set rather than pretending a database exists. It must
-/// look like a version — the schema rejects anything else — and the schema
-/// name itself lives in its own field, `schema`.
-pub const DB_VERSION: &str = "builtin-1";
 
 /// What a scan of one file produced, kept in one place so the text output and
 /// the report cannot drift apart.
@@ -118,7 +112,7 @@ pub fn report_for(s: &Scanned) -> Report {
         s.hashes.full.clone(),
         s.hashes.size,
         APP_VERSION,
-        DB_VERSION,
+        odina_core::g1_reference::VERSION,
     );
     if !s.hashes.head.is_empty() {
         report.header_hash = Some(s.hashes.head.clone());
@@ -304,39 +298,14 @@ pub fn walk(dir: &Path) -> Walked {
     }
 }
 
-/// Score one file the same way `scan` does. Kept here so `check` cannot invent
-/// a second opinion about the same file.
+/// Reuse `scan`'s read, reference lookup and decision, then collect the
+/// additional measurements needed only by the local export.
 pub fn score_file(path: &Path) -> Option<Scanned> {
-    let file = std::fs::File::open(path).ok()?;
-    // The cap exists for this loop and not for `scan`: `scan` was pointed at
-    // one file on purpose, while `check` walks whatever the user has. One ISO
-    // in a Downloads folder is several gigabytes of reading before the first
-    // line of output, which is indistinguishable from a hang. Above the cap,
-    // head and tail are still hashed, the file is still scored, and the report
-    // says the full digest was skipped rather than inventing one.
-    let hashes = hash_reader(file, Some(FULL_DIGEST_CAP)).ok()?;
-    let name = path
-        .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_default();
-
-    let mut evidence = Evidence::new();
-    evidence.set(
-        Indicator::NamePattern,
-        odina_core::heuristics::name_shape(&name).score(),
-    );
-    evidence.set(
-        Indicator::PathPattern,
-        odina_core::heuristics::path_score(odina_core::heuristics::guess_path_flags(path)),
-    );
-    // Same call, same arguments as `scan`, and no known-bad database exists to
-    // consult — the flag is the honest false, not an optimistic one.
-    let score = score_with_known_bad(&evidence, &Thresholds::default(), None, false);
-
+    let scanned = super::scan(path, Some(FULL_DIGEST_CAP)).ok()?;
     Some(Scanned {
-        path: path.to_path_buf(),
-        hashes,
-        score,
+        path: scanned.path,
+        hashes: scanned.hashes,
+        score: scanned.score,
         pe_hash: pe_info(path).map(|i| i.imphash),
         attributes: attributes_for(path),
     })

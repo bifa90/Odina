@@ -1,2 +1,5 @@
 # The portable data component has a byte-exact pin on Windows as well as Linux.
 components/repair/*.tsv text eol=lf
+
+# G1 compares the same corpus bytes on Windows and Linux.
+tests/fixtures/safe/* text eol=lf
