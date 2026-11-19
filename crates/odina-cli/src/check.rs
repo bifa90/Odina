@@ -19,6 +19,13 @@
 //! No socket, no URL, no clock beyond the date, and no file name anywhere: the
 //! report objects carry hashes and patterns.
 
+#[cfg(feature = "instrument")]
+mod cache;
+#[cfg(feature = "instrument")]
+mod engine;
+#[cfg(feature = "instrument")]
+mod stamp;
+
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
@@ -133,7 +140,7 @@ pub fn default_out() -> PathBuf {
 }
 
 /// Splice the perf object and the report array into one balanced JSON object.
-pub fn assemble(perf_json: &str, reports: &[String]) -> String {
+pub fn assemble(perf_json: &str, reports: &[String], work_json: &str) -> String {
     let inner = perf_json
         .strip_prefix('{')
         .and_then(|s| s.strip_suffix('}'))
@@ -141,6 +148,8 @@ pub fn assemble(perf_json: &str, reports: &[String]) -> String {
     let mut out = String::with_capacity(inner.len() + 64);
     out.push('{');
     out.push_str(inner);
+    out.push_str(",\"work\":");
+    out.push_str(work_json);
     out.push_str(",\"reports\":[");
     out.push_str(&reports.join(","));
     out.push_str("]}");
@@ -294,14 +303,6 @@ pub fn walk(dir: &Path) -> Walked {
     }
 }
 
-/// Hash and decide first. Retain just this file's handle until the export
-/// decision; there is never a handle per entry in the walk.
-fn score_file(path: &Path) -> Option<(super::Report, File)> {
-    let mut file = File::open(path).ok()?;
-    let scanned = super::scan_opened(path, &mut file, Some(FULL_DIGEST_CAP)).ok()?;
-    Some((scanned, file))
-}
-
 /// The command. Only reachable when the module is compiled, which is the
 /// check build and this crate's tests.
 #[cfg(feature = "instrument")]
@@ -311,6 +312,7 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
 
     let mut out_path = default_out();
     let mut target: Option<String> = None;
+    let mut cache_dir: Option<PathBuf> = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -323,8 +325,19 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                 eprintln!("odina: --out needs a file name");
                 return ExitCode::FAILURE;
             }
-            a if !a.starts_with("--") => target = Some(a.to_string()),
-            _ => {}
+            "--cache-dir" => {
+                let Some(v) = args.get(i + 1).filter(|v| !v.starts_with("--")) else {
+                    eprintln!("odina: --cache-dir needs a private directory outside the corpus");
+                    return ExitCode::FAILURE;
+                };
+                cache_dir = Some(PathBuf::from(v));
+                i += 1;
+            }
+            a if !a.starts_with("--") && target.is_none() => target = Some(a.to_string()),
+            _ => {
+                eprintln!("odina: unexpected check argument");
+                return ExitCode::FAILURE;
+            }
         }
         i += 1;
     }
@@ -342,6 +355,19 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
     let idle = Meter::now();
     let started = std::time::Instant::now();
 
+    let mut index = match cache_dir
+        .as_ref()
+        .map(|dir| cache::Cache::open(dir, path, &out_path))
+        .transpose()
+    {
+        Ok(index) => index,
+        Err(e) => {
+            eprintln!("odina: cannot use private scan cache: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+    let filter = odina_core::g1_reference::PrefixFilter::from_catalog();
+    let mut work = engine::Work::default();
     let mut stats = ScanStats::default();
     let mut exported: Vec<String> = Vec::new();
 
@@ -380,8 +406,8 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         if total >= 500 && done % 500 == 0 {
             eprintln!("odina: {done}/{total}");
         }
-        match score_file(file) {
-            Some((scanned, mut handle)) => {
+        match engine::scan(file, &filter, &mut index, &mut work) {
+            Ok((scanned, mut handle)) => {
                 stats.files += 1;
                 stats.bytes += scanned.hashes.size;
                 match scanned.score.verdict {
@@ -403,7 +429,7 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                     not_reported += 1;
                 }
             }
-            None => {
+            Err(_) => {
                 stats.files += 1;
                 stats.unreadable += 1;
             }
@@ -418,6 +444,11 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         );
     }
 
+    if let Some(c) = index {
+        if let Err(e) = c.finish() {
+            eprintln!("odina: could not publish cache; rescan next time: {e}");
+        }
+    }
     stats.elapsed_ms = started.elapsed().as_millis() as u64;
     let after = Meter::now();
 
@@ -430,7 +461,7 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
     );
     perf.fill_from_scan(stats, &idle, Some(&after));
 
-    let json = assemble(&perf.to_json(), &exported);
+    let json = assemble(&perf.to_json(), &exported, &work.json());
     if let Err(err) = std::fs::write(&out_path, json.as_bytes()) {
         eprintln!("odina: cannot write {}: {err}", out_path.display());
         return ExitCode::FAILURE;
@@ -486,7 +517,7 @@ mod tests {
     #[test]
     fn the_assembled_file_is_one_balanced_object() {
         let perf = r#"{"schema":"odina-perf/v1","metrics":[]}"#;
-        let out = assemble(perf, &[r#"{"schema":"odina-report/v1"}"#.to_string()]);
+        let out = assemble(perf, &[r#"{"schema":"odina-report/v1"}"#.to_string()], "{}");
         assert!(out.starts_with('{') && out.ends_with('}'));
         assert_eq!(out.matches('{').count(), out.matches('}').count());
         assert_eq!(out.matches('[').count(), out.matches(']').count());
@@ -504,9 +535,16 @@ mod tests {
         let _ = std::fs::remove_file(&f);
     }
 
+    #[cfg(feature = "instrument")]
     #[test]
     fn a_missing_file_has_no_scan_or_export() {
-        assert!(score_file(Path::new("/nonexistent/file.exe")).is_none());
+        assert!(engine::scan(
+            Path::new("/nonexistent/file.exe"),
+            &odina_core::g1_reference::PrefixFilter::from_catalog(),
+            &mut None,
+            &mut engine::Work::default()
+        )
+        .is_err());
     }
 
     #[test]
@@ -525,7 +563,9 @@ mod tests {
         bytes[nt + 24..nt + 26].copy_from_slice(&0x10bu16.to_le_bytes());
         std::fs::write(&f, bytes).unwrap();
 
-        let (mut scanned, mut handle) = score_file(&f).expect("readable");
+        let mut handle = File::open(&f).unwrap();
+        let mut scanned =
+            crate::scan_opened(&f, &mut handle, Some(FULL_DIGEST_CAP)).expect("readable");
         assert!(report_for(&scanned, || panic!("no enrichment for a clean file")).is_none());
         // Exercise the export path without using a malware sample.
         scanned.score.verdict = Verdict::Confirmed;

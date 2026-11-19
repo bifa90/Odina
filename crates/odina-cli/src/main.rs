@@ -56,7 +56,7 @@ USAGE:
     odina scan <path> [--json] [--recursive]
     odina repair-db [--demo]       # verify external data; optional in-memory repair exercise
     odina selftest                 # in memory: writes nothing to disk
-    odina check <path> [--out <file>]   # instrumented build only
+    odina check <path> [--out <file>] [--cache-dir <private-directory>]   # instrumented build only
     odina --version | --help
 
 EXIT CODES:
@@ -289,8 +289,13 @@ fn scan_opened(
     file: &mut std::fs::File,
     max_full_digest: Option<u64>,
 ) -> std::io::Result<Report> {
-    let hashes = hash_reader(file, max_full_digest)?;
+    Ok(assess(path, hash_reader(file, max_full_digest)?))
+}
 
+/// Common decision for public scan, exact candidates, and prefilter negatives.
+/// In this engine only V5 consumes content; a new content indicator MUST also
+/// be added to the evidence requirements in check::engine.
+fn assess(path: &Path, hashes: FileHashes) -> Report {
     let file_name = path
         .file_name()
         .map(|n| n.to_string_lossy().into_owned())
@@ -309,14 +314,14 @@ fn scan_opened(
 
     let score = score_with_known_bad(&evidence, &Thresholds::default(), None, known_bad);
 
-    Ok(Report {
+    Report {
         path: path.to_path_buf(),
         hashes,
         known_bad,
         score,
         name_score,
         path_score,
-    })
+    }
 }
 
 fn verdict_label(score: &Score) -> (&'static str, &'static str) {

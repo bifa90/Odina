@@ -22,11 +22,15 @@ odina-core = { path = "../odina-core" }
 odina-report = { path = "../odina-report", optional = true }
 odina-instrument = { path = "../odina-instrument", optional = true }
 
+[target.'cfg(target_os = "linux")'.dependencies]
+# fstatfs on the already-open file: never reuse hints on synthetic/remote FS.
+libc = { version = "0.2", optional = true }
+
 [features]
 default = []
 # The only difference between the two builds is this flag. There is no second
 # source tree, no fork, and no patched copy.
-instrument = ["odina-report", "odina-instrument"]
+instrument = ["odina-report", "odina-instrument", "dep:libc"]
 
 [dev-dependencies]
 # The unit tests of the export path need the report writer even when the
