@@ -36,7 +36,7 @@ scan.stop = 停止
 scan.complete = スキャン完了
 scan.clean_result = 有害なものは見つかりませんでした。
 alert.confirmed.title = 既知の脅威を止めました
-alert.confirmed.body = { $file } は確認済みの脅威で、隔離しました。
+alert.confirmed.body = { $file } の感染を確認しました。実行を阻止し、削除はしていません。
 alert.suspicious.title = プログラムがファイルにアクセスしようとしています
 alert.suspicious.body = { $file } がドキュメント内のファイルを変更しています。一時的に止めました。
 alert.suspicious.note = 一時的に止めました。
@@ -116,10 +116,10 @@ action.turn_off = 保護をオフにする
 action.turn_on = 保護を戻す
 disable.re_enable_note = いつでも保護を戻せます — パスワード不要。
 disable.reminder = 保護が自動で戻るまで残り { $minutes} 分。
-pause.resume_report = 通知を止めていた間に { $count} 件を隔離しました
+pause.resume_report = 通知停止中：修復 { $restored } 件・隔離 { $isolated } 件・処理中 { $pending } 件
 
 ## ── 外科的例外 (D45 · §4.8) ─────────────────────────
-exception.title = 例外 — すべてではなく、1 つのルール
+exception.title = 例外
 exception.sub = 業務で 1 つのルールを緩める必要があるなら、その 1 つだけを許可します。他はそのままです。
 exception.rule.a1.wsh = Windows スクリプト
 exception.rule.a1.wsh.desc = .vbs と .js は、既知の発行者の署名がない限り制限付きで実行されます。
@@ -164,7 +164,7 @@ exception.refused.veto_stands = このファイルは確認済みです。例外
 
 exception.live_note = あなたの判断 · 他はすべて有効なまま · いつでも取り消せます
 exception.lines_title = 例外にできない 4 つ:
-exception.lines_body = 第 1 の壁の判定（例外中でも確認済みは隔離）· 改ざん防止 · 2 番目のルール（WSH の例外で PowerShell は開かない）·「高リスク」以上。取り消しは常にワンクリック、パスワード不要。
+exception.lines_body = 第 1 の壁の判定（例外があっても感染を確認したファイルは実行不可）· 改ざん防止 · 2 番目のルール（WSH の例外で PowerShell は開かない）·「高リスク」以上。取り消しは常にワンクリック、パスワード不要。
 
 ## ── アプリの地図とナビゲーション (憲章 §6أ.3) ─────────────────
 nav.home = ホーム
@@ -240,7 +240,7 @@ settings.startup.body = 起動時からバックグラウンドで動きます�
 settings.notifications = 通知
 settings.notifications.body = 1 日 3 件まで。重要なものが先です。
 settings.updates = 更新
-settings.updates.body = 脅威データベースは自動、プログラムは手動です。
+settings.updates.body = 脅威データは自動更新、プログラムは手動更新です。修復データは別パッケージです。
 settings.about = このアプリについて
 settings.version = バージョン
 settings.database = 脅威データベース
@@ -279,9 +279,50 @@ home.goto.settings = 設定
 home.goto.proactive = 先制的保護
 home.quarantine_count = 隔離ボックスに { $count } 件
 home.alerts_count = 確認に値する通知 { $count } 件
-home.proactive_summary = 6 つのルール · 1 つ例外
+home.proactive_summary = 3 グループ、9 種類の操作
 proactive.title = 先制的保護
-proactive.sub = 6 つのルール。それぞれ別のスイッチで、他を開きません。
+proactive.sub = ここで許可しても、ファイル検査やファイアウォールの規則は適用されます。
+proactive.tier.mandatory = 非常に高いリスク · 自動ブロック
+proactive.tier.recommended = 中程度のリスク · ブロック推奨
+proactive.tier.optional = 比較的低いリスク · 任意でブロック
+proactive.surface.office_child = Office からのコマンド起動
+proactive.surface.office_child.tip = Word や Excel による cmd、PowerShell、mshta の起動が対象です。すべての子プロセスではありません。
+proactive.surface.wmi_subscription = WMI の永続サブスクリプション
+proactive.surface.wmi_subscription.tip = 信頼できない発行元による永続イベント購読の新規作成が対象です。通常の WMI クエリは含みません。
+proactive.surface.system_tools = 未信頼の入力を扱うシステムツール
+proactive.surface.system_tools.tip = 一時フォルダーやインターネットの未信頼データを扱う mshta、certutil、regsvr32 が対象です。
+proactive.surface.scheduled_task = スケジュールされたタスク
+proactive.surface.scheduled_task.tip = タスクの作成・変更が対象です。既存のタスクは停止しません。
+proactive.surface.com_registration = COM コンポーネント登録
+proactive.surface.com_registration.tip = ユーザー単位の COM 登録の変更が対象です。Windows の COM は無効にしません。
+proactive.surface.registry_autorun = レジストリの自動起動項目
+proactive.surface.registry_autorun.tip = レジストリの Run または RunOnce への項目追加や変更が対象です。
+proactive.surface.service_driver = サービスとドライバーの追加
+proactive.surface.service_driver.tip = サービスの作成やドライバーのインストールが対象です。稼働中のものは停止しません。
+proactive.surface.inbound_smb_rdp = SMB・RDP の受信接続
+proactive.surface.inbound_smb_rdp.tip = 共有やリモートデスクトップへの新しい受信接続が対象です。許可してもポートは開きません。
+proactive.surface.wsh_script = Windows スクリプト
+proactive.surface.wsh_script.tip = WSH による .js、.vbs、.wsf の起動が対象です。他のスクリプト検査は引き続き行われます。
+proactive.state.blocked = ブロック
+proactive.state.allowed = 許可
+proactive.state.contained = 一時ブロック
+proactive.state.off = 適用なし
+proactive.saved_until = { $rule } · 例外は { $until } まで保存されています
+proactive.user_wsh_block = 選択した Windows スクリプトのブロックがこの例外より優先されます。
+proactive.demo.title = 封じ込めのシミュレーション
+proactive.demo.note = 自動処置のシミュレーションです。ファイルの検査や Windows 設定の変更は行いません。
+proactive.demo.mode = シミュレーションの保護モード
+proactive.demo.ready = 検査で感染を確認したら、修復が成功するまで 9 種類の操作をすべてブロックします。
+proactive.demo.start = 確認済みの感染を模擬
+proactive.demo.scan = 三つの防御層で検査中です。九つの操作を一時的に遮断しています。
+proactive.demo.clean = 脅威を無力化しました。安全に駆除できるルールを探しています。
+proactive.demo.repair = 被害を修復し、ファイルを検査しています。最終確認まで遮断は続きます。
+proactive.demo.cleaned = 駆除成功
+proactive.demo.repaired = 修復成功
+proactive.demo.restored = 修復を確認しました。元の設定が再び適用されます。
+proactive.demo.off = ユーザーが保護を無効にしています。封じ込めは開始せず、設定も変更しません。
+proactive.demo.fail = 手順の失敗
+proactive.demo.failed = この手順は失敗しました。復旧が成功するまでブロックを継続します。
 alerts.title = 通知センター
 alerts.sub = 確認に値するすべてが一か所に。ポップアップはありません。
 alerts.empty = 今は確認に値するものはありません。
@@ -315,7 +356,7 @@ path.copy_hint = コピー
 nav.preview = 画面プレビュー
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = 隔離箱を開く
+alert.confirmed.cta = 処置を確認
 badge.confirmed = 確認済み
 badge.high = 強い疑い
 badge.low = 疑わしい
@@ -360,9 +401,9 @@ notes.5b = ロゴタイプ、タスクトレイのアイコン、エラー状態
 notes.5t = このプレビューに無いもの：
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = 確認済みの脅威
+q.reason1 = 単体のマルウェアで、救出できる宿主ファイルはありません
 q.reason2 = クラックツール
-quarantine.opened_from = 通知とホームの件数から開きます。隠れたメニューからは開きません。
+quarantine.opened_from = マルウェア、安全に駆除できないファイル、自分で移した項目を保管します。
 quarantine.restore = 復元
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -411,7 +452,7 @@ num.sample = 通知 3 件 · ファイル 12 個
 num.note = すぐ反映されます。再起動は不要です。
 
 ## ── 一時停止のヒント — 必要時 ─────────────────────────────
-tip.lvl1 = 窓も通知も音もありませんが、検査と遮断は裏で続きます。感染ファイルは黙って隔離され、戻ったときに見せます。
+tip.lvl1 = 検査、遮断、修復は通知なしで続きます。通知の再開時に結果を表示します。
 tip.lvl2 = 検査も遮断も通知もありません。サービスは動きますが何もせず、端末は完全に無防備です。
 tip.no_permanent = 最長の一時停止は再起動で終わります。それが唯一の制限です。
 
@@ -427,3 +468,32 @@ visual.n5 = 文字は絵を説明し、繰り返しません。
 visual.sample = アイコンに乗せる：一語。クリック：あなたの言語で全文。
 trust.count = 四つではなく五つ。
 help.sample.title = 実際の例
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = 感染ファイルに手を加える前に、活動中の脅威を止めています。
+proactive.demo.verify = 一時遮断の解除前に、感染による影響全体を再確認しています。
+recovery.title = 処置状況
+recovery.tip = 脅威を止めてから駆除と修復を行います。隔離はマルウェア本体か、安全に駆除できない場合だけです。
+recovery.case = 試すケース
+recovery.match = 修復可能な宿主ファイル
+recovery.no_rule = 一致する安全なルールがありません
+recovery.no_db = 修復データがないか信頼できません
+recovery.bad_verify = 駆除後のコピーが検証に失敗しました
+recovery.scan = 三つの防御層で検査
+recovery.neutralize = 脅威を無力化
+recovery.clean = ファイルを駆除
+recovery.repair = 被害を修復
+recovery.verify = 最終確認
+recovery.next = 次の段階
+recovery.file_ok = ファイルの駆除、修復、検証が完了しました。
+recovery.file_isolated = 隔離しました。削除はしていません。
+settings.repair_db = 修復データベース
+settings.repair_db.status = v1/r1 · 練習用ルール二つ
+settings.repair_db.help = ファミリー別のルールを同梱します。パッケージが { $mb } MB を超えたら別途ダウンロードできます。
+recovery.case_malware = 単体マルウェア
+recovery.case_unknown = ルール不一致
+recovery.case_missing = データベースなし
+recovery.case_invalid = 検証失敗
+settings.repair_db.install = 個別に導入
+settings.repair_db.instructions = 同じバージョンの Odina の { $package } を、フォルダー構成を保ってプログラムと同じ場所に展開します。
+settings.repair_db.releases = リリース一覧

@@ -36,7 +36,7 @@ scan.stop = 停止
 scan.complete = 扫描完成
 scan.clean_result = 未发现有害内容。
 alert.confirmed.title = 我们拦截了一个已知威胁
-alert.confirmed.body = { $file } 是已确认的威胁，已被隔离 —— 未删除。
+alert.confirmed.body = 已确认 { $file } 受感染。已阻止运行，未删除文件。
 alert.suspicious.title = 有程序正在访问你的文件
 alert.suspicious.body = { $file } 正在修改文档中的文件——我们已暂时阻止它。
 alert.suspicious.note = 我们已暂时阻止它。
@@ -116,10 +116,10 @@ action.turn_off = 关闭保护
 action.turn_on = 重新开启保护
 disable.re_enable_note = 你随时可以重新开启保护——无需密码。
 disable.reminder = 距保护自动恢复还有 { $minutes} 分钟。
-pause.resume_report = 暂停提示期间：已隔离 { $count} 个文件
+pause.resume_report = 静音期间：已修复 { $restored } · 已隔离 { $isolated } · 待处理 { $pending }
 
 ## ── 精准例外 (D45 · §4.8) ─────────────────────────
-exception.title = 例外 —— 一条规则，而非全部
+exception.title = 例外
 exception.sub = 如果你的工作需要放宽某一条规则，只放宽那一条。其余保持不变。
 exception.rule.a1.wsh = Windows 脚本
 exception.rule.a1.wsh.desc = .vbs 和 .js 文件在受限模式下运行，除非由已知发布者签名。
@@ -164,7 +164,7 @@ exception.refused.veto_stands = 该文件已确认。例外放宽的是规则，
 
 exception.live_note = 你的决定 · 其余仍然有效 · 你随时可以撤销
 exception.lines_title = 四项永不可例外：
-exception.lines_body = 第一道墙的判定（即使有例外，已确认的文件仍会隔离）· 防篡改 · 第二条规则（WSH 例外不会打开 PowerShell）·“高度风险”及以上。撤销始终只需一次点击，无需密码。
+exception.lines_body = 第一道墙的判定（即使有例外也不能运行已确认受感染的文件）· 防篡改 · 第二条规则（WSH 例外不会打开 PowerShell）·“高度风险”及以上。撤销始终只需一次点击，无需密码。
 
 ## ── 程序地图与导航 (章程 §6أ.3) ─────────────────
 nav.home = 主页
@@ -240,7 +240,7 @@ settings.startup.body = 从开机起在后台运行。你可以关闭它。
 settings.notifications = 通知
 settings.notifications.body = 每天最多三条。最重要的优先。
 settings.updates = 更新
-settings.updates.body = 威胁数据库自动更新，程序手动更新。
+settings.updates.body = 威胁库自动更新，程序手动更新。修复规则库是独立的数据包。
 settings.about = 关于
 settings.version = 版本
 settings.database = 威胁数据库
@@ -279,9 +279,50 @@ home.goto.settings = 设置
 home.goto.proactive = 主动防护
 home.quarantine_count = 隔离区有 { $count } 个文件
 home.alerts_count = 有 { $count } 条通知值得一看
-home.proactive_summary = 六条规则 · 一条已例外
+home.proactive_summary = 九项活动，分为三组
 proactive.title = 主动防护
-proactive.sub = 六条规则。各有各的开关，互不开启。
+proactive.sub = 在此允许某项活动不会绕过文件扫描或防火墙规则。
+proactive.tier.mandatory = 极高风险 · 自动阻止
+proactive.tier.recommended = 中等风险 · 建议阻止
+proactive.tier.optional = 较低风险 · 可选阻止
+proactive.surface.office_child = Office 启动命令解释器
+proactive.surface.office_child.tip = 仅限 Word 或 Excel 启动 cmd、PowerShell 或 mshta，不是所有 Office 子进程。
+proactive.surface.wmi_subscription = 永久 WMI 订阅
+proactive.surface.wmi_subscription.tip = 来自不可信来源的新永久事件订阅，不包括普通 WMI 查询。
+proactive.surface.system_tools = 系统工具处理不可信输入
+proactive.surface.system_tools.tip = mshta、certutil 或 regsvr32 处理来自临时目录或互联网的不可信输入。
+proactive.surface.scheduled_task = 计划任务
+proactive.surface.scheduled_task.tip = 创建或更改任务。阻止此操作不会停止已有任务。
+proactive.surface.com_registration = COM 组件注册
+proactive.surface.com_registration.tip = 更改当前用户的 COM 注册，不是禁用 Windows COM。
+proactive.surface.registry_autorun = 注册表启动项
+proactive.surface.registry_autorun.tip = 在注册表的 Run 或 RunOnce 下添加或更改启动项。
+proactive.surface.service_driver = 安装服务和驱动程序
+proactive.surface.service_driver.tip = 创建服务或安装新驱动程序，不停止正在运行的服务和驱动程序。
+proactive.surface.inbound_smb_rdp = 入站 SMB 和 RDP
+proactive.surface.inbound_smb_rdp.tip = 新建入站共享或远程桌面连接。允许此项不会打开端口。
+proactive.surface.wsh_script = Windows 脚本
+proactive.surface.wsh_script.tip = 通过 WSH 启动 .js、.vbs 或 .wsf。其他脚本检查仍然有效。
+proactive.state.blocked = 已阻止
+proactive.state.allowed = 已允许
+proactive.state.contained = 暂时阻止
+proactive.state.off = 未执行
+proactive.saved_until = { $rule } · 例外保留至 { $until }
+proactive.user_wsh_block = 你设置的 Windows 脚本阻止规则优先于此例外。
+proactive.demo.title = 遏制模拟
+proactive.demo.note = 这是自动处置流程的模拟，不会扫描你的文件或更改 Windows 设置。
+proactive.demo.mode = 模拟保护模式
+proactive.demo.ready = 扫描确认感染后，九项活动会被阻止，直到修复成功。
+proactive.demo.start = 模拟已确认的感染
+proactive.demo.scan = 正在通过三道防线检查，九项活动均已暂时阻止。
+proactive.demo.clean = 威胁已消除。正在查找可信的文件清理规则。
+proactive.demo.repair = 正在修复损坏并检查文件。完成事件复核前仍保持拦截。
+proactive.demo.cleaned = 清理成功
+proactive.demo.repaired = 修复成功
+proactive.demo.restored = 修复结果已验证。已恢复你原来的选择。
+proactive.demo.off = 你已关闭保护。不会启动遏制，也不会更改你的选择。
+proactive.demo.fail = 步骤失败
+proactive.demo.failed = 此步骤未成功。将继续阻止，直到恢复成功。
 alerts.title = 通知中心
 alerts.sub = 值得一看的一切都在一处。没有弹窗。
 alerts.empty = 现在没有任何值得一看的内容。
@@ -315,7 +356,7 @@ path.copy_hint = 复制
 nav.preview = 界面预览
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = 打开隔离区
+alert.confirmed.cta = 查看处置进度
 badge.confirmed = 已确认
 badge.high = 高度可疑
 badge.low = 可疑
@@ -360,9 +401,9 @@ notes.5b = 文字标志、托盘图标与错误状态——另行评审（R3）�
 notes.5t = 本预览未包含：
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = 已确认威胁
+q.reason1 = 独立恶意程序，没有可挽救的宿主文件
 q.reason2 = 破解工具
-quarantine.opened_from = 从通知和主页上的计数进入——绝不从隐藏菜单。
+quarantine.opened_from = 这里存放恶意程序、无法安全清除感染的文件，以及你手动移入的项目。
 quarantine.restore = 恢复
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -411,7 +452,7 @@ num.sample = 3 条通知 · 12 个文件
 num.note = 立即生效，无需重启。
 
 ## ── 暂停提示 — 按需 ─────────────────────────────
-tip.lvl1 = 无窗口、无通知、无声音，但检查与拦截在后台继续：被感染文件会被静默隔离，回来时给你看。
+tip.lvl1 = 扫描、拦截和修复会在后台继续。恢复提醒后可查看结果。
 tip.lvl2 = 不检查、不拦截、不提醒。服务在运行但什么也不做，设备完全无防护。
 tip.no_permanent = 最长的暂停到重启为止，这是我们唯一的限制。
 
@@ -427,3 +468,32 @@ visual.n5 = 文字解释图，不重复图。
 visual.sample = 悬停图标：一个词。点击：用你的语言完整解释。
 trust.count = 五条，不是四条。
 help.sample.title = 实时示例
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = 先阻止正在活动的威胁，再处理受感染的文件。
+proactive.demo.verify = 正在复核整个事件，确认后才会解除临时限制。
+recovery.title = 处置进度
+recovery.tip = 先消除威胁，再清除感染、修复损坏。仅隔离恶意程序或无法安全清理的文件。
+recovery.case = 示例情形
+recovery.match = 可修复的宿主文件
+recovery.no_rule = 没有匹配的安全规则
+recovery.no_db = 修复库缺失或不可信
+recovery.bad_verify = 清理后的副本未通过验证
+recovery.scan = 三道防线检查
+recovery.neutralize = 消除活动威胁
+recovery.clean = 清除文件感染
+recovery.repair = 修复损坏
+recovery.verify = 最终验证
+recovery.next = 下一步
+recovery.file_ok = 文件已清理、修复并通过验证。
+recovery.file_isolated = 文件已隔离，未删除。
+settings.repair_db = 修复规则库
+settings.repair_db.status = v1/r1 · 两条演示规则
+settings.repair_db.help = 按恶意软件家族提供规则，默认随程序附带。若软件包超过 { $mb } MB，可单独下载。
+recovery.case_malware = 独立恶意程序
+recovery.case_unknown = 无匹配规则
+recovery.case_missing = 无可用修复库
+recovery.case_invalid = 验证失败
+settings.repair_db.install = 单独安装
+settings.repair_db.instructions = 从对应的 Odina 版本取得 { $package }，解压到程序所在目录，并保留文件夹结构。
+settings.repair_db.releases = 发行包

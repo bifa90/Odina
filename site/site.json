@@ -9,6 +9,8 @@
   },
   "include": [
     "ui-preview.html",
+    "locales.js",
+    "proactive-preview.js",
     "signing.html",
     "logo-review.html",
     "assets/logo/svg/*.svg",

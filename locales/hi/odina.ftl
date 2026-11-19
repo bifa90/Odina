@@ -36,7 +36,7 @@ scan.stop = रोकें
 scan.complete = जाँच पूरी
 scan.clean_result = कोई हानिकारक चीज़ नहीं मिली।
 alert.confirmed.title = हमने एक ज्ञात ख़तरा रोका
-alert.confirmed.body = { $file } पुष्ट ख़तरा है और अलग कर दिया गया है।
+alert.confirmed.body = { $file } में संक्रमण की पुष्टि हुई। इसे चलने से रोका गया, मिटाया नहीं गया।
 alert.suspicious.title = एक प्रोग्राम आपकी फ़ाइलों तक पहुँचने की कोशिश कर रहा है
 alert.suspicious.body = { $file } दस्तावेज़ों में फ़ाइलें बदल रहा है। हमने इसे अस्थायी रूप से रोका।
 alert.suspicious.note = हमने इसे अस्थायी रूप से रोका।
@@ -116,13 +116,13 @@ action.turn_off = सुरक्षा बंद करें
 action.turn_on = सुरक्षा फिर चालू करें
 disable.re_enable_note = आप कभी भी सुरक्षा फिर चालू कर सकते हैं — बिना पासवर्ड।
 disable.reminder = { $minutes } मिनट बाद सुरक्षा अपने आप लौट आएगी।
-pause.resume_report = सूचनाएँ रुकी रहने के दौरान: { $count } फ़ाइल अलग की गई
+pause.resume_report = मौन के दौरान: { $restored } ठीक · { $isolated } अलग · { $pending } लंबित
 
 ## ── सटीक अपवाद (D45 · §4.8) ─────────────────────────
-exception.title = अपवाद — एक नियम, सभी नहीं
+exception.title = अपवाद
 exception.sub = अगर काम के लिए एक नियम ढीला करना पड़े, तो सिर्फ़ वही अनुमति दें। बाकी सब वैसा ही रहेगा।
 exception.rule.a1.wsh = Windows स्क्रिप्ट
-exception.rule.a1.wsh.desc = .vbs और .js फ़ाइलें प्रतिबंधित रूप में चलती हैं, जब तक किसी ज्ञात प्रकाशक द्वारा हस्ताक्षरित न हों।
+exception.rule.a1.wsh.desc = ज्ञात प्रकाशक के हस्ताक्षर न हों तो .vbs और .js फ़ाइलें सीमित मोड में चलती हैं।
 exception.rule.a1.powershell = PowerShell कमांड
 exception.rule.a1.powershell.desc = PowerShell प्रतिबंधित मोड में चलता है। अनुमति देने से Windows Script Host नहीं खुलता।
 exception.rule.a1.macros = Office मैक्रो
@@ -164,7 +164,7 @@ exception.refused.veto_stands = फ़ाइल पुष्ट है। अप
 
 exception.live_note = आपका निर्णय · बाकी सब सक्रिय है · आप कभी भी रद्द कर सकते हैं
 exception.lines_title = चार चीज़ें कभी अपवाद नहीं होतीं:
-exception.lines_body = पहली दीवार का निर्णय (अपवाद के बावजूद पुष्ट फ़ाइल अलग की जाती है) · छेड़छाड़ सुरक्षा · दूसरा नियम (WSH अपवाद PowerShell नहीं खोलता) · “उच्च जोखिम” और ऊपर। रद्द करना हमेशा एक क्लिक, बिना पासवर्ड।
+exception.lines_body = पहली दीवार का निर्णय (अपवाद भी पुष्ट संक्रमित फ़ाइल को चलने नहीं देता) · छेड़छाड़ सुरक्षा · दूसरा नियम (WSH अपवाद PowerShell नहीं खोलता) · “उच्च जोखिम” और ऊपर। रद्द करना हमेशा एक क्लिक, बिना पासवर्ड।
 
 ## ── ऐप का नक्शा और नेविगेशन (संविधान §6أ.3) ─────────────────
 nav.home = होम
@@ -240,7 +240,7 @@ settings.startup.body = बूट से ही पृष्ठभूमि म�
 settings.notifications = सूचनाएँ
 settings.notifications.body = दिन में अधिकतम तीन। सबसे ज़रूरी पहले।
 settings.updates = अद्यतन
-settings.updates.body = ख़तरा डेटाबेस के लिए स्वचालित, प्रोग्राम के लिए मैन्युअल।
+settings.updates.body = खतरों के डेटा का अपडेट अपने आप होता है, प्रोग्राम का मैन्युअल। मरम्मत डेटा अलग पैकेज में है।
 settings.about = ऐप के बारे में
 settings.version = संस्करण
 settings.database = ख़तरा डेटाबेस
@@ -279,9 +279,50 @@ home.goto.settings = सेटिंग्स
 home.goto.proactive = पूर्ववर्ती सुरक्षा
 home.quarantine_count = { $count } फ़ाइलें क्वारंटीन में
 home.alerts_count = { $count } सूचनाएँ देखने योग्य
-home.proactive_summary = छह नियम · एक अपवादित
+home.proactive_summary = तीन समूहों में नौ गतिविधियाँ
 proactive.title = पूर्ववर्ती सुरक्षा
-proactive.sub = छह नियम। हर एक का अपना स्विच, और कोई दूसरे को नहीं खोलता।
+proactive.sub = यहाँ अनुमति देने से फ़ाइल जाँच या फ़ायरवॉल के नियम नहीं हटते।
+proactive.tier.mandatory = बहुत अधिक जोखिम · अपने आप रोकें
+proactive.tier.recommended = मध्यम जोखिम · रोकने की सलाह
+proactive.tier.optional = कम जोखिम · रोकना वैकल्पिक
+proactive.surface.office_child = Office से कमांड इंटरप्रेटर
+proactive.surface.office_child.tip = Word या Excel से cmd, PowerShell या mshta शुरू करना; सभी चाइल्ड प्रक्रियाएँ नहीं।
+proactive.surface.wmi_subscription = स्थायी WMI सदस्यताएँ
+proactive.surface.wmi_subscription.tip = अविश्वसनीय स्रोत से नई स्थायी इवेंट सदस्यता बनाना, सामान्य WMI क्वेरी नहीं।
+proactive.surface.system_tools = अविश्वसनीय इनपुट वाले सिस्टम टूल
+proactive.surface.system_tools.tip = अस्थायी फ़ोल्डर या इंटरनेट के अविश्वसनीय इनपुट के साथ mshta, certutil या regsvr32।
+proactive.surface.scheduled_task = शेड्यूल किए गए कार्य
+proactive.surface.scheduled_task.tip = कार्य बनाना या बदलना। रोकने से मौजूदा कार्य बंद नहीं होते।
+proactive.surface.com_registration = COM पंजीकरण
+proactive.surface.com_registration.tip = उपयोगकर्ता का COM पंजीकरण बदलना, Windows में COM को बंद करना नहीं।
+proactive.surface.registry_autorun = रजिस्ट्री स्टार्टअप प्रविष्टियाँ
+proactive.surface.registry_autorun.tip = रजिस्ट्री में Run या RunOnce के अंतर्गत प्रविष्टि जोड़ना या बदलना।
+proactive.surface.service_driver = सेवा और ड्राइवर स्थापना
+proactive.surface.service_driver.tip = नई सेवा बनाना या ड्राइवर स्थापित करना। चालू सेवाएँ और ड्राइवर बंद नहीं होते।
+proactive.surface.inbound_smb_rdp = इनकमिंग SMB और RDP
+proactive.surface.inbound_smb_rdp.tip = शेयरिंग या रिमोट डेस्कटॉप के लिए नए इनकमिंग कनेक्शन। अनुमति देने से पोर्ट नहीं खुलता।
+proactive.surface.wsh_script = Windows स्क्रिप्ट
+proactive.surface.wsh_script.tip = WSH से .js, .vbs या .wsf शुरू करना। स्क्रिप्ट की अन्य जाँच जारी रहती हैं।
+proactive.state.blocked = अवरुद्ध
+proactive.state.allowed = अनुमत
+proactive.state.contained = अस्थायी रोक
+proactive.state.off = लागू नहीं
+proactive.saved_until = { $rule } · अपवाद { $until } तक सहेजा गया है
+proactive.user_wsh_block = Windows स्क्रिप्ट पर आपकी रोक इस अपवाद से पहले लागू होती है।
+proactive.demo.title = रोकथाम का अनुकरण
+proactive.demo.note = यह स्वचालित उपचार का अनुकरण है। आपकी फ़ाइलें जाँची नहीं जातीं और Windows की सेटिंग नहीं बदलती।
+proactive.demo.mode = अनुकरण में सुरक्षा मोड
+proactive.demo.ready = जाँच में संक्रमण की पुष्टि होने पर सफल मरम्मत तक सभी नौ गतिविधियाँ रुकी रहती हैं।
+proactive.demo.start = पुष्ट संक्रमण का अनुकरण करें
+proactive.demo.scan = तीनों सुरक्षा दीवारों से जाँच जारी है। सभी नौ गतिविधियों पर अस्थायी रोक है।
+proactive.demo.clean = खतरा निष्क्रिय है। फ़ाइल की सफ़ाई के लिए भरोसेमंद नियम खोजा जा रहा है।
+proactive.demo.repair = नुकसान ठीक कर फ़ाइल की जाँच हो रही है। अंतिम पुष्टि तक रोक जारी है।
+proactive.demo.cleaned = सफ़ाई सफल
+proactive.demo.repaired = मरम्मत सफल
+proactive.demo.restored = मरम्मत की पुष्टि हुई। आपकी पुरानी पसंद फिर लागू है।
+proactive.demo.off = आपने सुरक्षा बंद की है। रोकथाम शुरू नहीं होगी और आपके विकल्प नहीं बदलेंगे।
+proactive.demo.fail = चरण विफल
+proactive.demo.failed = यह चरण सफल नहीं हुआ। सफल पुनर्प्राप्ति तक रोक जारी रहेगी।
 alerts.title = सूचना केंद्र
 alerts.sub = देखने योग्य सब कुछ एक जगह। कोई पॉप-अप नहीं।
 alerts.empty = अभी देखने योग्य कुछ नहीं।
@@ -315,7 +356,7 @@ path.copy_hint = कॉपी
 nav.preview = इंटरफ़ेस पूर्वावलोकन
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = क्वारंटीन खोलें
+alert.confirmed.cta = उपचार देखें
 badge.confirmed = पुष्ट
 badge.high = अत्यधिक संदिग्ध
 badge.low = संदिग्ध
@@ -360,9 +401,9 @@ notes.5b = लोगोटाइप, ट्रे आइकन और त्र�
 notes.5t = इसमें शामिल नहीं:
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = पुष्ट ख़तरा
+q.reason1 = अलग मैलवेयर; बचाने के लिए कोई मेज़बान फ़ाइल नहीं
 q.reason2 = क्रैकिंग टूल
-quarantine.opened_from = सूचना और होम के काउंटर से खुलता है — कभी छिपे मेनू से नहीं।
+quarantine.opened_from = यहाँ मैलवेयर, सुरक्षित रूप से साफ़ न हो सकी फ़ाइलें और आपके भेजे गए आइटम हैं।
 quarantine.restore = पुनर्स्थापित
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -411,7 +452,7 @@ num.sample = 3 सूचनाएँ · 12 फ़ाइलें
 num.note = बदलाव तुरंत। रीस्टार्ट की ज़रूरत नहीं।
 
 ## ── विराम के संकेत — माँग पर ─────────────────────────────
-tip.lvl1 = न विंडो, न सूचना, न आवाज़, पर जाँच और रोक पृष्ठभूमि में जारी है: संक्रमित फ़ाइल चुपचाप अलग की जाती है और लौटने पर दिखाई जाती है।
+tip.lvl1 = जाँच, रोक और उपचार चुपचाप जारी रहते हैं। सूचनाएँ लौटने पर परिणाम देखें।
 tip.lvl2 = न जाँच, न रोक, न सूचना। सेवा चलती है पर कुछ नहीं करती, और आपका डिवाइस पूरी तरह असुरक्षित है।
 tip.no_permanent = सबसे लंबा विराम रीस्टार्ट पर खत्म होता है, और यही हमारी एकमात्र सीमा है।
 
@@ -427,3 +468,32 @@ visual.n5 = पाठ चित्र को समझाता है, दो�
 visual.sample = आइकन पर रुकें: एक शब्द। क्लिक करें: आपकी भाषा में पूरी व्याख्या।
 trust.count = पाँच, चार नहीं।
 help.sample.title = एक जीवंत उदाहरण
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = संक्रमित फ़ाइल को छूने से पहले सक्रिय खतरे को रोका जा रहा है।
+proactive.demo.verify = अस्थायी रोक हटाने से पहले पूरे संक्रमण के असर की जाँच हो रही है।
+recovery.title = उपचार
+recovery.tip = पहले खतरा रोकें, फिर सफ़ाई और मरम्मत। केवल मैलवेयर या न सुधर सकी फ़ाइल अलग रखें।
+recovery.case = उदाहरण चुनें
+recovery.match = ठीक हो सकने वाली फ़ाइल
+recovery.no_rule = कोई सुरक्षित नियम मेल नहीं खाता
+recovery.no_db = मरम्मत डेटा नहीं है या भरोसेमंद नहीं है
+recovery.bad_verify = साफ़ प्रति की पुष्टि नहीं हुई
+recovery.scan = तीनों दीवारों से जाँच
+recovery.neutralize = खतरे को निष्क्रिय करना
+recovery.clean = फ़ाइल की सफ़ाई
+recovery.repair = नुकसान की मरम्मत
+recovery.verify = अंतिम पुष्टि
+recovery.next = अगला चरण
+recovery.file_ok = फ़ाइल साफ़ और ठीक हुई, जाँच भी सफल रही।
+recovery.file_isolated = फ़ाइल अलग रखी गई, मिटाई नहीं गई।
+settings.repair_db = मरम्मत डेटाबेस
+settings.repair_db.status = v1/r1 · दो अभ्यास नियम
+settings.repair_db.help = परिवार-विशेष के नियम साथ मिलते हैं। पैकेज { $mb } MB से बड़ा हो तो अलग डाउनलोड करें।
+recovery.case_malware = अलग मैलवेयर
+recovery.case_unknown = नियम नहीं मिला
+recovery.case_missing = डेटाबेस नहीं है
+recovery.case_invalid = पुष्टि विफल
+settings.repair_db.install = अलग स्थापना
+settings.repair_db.instructions = इसी Odina रिलीज़ का { $package } प्रोग्राम के पास निकालें। फ़ोल्डरों का क्रम न बदलें।
+settings.repair_db.releases = रिलीज़ पैकेज

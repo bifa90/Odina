@@ -241,8 +241,10 @@ impl Meter {
         }
     }
 
-    /// CPU time used between two snapshots, as a percentage of wall time on
-    /// one core. Returns `None` when either side could not be read.
+    /// Process CPU time across all threads, divided by elapsed time on ONE
+    /// logical core. Do not divide by available parallelism or clamp at 100%:
+    /// two busy threads on two cores can give 200%. Missing/invalid deltas
+    /// yield `None`, not a successful zero.
     pub fn cpu_percent_of(&self, earlier: &Meter) -> Option<f64> {
         let wall = self.at?.checked_duration_since(earlier.at?)?.as_secs_f64();
         let cpu = self.cpu?.checked_sub(earlier.cpu?)?.as_secs_f64();

@@ -47,12 +47,17 @@ fn hex(bytes: &[u8]) -> String {
     out
 }
 
+/// One whole-object digest for component pins and byte-exact repair recipes.
+pub(crate) fn sha256_hex(bytes: &[u8]) -> String {
+    hex(&Sha256::digest(bytes))
+}
+
 /// Hash bytes already in memory. Used for tests and for small artefacts.
 pub fn hash_bytes(data: &[u8]) -> FileHashes {
     let head_len = data.len().min(HEAD_BYTES);
     let tail_start = data.len().saturating_sub(TAIL_BYTES);
     FileHashes {
-        full: hex(&Sha256::digest(data)),
+        full: sha256_hex(data),
         head: hex(&Sha256::digest(&data[..head_len])),
         tail: hex(&Sha256::digest(&data[tail_start..])),
         size: data.len() as u64,

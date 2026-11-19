@@ -122,7 +122,7 @@ pub enum Verdict {
     Suspicious,
     /// 0.80 .. 0.989 — stop now, mandatory behaviour check, 60 s.
     HighRisk,
-    /// >= 0.99 — isolate, one button, cannot be dismissed.
+    /// >= 0.99 — deny execution and start remediation, not automatic quarantine.
     Confirmed,
 }
 
@@ -136,7 +136,7 @@ impl Verdict {
     /// absence of a decision, and absence of a decision must not run the file.
     pub fn timeout_action(self) -> &'static str {
         match self {
-            Verdict::Confirmed => "quarantine",
+            Verdict::Confirmed => "block_and_remediate",
             Verdict::HighRisk | Verdict::Suspicious => "block",
             Verdict::Monitor | Verdict::Clean => "none",
         }
@@ -518,7 +518,7 @@ mod tests {
         ] {
             assert_ne!(v.timeout_action(), "allow");
         }
-        assert_eq!(Verdict::Confirmed.timeout_action(), "quarantine");
+        assert_eq!(Verdict::Confirmed.timeout_action(), "block_and_remediate");
     }
 
     #[test]
@@ -551,7 +551,7 @@ mod tests {
         assert_eq!(s.verdict, Verdict::Confirmed);
         assert_eq!(s.veto, Some(Veto::KnownBad));
         assert!(s.interrupts());
-        assert_eq!(s.verdict.timeout_action(), "quarantine");
+        assert_eq!(s.verdict.timeout_action(), "block_and_remediate");
     }
 
     #[test]

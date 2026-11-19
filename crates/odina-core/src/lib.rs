@@ -10,11 +10,16 @@
 //!   * every rule in `docs/spec/scoring-spec-v1.md` has a home here.
 //!
 //! What it does NOT do: read directories, watch USB, talk to Windows, or
-//! spawn threads. Callers hand it bytes; it hands back verdicts.
+//! spawn threads. Callers supply bytes or normalized activities; it returns
+//! file verdicts or policy decisions, never OS side effects.
 
+pub mod g1_reference;
 pub mod hashing;
 pub mod heuristics;
 pub mod policy;
+pub mod proactive;
+pub mod remediation;
+pub mod repair_db;
 pub mod scoring;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};

@@ -19,9 +19,9 @@ restore step, because nothing outside site/ is ever handed to Firebase.
     python3 tools/deploy-site.py --dry-run  # build + check only
     python3 tools/deploy-site.py --serve    # build, then serve locally
 
-Requires: firebase-tools (`npm i -g firebase-tools`), logged in once with
-`firebase login`. Nothing else. Self-update from git is gone on purpose:
-publishing a website must not be able to overwrite the working tree.
+Only publishing requires firebase-tools and `firebase login`. Building and
+serving the staged site need only the Python standard library. Self-update
+from git is gone: publishing must not be able to overwrite the working tree.
 
 Exit codes: 0 ok, 1 failure, 2 usage/config error, 130 interrupted.
 """
@@ -36,6 +36,8 @@ import shutil
 import subprocess
 import sys
 import time
+from functools import partial
+from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -135,11 +137,16 @@ def build(manifest: dict) -> dict:
         dest = STAGE / dest_rel
         dest.parent.mkdir(parents=True, exist_ok=True)
 
-        if dest.suffix.lower() in {".html", ".css"} and fonts_base:
+        if dest.suffix.lower() in {".html", ".css"}:
             text = src.read_text(encoding="utf-8")
-            new_text, n = re.subn(r"fonts/vendor/", fonts_base, text)
-            dest.write_text(new_text, encoding="utf-8")
-            rewritten += n
+            if fonts_base:
+                text, n = re.subn(r"fonts/vendor/", lambda _: fonts_base, text)
+                rewritten += n
+            else:
+                # The disk preview can use vendored fonts. The default site ships
+                # none: use the same CSS fallback stacks without a round of 404s.
+                text = re.sub(r"<style data-vendor-fonts>.*?</style>\s*", "", text, flags=re.S)
+            dest.write_text(text, encoding="utf-8")
             size = dest.stat().st_size
         else:
             shutil.copy2(src, dest)
@@ -284,12 +291,12 @@ def deploy(project: str | None, concurrency: int) -> None:
 
 
 # ── serve ──────────────────────────────────────────────────────────────
-def serve(port: int) -> None:
-    head("معاينة محلية")
-    require_firebase()
-    info(f"http://localhost:{port}  — أوقف بـ Ctrl+C")
-    subprocess.run(["firebase", "serve", "--only", "hosting",
-                    "--port", str(port)], cwd=ROOT)
+def serve(host: str, port: int) -> None:
+    head("معاينة محلية — بلا نشر")
+    handler = partial(SimpleHTTPRequestHandler, directory=str(STAGE))
+    with ThreadingHTTPServer((host, port), handler) as server:
+        info(f"http://{host}:{server.server_port}  — أوقف بـ Ctrl+C")
+        server.serve_forever()
 
 
 # ── main ───────────────────────────────────────────────────────────────
@@ -299,6 +306,7 @@ def main() -> int:
                     help="بناء وفحص بلا نشر")
     ap.add_argument("--serve", action="store_true",
                     help="بناء ثم معاينة محلية")
+    ap.add_argument("--bind", default="127.0.0.1", help="عنوان الاستماع للمعاينة فقط")
     ap.add_argument("--port", type=int, default=5000)
     ap.add_argument("--project", default=None,
                     help="معرّف مشروع Firebase (اختياري)")
@@ -315,7 +323,7 @@ def main() -> int:
     check(stats)
 
     if args.serve:
-        serve(args.port)
+        serve(args.bind, args.port)
         return 0
 
     if args.dry_run:

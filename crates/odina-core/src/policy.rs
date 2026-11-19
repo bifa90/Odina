@@ -17,7 +17,7 @@
 //!   * **how long** — [`Duration`], where `Permanent` exists but is visible.
 //!
 //! And three things can never be relaxed, whatever the user says: the first
-//! wall's verdict (a confirmed file is quarantined even under an exception),
+//! wall's verdict (an exception cannot run a confirmed infection or skip remediation),
 //! the tamper protection, and the rule that one exception never switches on a
 //! second rule. Those are enforced in [`Policy::effective`], not documented
 //! and hoped for — the isolation test is the one that would catch a regression.
@@ -271,7 +271,7 @@ pub enum Refusal {
     NoPermanence,
     /// A whole-rule permanent exception asked for in the standard flow.
     NeedsExpertMode,
-    /// The second wall's verdict is in force: a confirmed file is quarantined
+    /// The file verdict stands: confirmed execution is denied during remediation
     /// whatever the policy says.
     VetoStands,
 }
@@ -314,6 +314,9 @@ impl Granted {
 #[derive(Debug, Clone, Default)]
 pub struct Policy {
     exceptions: Vec<Exception>,
+    /// Baseline surface choices and outstanding remediation jobs (§2.3.1).
+    /// Evaluate a surface through `evaluate_activity`, not a D45 grant alone.
+    pub surfaces: crate::proactive::SurfacePolicy,
 }
 
 impl Policy {

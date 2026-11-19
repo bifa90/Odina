@@ -48,7 +48,7 @@ DEFAULT_ENGINE = "google"
 
 SCREEN_IDS = [
     "home", "quarantine", "proactive", "alerts", "settings",
-    "language", "privacy", "exception",
+    "language", "privacy", "exception", "remediation",
 ]
 
 
@@ -78,6 +78,7 @@ def check_tips(html: str, root: Path) -> list[str]:
     # other: a long text nobody declared is a text nobody reviewed.
     used = set(re.findall(r'data-tipkey="([^"]+)"', html))
     used |= set(re.findall(r'data-why="([^"]+)"', html))
+    used |= set(re.findall(r'data-list-tip="(tip\.[^"]+)"', html))
     for key in sorted(used - declared):
         problems.append(f"tooltip {key} is used but not in glossary-v1.md")
     return problems
@@ -282,19 +283,24 @@ def check_editable(html: str, root: Path) -> list[str]:
     if not locales:
         return ["no locale files found"]
 
-    declared: dict[str, set[str]] = {}
+    # Navigation descriptions are bound to [data-k] at boot. Rule/setting
+    # descriptions already live in their disclosure in the HTML.
+    list_tips = set(re.findall(r'data-list-tip="([^"]+)"', html))
+    for tag in re.findall(r'<[^>]*\brole="tooltip"[^>]*>', html):
+        list_tips.update(re.findall(r'data-k="([^"]+)"', tag))
+    used = set(re.findall(r'data-k="([^"]+)"', html)) | list_tips
     for path in locales:
-        keys = set(re.findall(r"^([A-Za-z0-9_.-]+) =", path.read_text(encoding="utf-8"), re.M))
-        declared[path.parent.name] = keys
-
-    used = set(re.findall(r'data-k="([^"]+)"', html))
-    for lang, keys in declared.items():
-        missing = sorted(used - keys)
+        lang = path.parent.name
+        values = dict(re.findall(r"^([A-Za-z0-9_.-]+) = (.*)$", path.read_text(encoding="utf-8"), re.M))
+        missing = sorted(used - values.keys())
         if missing:
             problems.append(
                 f"{lang}: {len(missing)} key(s) on the page are not in the locale "
                 f"file, so they cannot be edited: {', '.join(missing[:4])}"
             )
+        for key in sorted(list_tips & values.keys()):
+            if not values[key].strip() or len(values[key]) > HINT_LIMIT:
+                problems.append(f"{lang}: list tip {key} must be 1–{HINT_LIMIT} characters")
 
     # The signing page is the other editable surface; it must stay data-driven.
     signing = root / "signing.html"

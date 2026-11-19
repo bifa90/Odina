@@ -36,7 +36,7 @@ scan.stop = Detener
 scan.complete = Análisis completado
 scan.clean_result = No se encontró nada dañino.
 alert.confirmed.title = Detuvimos una amenaza conocida
-alert.confirmed.body = { $file } es una amenaza confirmada y fue aislado.
+alert.confirmed.body = Infección confirmada en { $file }. Se bloqueó su ejecución; no se borró nada.
 alert.suspicious.title = Un programa intenta acceder a tus archivos
 alert.suspicious.body = { $file } está modificando archivos en Documentos. Lo detuvimos temporalmente.
 alert.suspicious.note = Lo detuvimos temporalmente.
@@ -116,13 +116,13 @@ action.turn_off = Desactivar la protección
 action.turn_on = Reactivar la protección
 disable.re_enable_note = Puedes reactivar la protección en cualquier momento, sin contraseña.
 disable.reminder = Quedan { $minutes} minutos para que la protección vuelva sola.
-pause.resume_report = Mientras los avisos estaban en pausa: { $count} archivo(s) aislado(s)
+pause.resume_report = Durante el silencio: { $restored } reparados · { $isolated } aislados · { $pending } pendientes
 
 ## ── Excepción quirúrgica (D45 · §4.8) ─────────────────────────
-exception.title = Excepciones — una regla, no todas
+exception.title = Excepciones
 exception.sub = Si tu trabajo necesita que una regla ceda, permite solo esa. El resto queda igual.
 exception.rule.a1.wsh = Scripts de Windows
-exception.rule.a1.wsh.desc = Los archivos .vbs y .js se ejecutan restringidos salvo que estén firmados por un editor conocido.
+exception.rule.a1.wsh.desc = Los .vbs y .js se ejecutan con límites salvo que los firme un editor conocido.
 exception.rule.a1.powershell = Comandos de PowerShell
 exception.rule.a1.powershell.desc = PowerShell se ejecuta en modo restringido. Permitirlo no abre Windows Script Host.
 exception.rule.a1.macros = Macros de Office
@@ -164,7 +164,7 @@ exception.refused.veto_stands = El archivo está confirmado. Una excepción rela
 
 exception.live_note = tu decisión · todo lo demás sigue activo · puedes revocar en cualquier momento
 exception.lines_title = Cuatro cosas nunca se exceptúan:
-exception.lines_body = el veredicto del primer muro (un archivo confirmado se aísla incluso con una excepción) · la protección contra manipulación · la segunda regla (una excepción de WSH no abre PowerShell) · «riesgo alto» y superior. Revocar siempre es un clic, sin contraseña.
+exception.lines_body = el veredicto del primer muro (una excepción no autoriza ejecutar un archivo infectado confirmado) · la protección contra manipulación · la segunda regla (una excepción de WSH no abre PowerShell) · «riesgo alto» y superior. Revocar siempre es un clic, sin contraseña.
 
 ## ── Mapa de la app y navegación (constitución §6أ.3) ─────────────────
 nav.home = Inicio
@@ -240,7 +240,7 @@ settings.startup.body = Funciona en segundo plano desde el arranque. Puedes desa
 settings.notifications = Avisos
 settings.notifications.body = Tres al día como máximo. Lo importante primero.
 settings.updates = Actualizaciones
-settings.updates.body = Automáticas para la base de amenazas, manuales para el programa.
+settings.updates.body = Los datos de amenazas se actualizan automáticamente; el programa, a mano. La base de reparación va aparte.
 settings.about = Acerca de
 settings.version = Versión
 settings.database = Base de amenazas
@@ -279,9 +279,50 @@ home.goto.settings = Ajustes
 home.goto.proactive = Protección proactiva
 home.quarantine_count = { $count } archivo(s) en cuarentena
 home.alerts_count = { $count } aviso(s) que valen una mirada
-home.proactive_summary = Seis reglas · una exceptuada
+home.proactive_summary = Nueve actividades en tres grupos
 proactive.title = Protección proactiva
-proactive.sub = Seis reglas. Cada una con su interruptor, y ninguna abre otra.
+proactive.sub = Permitir una actividad aquí no anula los análisis de archivos ni las reglas del cortafuegos.
+proactive.tier.mandatory = Riesgo muy alto · Bloqueo automático
+proactive.tier.recommended = Riesgo medio · Bloqueo recomendado
+proactive.tier.optional = Riesgo menor · Bloqueo opcional
+proactive.surface.office_child = Intérpretes iniciados por Office
+proactive.surface.office_child.tip = Inicio de cmd, PowerShell o mshta desde Word o Excel, no todos los procesos secundarios.
+proactive.surface.wmi_subscription = Suscripciones WMI persistentes
+proactive.surface.wmi_subscription.tip = Nuevas suscripciones permanentes de origen no fiable, no las consultas WMI normales.
+proactive.surface.system_tools = Herramientas con entradas no fiables
+proactive.surface.system_tools.tip = mshta, certutil o regsvr32 con entradas no fiables de carpetas temporales o de Internet.
+proactive.surface.scheduled_task = Tareas programadas
+proactive.surface.scheduled_task.tip = Crear o modificar una tarea. El bloqueo no detiene las tareas existentes.
+proactive.surface.com_registration = Registro de componentes COM
+proactive.surface.com_registration.tip = Cambios en el registro COM de un usuario, sin desactivar COM en Windows.
+proactive.surface.registry_autorun = Entradas de inicio del registro
+proactive.surface.registry_autorun.tip = Añadir o cambiar entradas bajo Run o RunOnce en el registro.
+proactive.surface.service_driver = Instalación de servicios y controladores
+proactive.surface.service_driver.tip = Crear un servicio o instalar un controlador, sin detener los que ya se ejecutan.
+proactive.surface.inbound_smb_rdp = SMB y RDP entrantes
+proactive.surface.inbound_smb_rdp.tip = Nuevas conexiones entrantes de uso compartido o escritorio remoto. No se abren puertos.
+proactive.surface.wsh_script = Scripts de Windows
+proactive.surface.wsh_script.tip = Ejecutar .js, .vbs o .wsf mediante WSH. Siguen vigentes los demás controles de scripts.
+proactive.state.blocked = Bloqueado
+proactive.state.allowed = Permitido
+proactive.state.contained = Bloqueo temporal
+proactive.state.off = Sin aplicar
+proactive.saved_until = { $rule } · excepción guardada hasta { $until }
+proactive.user_wsh_block = Tu bloqueo de scripts de Windows prevalece sobre esta excepción.
+proactive.demo.title = Simulación de contención
+proactive.demo.note = Simulación del tratamiento automático. No se analizan archivos ni se cambian ajustes de Windows.
+proactive.demo.mode = Modo de protección simulado
+proactive.demo.ready = Si el análisis confirma una infección, las nueve actividades se bloquean hasta que se complete la reparación.
+proactive.demo.start = Simular infección confirmada
+proactive.demo.scan = Análisis con las tres barreras. Las nueve actividades siguen bloqueadas temporalmente.
+proactive.demo.clean = Peligro neutralizado. Buscando una regla fiable para desinfectar el archivo.
+proactive.demo.repair = Reparando daños y comprobando el archivo. El bloqueo sigue hasta la verificación final.
+proactive.demo.cleaned = Limpieza completada
+proactive.demo.repaired = Reparación completada
+proactive.demo.restored = Reparación verificada. Vuelven a aplicarse tus preferencias.
+proactive.demo.off = Has desactivado la protección. No se inicia la contención ni se cambian tus preferencias.
+proactive.demo.fail = Falló el paso
+proactive.demo.failed = El paso no se completó. La contención se mantiene hasta que finalice la recuperación.
 alerts.title = Centro de avisos
 alerts.sub = Todo lo que vale una mirada en un solo lugar. Sin ventanas emergentes.
 alerts.empty = Nada que valga una mirada ahora mismo.
@@ -315,7 +356,7 @@ path.copy_hint = copiar
 nav.preview = Vista previa
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = Abrir cuarentena
+alert.confirmed.cta = Ver tratamiento
 badge.confirmed = Confirmado
 badge.high = Muy sospechoso
 badge.low = Sospechoso
@@ -360,9 +401,9 @@ notes.5b = logotipo, icono de bandeja y estados de error — se revisan aparte (
 notes.5t = No incluido aquí:
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = Amenaza confirmada
+q.reason1 = Malware independiente, sin archivo anfitrión que salvar
 q.reason2 = Herramienta de crackeo
-quarantine.opened_from = Se abre desde un aviso y desde el contador de Inicio, nunca desde un menú oculto.
+quarantine.opened_from = Malware, archivos que no se pudieron desinfectar con seguridad y elementos que moviste aquí.
 quarantine.restore = Restaurar
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -411,7 +452,7 @@ num.sample = 3 avisos · 12 archivos
 num.note = El cambio es inmediato. No hace falta reiniciar.
 
 ## ── Avisos de la pausa — a demanda ─────────────────────────────
-tip.lvl1 = Sin ventana, sin aviso, sin sonido, pero el análisis y el bloqueo siguen en segundo plano: un archivo infectado se aísla en silencio y se muestra al volver.
+tip.lvl1 = El análisis, el bloqueo y la reparación continúan en silencio. Verás los resultados al volver.
 tip.lvl2 = Sin análisis, sin bloqueo, sin aviso. El servicio funciona pero no hace nada, y tu equipo queda sin protección.
 tip.no_permanent = La pausa más larga termina al reiniciar, y ese es el único límite que imponemos.
 
@@ -427,3 +468,32 @@ visual.n5 = El texto explica la imagen, no la repite.
 visual.sample = Pasa sobre el icono: una palabra. Púlsalo: explicación completa en tu idioma.
 trust.count = Cinco, no cuatro.
 help.sample.title = Ejemplo real
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = Deteniendo la amenaza activa antes de tocar el archivo infectado.
+proactive.demo.verify = Verificando todo el incidente antes de levantar el bloqueo.
+recovery.title = Tratamiento
+recovery.tip = Neutralizar, limpiar y reparar. Aislar solo malware o archivos sin recuperación segura.
+recovery.case = Caso de ejemplo
+recovery.match = Archivo recuperable
+recovery.no_rule = No hay una regla segura que coincida
+recovery.no_db = Faltan datos de reparación fiables
+recovery.bad_verify = La copia limpia no superó la verificación
+recovery.scan = Análisis con tres barreras
+recovery.neutralize = Neutralizar el peligro
+recovery.clean = Desinfectar el archivo
+recovery.repair = Reparar los daños
+recovery.verify = Verificación final
+recovery.next = Siguiente paso
+recovery.file_ok = Archivo desinfectado, reparado y verificado.
+recovery.file_isolated = Archivo aislado, no borrado.
+settings.repair_db = Base de reparación
+settings.repair_db.status = v1/r1 · dos reglas de prueba
+settings.repair_db.help = Incluye reglas por familia. Descarga separada si el paquete supera los { $mb } MB.
+recovery.case_malware = Malware independiente
+recovery.case_unknown = Sin regla compatible
+recovery.case_missing = Base ausente
+recovery.case_invalid = Verificación fallida
+settings.repair_db.install = Instalación aparte
+settings.repair_db.instructions = Extrae { $package } de la misma versión de Odina junto al programa, sin cambiar las carpetas.
+settings.repair_db.releases = Paquetes publicados

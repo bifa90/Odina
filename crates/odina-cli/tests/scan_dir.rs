@@ -15,18 +15,6 @@ fn binary() -> PathBuf {
     PathBuf::from(env!("CARGO_BIN_EXE_odina"))
 }
 
-/// The EICAR standard test string, assembled from pieces so this source file
-/// does not itself look like the test file to a scanner.
-fn eicar() -> Vec<u8> {
-    [
-        "X5O!P%@AP[4\\PZX54(P^)7CC)7}$",
-        "EICAR-STANDARD-ANTIVIRUS-",
-        "TEST-FILE!$H+H*",
-    ]
-    .concat()
-    .into_bytes()
-}
-
 fn scratch(name: &str) -> PathBuf {
     let dir = std::env::temp_dir().join(format!("odina-cli-test-{name}"));
     let _ = std::fs::remove_dir_all(&dir);
@@ -38,7 +26,11 @@ fn scratch(name: &str) -> PathBuf {
 fn scans_a_folder_and_flags_the_deceptive_name() {
     let dir = scratch("mixed");
     std::fs::write(dir.join("notes.txt"), b"just some notes").unwrap();
-    std::fs::write(dir.join("photo.jpg.exe"), eicar()).unwrap();
+    std::fs::write(
+        dir.join("photo.jpg.exe"),
+        b"a note with a misleading filename",
+    )
+    .unwrap();
 
     let out = Command::new(binary())
         .arg("scan")

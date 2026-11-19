@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
+# Browser gate only; not needed by the site, dry-run or local preview.
+playwright==1.65.0

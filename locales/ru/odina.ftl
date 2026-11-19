@@ -36,7 +36,7 @@ scan.stop = Остановить
 scan.complete = Проверка завершена
 scan.clean_result = Вредоносного не найдено.
 alert.confirmed.title = Мы остановили известную угрозу
-alert.confirmed.body = { $file } — подтверждённая угроза, изолирован — не удалён.
+alert.confirmed.body = Заражение { $file } подтверждено. Запуск заблокирован, файл не удалён.
 alert.suspicious.title = Программа пытается получить доступ к вашим файлам
 alert.suspicious.body = { $file } изменяет файлы в Документах. Мы временно остановили её.
 alert.suspicious.note = Мы временно остановили её.
@@ -116,10 +116,10 @@ action.turn_off = Отключить защиту
 action.turn_on = Включить защиту снова
 disable.re_enable_note = Включить защиту можно в любой момент — без пароля.
 disable.reminder = Через { $minutes} мин. защита включится автоматически.
-pause.resume_report = Пока уведомления были на паузе: изолировано { $count}
+pause.resume_report = За время тишины: исправлено — { $restored } · изолировано — { $isolated } · в работе — { $pending }
 
 ## ── Точечное исключение (D45 · §4.8) ─────────────────────────
-exception.title = Исключения — одно правило, а не все
+exception.title = Исключения
 exception.sub = Если для работы нужно ослабить одно правило, разрешите только его. Остальное остаётся как было.
 exception.rule.a1.wsh = Скрипты Windows
 exception.rule.a1.wsh.desc = Файлы .vbs и .js запускаются с ограничениями, если они не подписаны известным издателем.
@@ -132,7 +132,7 @@ exception.rule.a3.downloads.desc = Каждый новый файл в «Заг�
 exception.rule.a4.periodic = Периодическая проверка
 exception.rule.a4.periodic.desc = Тихая проверка элементов автозапуска и важных ключей каждые два часа.
 exception.rule.a6.doubt = Осторожность при сомнении
-exception.rule.a6.doubt.desc = При сомнении сначала блокирует, затем спрашивает. Можно ослабить, но не разрешить полностью.
+exception.rule.a6.doubt.desc = При сомнении блокирует, затем спрашивает. Правило можно смягчить, но не снять полностью.
 exception.state.on = Активно
 exception.state.relaxed_until = Ослаблено до { $until }
 exception.state.allowed_until = Разрешено до { $until }
@@ -164,7 +164,7 @@ exception.refused.veto_stands = Файл подтверждён. Исключе�
 
 exception.live_note = ваше решение · всё остальное действует · отменить можно в любой момент
 exception.lines_title = Четыре вещи не исключаются никогда:
-exception.lines_body = вердикт первой стены (подтверждённое изолируется даже при исключении) · защита от подмены · второе правило (исключение для WSH не открывает PowerShell) · «высокий риск» и выше. Отмена — всегда одно нажатие, без пароля.
+exception.lines_body = вердикт первой стены (исключение не разрешает запуск подтверждённо заражённого файла) · защита от подмены · второе правило (исключение для WSH не открывает PowerShell) · «высокий риск» и выше. Отмена — всегда одно нажатие, без пароля.
 
 ## ── Карта приложения и навигация (конституция §6أ.3) ─────────────────
 nav.home = Главная
@@ -240,7 +240,7 @@ settings.startup.body = Работает в фоне с самого запус�
 settings.notifications = Уведомления
 settings.notifications.body = Не больше трёх в день. Сначала важное.
 settings.updates = Обновления
-settings.updates.body = Автоматически для базы угроз, вручную для программы.
+settings.updates.body = База угроз обновляется автоматически, программа — вручную. База лечения поставляется отдельным пакетом.
 settings.about = О программе
 settings.version = Версия
 settings.database = База угроз
@@ -279,9 +279,50 @@ home.goto.settings = Настройки
 home.goto.proactive = Упреждающая защита
 home.quarantine_count = { $count } файл(ов) в карантине
 home.alerts_count = { $count } уведомление(й) стоит взгляда
-home.proactive_summary = Шесть правил · одно исключено
+home.proactive_summary = Девять действий в трёх группах
 proactive.title = Упреждающая защита
-proactive.sub = Шесть правил. У каждого свой переключатель, и ни один не открывает другой.
+proactive.sub = Разрешение здесь не отменяет проверку файлов и правила брандмауэра.
+proactive.tier.mandatory = Очень высокий риск · Автоблокировка
+proactive.tier.recommended = Средний риск · Блокировка рекомендована
+proactive.tier.optional = Меньший риск · Блокировка по выбору
+proactive.surface.office_child = Интерпретаторы из Office
+proactive.surface.office_child.tip = Запуск cmd, PowerShell или mshta из Word и Excel, а не все дочерние процессы Office.
+proactive.surface.wmi_subscription = Постоянные подписки WMI
+proactive.surface.wmi_subscription.tip = Новые постоянные подписки на события из недоверенных источников, не обычные запросы WMI.
+proactive.surface.system_tools = Системные средства с ненадёжными данными
+proactive.surface.system_tools.tip = mshta, certutil или regsvr32 с ненадёжными данными из временных папок или интернета.
+proactive.surface.scheduled_task = Задания планировщика
+proactive.surface.scheduled_task.tip = Создание или изменение задания. Действующие задания не останавливаются.
+proactive.surface.com_registration = Регистрация компонентов COM
+proactive.surface.com_registration.tip = Изменение регистрации COM для пользователя, а не отключение COM в Windows.
+proactive.surface.registry_autorun = Записи автозапуска
+proactive.surface.registry_autorun.tip = Добавление или изменение записей реестра в Run или RunOnce.
+proactive.surface.service_driver = Установка служб и драйверов
+proactive.surface.service_driver.tip = Создание службы или установка драйвера без остановки уже работающих служб и драйверов.
+proactive.surface.inbound_smb_rdp = Входящие SMB и RDP
+proactive.surface.inbound_smb_rdp.tip = Новые входящие подключения к общим ресурсам или рабочему столу. Порт не открывается.
+proactive.surface.wsh_script = Сценарии Windows
+proactive.surface.wsh_script.tip = Запуск .js, .vbs и .wsf через WSH. Другие проверки сценариев продолжают действовать.
+proactive.state.blocked = Запрещено
+proactive.state.allowed = Разрешено
+proactive.state.contained = Временно заблокировано
+proactive.state.off = Не применяется
+proactive.saved_until = { $rule } · исключение сохранено до { $until }
+proactive.user_wsh_block = Выбранная вами блокировка сценариев Windows важнее этого исключения.
+proactive.demo.title = Модель сдерживания
+proactive.demo.note = Имитация автоматического лечения. Файлы не проверяются, настройки Windows не меняются.
+proactive.demo.mode = Режим защиты в модели
+proactive.demo.ready = При подтверждённом заражении все девять действий блокируются до успешного восстановления.
+proactive.demo.start = Смоделировать подтверждённое заражение
+proactive.demo.scan = Проверка тремя рубежами защиты. Все девять действий временно заблокированы.
+proactive.demo.clean = Угроза устранена. Ищем надёжное правило лечения файла.
+proactive.demo.repair = Исправляем последствия и проверяем файл. Блокировка остаётся до итоговой проверки.
+proactive.demo.cleaned = Очистка завершена
+proactive.demo.repaired = Восстановление завершено
+proactive.demo.restored = Результат лечения проверен. Прежние настройки снова действуют.
+proactive.demo.off = Вы отключили защиту. Сдерживание не начнётся, ваши настройки не изменятся.
+proactive.demo.fail = Сбой этапа
+proactive.demo.failed = Этап не завершён. Блокировка остаётся до успешного восстановления.
 alerts.title = Центр уведомлений
 alerts.sub = Всё, что стоит взгляда, в одном месте. Без всплывающих окон.
 alerts.empty = Сейчас нет ничего, что стоит взгляда.
@@ -315,7 +356,7 @@ path.copy_hint = копировать
 nav.preview = Предпросмотр интерфейса
 
 ## ── التنبيهات والشارات ────────────────────────────
-alert.confirmed.cta = Открыть изолятор
+alert.confirmed.cta = Ход лечения
 badge.confirmed = Подтверждено
 badge.high = Сильное подозрение
 badge.low = Подозрительно
@@ -360,9 +401,9 @@ notes.5b = логотип, значок в трее и состояния оши
 notes.5t = Чего нет в превью:
 
 ## ── صندوق العزل ────────────────────────────
-q.reason1 = Подтверждённая угроза
+q.reason1 = Отдельная вредоносная программа без файла-носителя
 q.reason2 = Средство взлома
-quarantine.opened_from = Открывается из уведомления и из счётчика на главной — никогда из скрытого меню.
+quarantine.opened_from = Здесь вредоносные программы, файлы без безопасного способа лечения и объекты, которые вы перенесли сами.
 quarantine.restore = Восстановить
 
 ## ── دستور الواجهة — القواعد الخمس ────────────────────────────
@@ -411,7 +452,7 @@ num.sample = 3 уведомления · 12 файлов
 num.note = Изменение сразу. Перезапуск не нужен.
 
 ## ── Подсказки паузы — по запросу ─────────────────────────────
-tip.lvl1 = Ни окна, ни уведомления, ни звука, но проверка и блокировка идут в фоне: заражённый файл тихо изолируется и показывается по возвращении.
+tip.lvl1 = Проверка, блокировка и лечение продолжаются без уведомлений. Итоги появятся при возвращении.
 tip.lvl2 = Ни проверки, ни блокировки, ни уведомления. Служба работает, но ничего не делает, и устройство совсем не защищено.
 tip.no_permanent = Самая долгая пауза заканчивается перезапуском, и это единственный предел, который мы ставим.
 
@@ -427,3 +468,32 @@ visual.n5 = Текст объясняет картинку, а не повтор
 visual.sample = Наведите на значок: одно слово. Нажмите: полное объяснение на вашем языке.
 trust.count = Пять, а не четыре.
 help.sample.title = Живой пример
+
+## ── Recovery (D47) ──
+proactive.demo.neutralize = Останавливаем активную угрозу до начала работы с заражённым файлом.
+proactive.demo.verify = Проверяем последствия заражения перед снятием временной блокировки.
+recovery.title = Лечение
+recovery.tip = Устранить угрозу, вылечить, исправить. Изолировать только вредоносное или неизлечимое.
+recovery.case = Пример случая
+recovery.match = Излечимый файл
+recovery.no_rule = Нет подходящего безопасного правила
+recovery.no_db = Нет доверенной базы лечения
+recovery.bad_verify = Очищенная копия не прошла проверку
+recovery.scan = Проверка тремя рубежами
+recovery.neutralize = Устранение угрозы
+recovery.clean = Лечение файла
+recovery.repair = Исправление последствий
+recovery.verify = Итоговая проверка
+recovery.next = Следующий шаг
+recovery.file_ok = Файл очищен, восстановлен и проверен.
+recovery.file_isolated = Файл изолирован, не удалён.
+settings.repair_db = База лечения
+settings.repair_db.status = v1/r1 · два учебных правила
+settings.repair_db.help = Правила по семействам в комплекте. Если пакет больше { $mb } МБ — скачать отдельно.
+recovery.case_malware = Отдельный вредонос
+recovery.case_unknown = Нет правила
+recovery.case_missing = База недоступна
+recovery.case_invalid = Сбой проверки
+settings.repair_db.install = Отдельная установка
+settings.repair_db.instructions = Распакуйте { $package } из соответствующего выпуска Odina рядом с программой, сохранив структуру папок.
+settings.repair_db.releases = Пакеты выпусков

@@ -5,13 +5,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/svg+xml" href="assets/logo/svg/odina-icon-light.svg">
 <title>Odina — معاينة الواجهة (v1)</title>
-<style>
+<style data-vendor-fonts>
 /* ══════════════════════════════════════════════════════════════════
-   Odina — UI Preview · ملف واحد قابل للتعديل
+   Odina — UI Preview
    الخطوط المسجّلة هنا من fonts/vendor/ (محلية). عند فتح الملف من
    القرص تأكد أن مجلد fonts/ بجانبه. الخطوط الآسيوية ← خطوط النظام.
-   الألوان والنصوص مأخوذة من docs/odina-agent-prompt-v10.md (§23.3، §36.2)
    ══════════════════════════════════════════════════════════════════ */
 
 @font-face{font-family:'Inter';src:url('fonts/vendor/inter/inter-latin-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
@@ -22,6 +22,8 @@
 @font-face{font-family:'PT Sans';src:url('fonts/vendor/pt-sans/pt-sans-cyrillic-700-normal.woff2') format('woff2');font-weight:700;font-display:swap}
 @font-face{font-family:'Noto Sans Devanagari';src:url('fonts/vendor/noto-sans-devanagari/noto-sans-devanagari-devanagari-400-normal.woff2') format('woff2');font-weight:400;font-display:swap}
 
+</style>
+<style>
 :root{
   --accent:#0E7C6B; --ok:#157A4B; --warn:#8A5200; --danger:#B3261E; --focus:#0B5FFF;
   --bg:#F7F8FA; --surface:#FFFFFF; --surface2:#EFF1F4;
@@ -112,7 +114,7 @@ html[data-theme="dark"] .btn.danger{color:#0B1416}
 .alert .t{font-weight:600;font-size:15px;display:flex;gap:8px;align-items:center}
 .alert .b{color:var(--text2);font-size:14px;margin:6px 0 0}
 .alert .why{font-size:12px;color:var(--text3);margin-top:8px;text-decoration:underline;cursor:pointer}
-.alert .row{display:flex;gap:10px;margin-top:14px;align-items:center}
+.alert .row{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;align-items:center}
 .alert .row .btn{flex:0 0 auto;min-width:104px}
 .badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;border:1px solid currentColor}
 .badge.conf{color:var(--danger)} .badge.med{color:var(--warn)} .badge.low{color:var(--ok)}
@@ -189,7 +191,6 @@ html[data-theme="dark"] .warnbox{background:rgba(255,123,114,.09);border-color:r
 .exccard .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:8px}
 .exccard .nm .i{color:var(--text2);flex:none}
 .exccard.live .nm .i{color:var(--warn)}
-.exccard .ds{font-size:13px;color:var(--text2);line-height:1.5}
 .exccard .st{font-size:12px;color:var(--text3)}
 .exccard.live .st{color:var(--warn)}
 /* العاقبة فوق الزر، لا تحته (§2.1.4) */
@@ -247,6 +248,67 @@ body.real .sec + .sec{margin-top:26px}
   background:var(--text);color:var(--bg);font-size:12px;line-height:1.5;padding:7px 10px;
   border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.22);white-space:normal;font-weight:400}
 
+/* List help is local. A navigation label remains a one-tap destination;
+   the adjacent information disclosure is an independent touch target. */
+.tip-pair{display:flex;align-items:center;gap:4px;position:relative}
+.tip-pair>.btn{flex:0 1 auto}
+.list-tip{position:relative}
+.tip-pair>.list-tip,.setrow .list-tip{position:static}
+.list-tip summary{list-style:none;width:fit-content;max-width:100%;min-height:24px;
+  cursor:help;text-decoration:underline dotted var(--text3);text-underline-offset:4px}
+.list-tip summary::-webkit-details-marker{display:none}
+.list-tip summary:focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:var(--r-sm)}
+.list-tip .tip-icon{width:32px;height:32px;display:grid;place-items:center;color:var(--text3);border-radius:50%}
+.list-tip .tip-icon:hover,.list-tip[open] .tip-icon{color:var(--accent);background:var(--surface2)}
+.list-tip:not([open]) [role="tooltip"]{display:none}
+.list-tip [role="tooltip"]{position:absolute;z-index:40;inset-inline-start:0;bottom:100%;
+  width:max-content;max-width:min(20rem,100%);overflow-wrap:anywhere;text-align:start;
+  padding:7px 10px;background:var(--text);color:var(--bg);border-radius:var(--r-sm);
+  box-shadow:var(--shadow);font-size:13px;line-height:1.5;font-weight:400}
+.list-tip.below [role="tooltip"]{top:100%;bottom:auto}
+/* Inside a decision card, make room for the bubble; never cover the expiry or consequence. */
+.exccard .list-tip[open] [role="tooltip"]{display:block;position:static;margin-top:3px}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;
+  clip-path:inset(50%);white-space:nowrap;border:0}
+
+/* Wall 3: the state stays in the row; only the activity scope is a tooltip. */
+.surface-intro,.demo-notice{font-size:13px;color:var(--text2);margin:6px 0 12px}
+.remediation-box{padding:12px 14px;border:1px solid var(--border);border-inline-start:3px solid var(--accent);
+  border-radius:var(--radius);background:var(--surface)}
+.remediation-box .demo-notice{margin:0 0 4px}
+#remediation-status{margin:0;font-size:14px;font-weight:600}
+#remediation-demo{margin-top:9px;font-size:14px}
+#remediation-demo summary{width:fit-content;cursor:pointer;color:var(--text2)}
+.demo-controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:10px}
+.demo-controls :is(select,button){max-width:100%;flex:0 1 auto}
+.demo-controls button[hidden]{display:none}
+.surface-heading{font-size:15px;margin:18px 0 6px}
+.surface-list{list-style:none;margin:0 0 14px;padding:0 12px;border:1px solid var(--border);
+  border-radius:var(--radius);background:var(--surface)}
+.surface-list li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;
+  padding:9px 0;align-items:center;font-size:14px;overflow-wrap:anywhere}
+.surface-list li+li{border-top:1px solid var(--border)}
+.surface-list[data-tier="mandatory"] li{grid-template-columns:minmax(0,1fr) auto}
+.surface-list .list-tip[open] [role="tooltip"]{position:static;display:block;margin-top:2px}
+.surface-state{font-size:12px;color:var(--text2)}
+[data-effective="contained"] .surface-state{color:var(--warn);font-weight:600}
+#screen-proactive :disabled{cursor:not-allowed;opacity:.65}
+@media(max-width:600px){
+  .surface-list li{grid-template-columns:minmax(0,1fr) auto;gap:3px 10px}
+  .surface-list .surface-state{grid-column:1}
+  .surface-list[data-tier="mandatory"] .surface-state{grid-column:2;grid-row:1}
+  .surface-list button{grid-column:2;grid-row:1 / span 2}
+}
+
+/* D47: the current step has a visible marker as well as a color. */
+.recovery-steps{display:flex;flex-wrap:wrap;gap:6px 20px;padding-inline-start:1.5em;font-size:13px}
+.recovery-steps li{padding:3px 5px;margin-inline-end:10px}
+.recovery-steps [aria-current="step"]{font-weight:700;outline:1px solid var(--accent);border-radius:var(--r-sm)}
+#screen-remediation [hidden],#q-demo[hidden],#pause-demo[hidden]{display:none}
+#screen-remediation select{max-width:100%;min-width:0}
+.component-install{margin:12px 0;font-size:14px;overflow-wrap:anywhere}
+.component-install summary{cursor:pointer;font-weight:600}
+.setrow .component-status{flex:0 1 auto;max-width:48%;font-size:13px;color:var(--text2)}
 /* ═══ صندوق العزل ═══ */
 .qitem{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--border)}
 .qitem:last-child{border-bottom:0}
@@ -294,7 +356,6 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
   border-end-start-radius:6px}
 .appmap li:first-child::before{top:-2px;height:60%}
 .appmap li.dotted::before{border-bottom-style:dotted}
-.appmap .why{display:block;font-size:12px;color:var(--text3);margin-top:1px}
 .appmap a,.appmap button.linkish{color:var(--text);text-decoration:none;background:none;border:0;
   padding:0;font:inherit;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border)}
 .appmap a:hover,.appmap button.linkish:hover{color:var(--accent);border-bottom-color:var(--accent)}
@@ -332,8 +393,8 @@ code{font-family:ui-monospace,monospace;font-size:12px;background:var(--surface2
 
 /* الإعدادات: صفوف لا بطاقات — كل صف فعل واحد */
 .setrows{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:var(--radius);
-  background:var(--surface);overflow:hidden}
-.setrow{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+  background:var(--surface)}
+.setrow{position:relative;display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
 .setrow:last-child{border-bottom:0}
 .setrow .txt{flex:1;min-width:0}
 .setrow .t{font-size:15px;font-weight:600}
@@ -373,7 +434,7 @@ body.real .screen{display:block}
   direction:ltr;margin-inline-start:6px}
 
 /* شريط تنقل الرئيسية: رمز + كلمة + عدد · الهدف 64px، لا أصغر */
-.appbar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px;
+.appbar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:16px;
   border-top:1px solid var(--border);padding-top:14px}
 .appbar .navcell{display:flex;flex-direction:column;align-items:center;gap:7px;
   background:none;border:1px solid transparent;border-radius:var(--radius);
@@ -384,13 +445,21 @@ body.real .screen{display:block}
 .appbar .navcell[data-goto="quarantine"] .nb{}
 .appbar .ni{position:relative;display:inline-flex}
 .appbar .ni .i{width:26px;height:26px;stroke-width:1.7}
-.appbar .nl{font-size:12.5px;line-height:1.25;text-align:center;max-width:96px}
+.appbar .nl{overflow-wrap:anywhere;font-size:12.5px;line-height:1.25;text-align:center;max-width:96px}
 /* العدد على الرمز، لا بجانبه: العين تجده قبل أن تقرأ (§6أ.4أ) */
 .appbar .nb{position:absolute;inset-inline-end:-11px;top:-8px;min-width:19px;height:19px;
   border-radius:99px;background:var(--accent);color:#fff;font-size:11px;font-weight:700;
   display:grid;place-items:center;padding:0 5px;line-height:1}
 .appbar .nb.warn{background:var(--warn);color:#231A00}
 html[data-theme="dark"] .appbar .nb{color:#0B1416}
+
+/* Scroll targets must not land under a toolbar whose height changes with language. */
+html{scroll-padding-block-start:var(--toolbar-height,0px)}
+@media (max-width:600px){
+  html{scroll-padding-block-start:0}
+  .topbar{position:static;gap:8px;padding:8px 12px}
+  .appbar{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
 
 /* نظام الأرقام: البديلان معًا، والمختار عليه الإطار (§6أ.6) */
 .numpick{display:flex;gap:10px;flex-wrap:wrap}
@@ -435,12 +504,12 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <path d="M476 592 Q476 566 502 566 L522 566 Q548 566 548 592 L548 756 L476 756 Z"
             fill="var(--gold)" transform="translate(512 512) scale(1.13) translate(-512 -512)"/>
     </svg>
-    <span>Odina</span>
+    <span>Odina · <span data-k="nav.preview">معاينة الواجهة</span></span>
   </div>
   <div class="spacer"></div>
-  <a class="policy-link" href="signing.html">سياسة التوقيع · Code signing</a>
-  <label style="font-size:13px;color:var(--text3)" for="lang">اللغة</label>
-  <select id="lang" aria-label="Language">
+  <a class="policy-link" href="signing.html" data-k="signing.title">سياسة توقيع الشيفرة</a>
+  <label style="font-size:13px;color:var(--text3)" for="lang" data-k="lang.current">اللغة الحالية</label>
+  <select id="lang">
     <option value="ar">العربية (ar)</option>
     <option value="en">English (en)</option>
     <option value="zh-Hans">简体中文 (zh-Hans)</option>
@@ -452,7 +521,8 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <option value="fr">Français (fr)</option>
     <option value="pt-BR">Português (pt-BR)</option>
   </select>
-  <button class="tog" id="theme">الوضع الداكن</button>
+  <span id="draftflag" hidden data-k="lang.review">مراجعة ناطق أصلي</span>
+  <button class="tog" id="theme" data-k="settings.theme_dark">الوضع الداكن</button>
   <button class="tog" id="mode">كل الأقسام</button>
   <button class="tog" id="popout" title="open standalone"><svg class="i sm"><use href="#i-external"/></svg></button>
 </div>
@@ -494,24 +564,19 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         <div class="root"><svg class="i"><use href="#i-shield-check"/></svg><span data-k="map.node.home">الرئيسية</span></div>
         <ul>
           <li>
-            <button class="linkish" data-goto="quarantine" data-k="nav.quarantine">صندوق العزل</button>
-            <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
+            <button class="linkish" data-goto="quarantine" data-list-tip="tip.quarantine" data-k="nav.quarantine">صندوق العزل</button>
           </li>
           <li>
-            <button class="linkish" data-goto="pause" data-k="pause.title">الإيقاف المؤقت</button>
-            <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
+            <button class="linkish" data-goto="pause" data-list-tip="lvl.title" data-k="pause.title">الإيقاف المؤقت</button>
           </li>
           <li>
-            <button class="linkish" data-goto="proactive" data-k="nav.proactive">الحماية الاستباقية</button>
-            <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
+            <button class="linkish" data-goto="proactive" data-list-tip="tip.proactive" data-k="nav.proactive">الحماية الاستباقية</button>
           </li>
           <li class="dotted">
-            <button class="linkish" data-goto="alerts" data-k="nav.alerts">مركز التنبيهات</button>
-            <span class="why" data-k="map.edge.from_alert">من التنبيه</span>
+            <button class="linkish" data-goto="alerts" data-list-tip="map.edge.from_alert" data-k="nav.alerts">مركز التنبيهات</button>
           </li>
           <li>
             <button class="linkish" data-goto="settings" data-k="nav.settings">الإعدادات</button>
-            <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
           </li>
         </ul>
       </div>
@@ -520,8 +585,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         <div class="root"><svg class="i"><use href="#i-pause"/></svg><span data-k="nav.proactive">الحماية الاستباقية</span></div>
         <ul>
           <li>
-            <button class="linkish" data-goto="exception" data-k="exception.title">الاستثناءات — قاعدة واحدة، لا الكل</button>
-            <span class="why" data-k="map.edge.from_home">من الرئيسية</span>
+            <button class="linkish" data-goto="exception" data-list-tip="tip.exception" data-k="exception.title">الاستثناءات</button>
           </li>
           <li>
             <button class="linkish" data-goto="home" data-k="map.node.home">الرئيسية</button>
@@ -530,16 +594,21 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       </div>
 
       <div class="branch">
+        <div class="root"><svg class="i"><use href="#i-alert"/></svg><span data-k="nav.alerts">مركز التنبيهات</span></div>
+        <ul><li class="dotted"><button class="linkish" data-goto="remediation" data-list-tip="recovery.tip" data-k="recovery.title">المعالجة</button></li></ul>
+      </div>
+
+      <div class="branch">
         <div class="root"><svg class="i"><use href="#i-scale"/></svg><span data-k="nav.settings">الإعدادات</span></div>
         <ul>
           <li>
-            <button class="linkish" data-goto="language" data-k="nav.language">اللهجة واللغة</button>
+            <button class="linkish" data-goto="language" data-list-tip="lang.sub" data-k="nav.language">اللهجة واللغة</button>
           </li>
           <li>
-            <button class="linkish" data-goto="privacy" data-k="nav.privacy">الخصوصية</button>
+            <button class="linkish" data-goto="privacy" data-list-tip="privacy.sub" data-k="nav.privacy">الخصوصية</button>
           </li>
           <li>
-            <button class="linkish" data-goto="numbers" data-k="num.title">الأرقام</button>
+            <button class="linkish" data-goto="numbers" data-list-tip="num.sub" data-k="num.title">الأرقام</button>
           </li>
           <li>
             <button class="linkish" data-goto="help" data-k="help.title">الشرح عند الطلب</button>
@@ -577,7 +646,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         </svg>
         <div class="label" data-k="state.protected">أنت محمي</div>
         <div class="sub" data-k="shield.sub" data-tmpl="shield.sub"
-             data-k-args='{"n":"3"}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
+             data-k-args='{"n":3}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
       </div>
 
       <div class="walls">
@@ -616,7 +685,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         </button>
         <button class="navcell" data-goto="proactive" aria-pressed="false">
           <span class="ni"><svg class="i"><use href="#i-pause"/></svg>
-            <span class="nb" data-numeral="6">٦</span></span>
+            <span class="nb" data-numeral="9">٩</span></span>
           <span class="nl" data-k="nav.proactive">الحماية الاستباقية</span>
         </button>
         <button class="navcell" data-goto="alerts" aria-pressed="false">
@@ -658,7 +727,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 1c. الإيقاف: مستويان ══════════ -->
   <section class="sec screen" id="screen-pause" data-screen="pause">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="pause.title">الإيقاف المؤقت</span>
@@ -678,7 +747,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="lvrow"><span data-k="lvl.app">التطبيق</span><b data-k="lvl1.app">يعمل · يفحص · يمنع · لا يسأل</b></div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":"10"}'>١٠ دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":"30"}'>٣٠ دقيقة</span>
+          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":10}'>١٠ دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>٣٠ دقيقة</span>
           <span class="chip" data-k="lvl.d60">ساعة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
       </div>
@@ -692,7 +761,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="resp" data-k="lvl2.resp">القرار قرارك، والمسؤولية عليك أثناء هذه المدة.</div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":"30"}'>٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
+          <span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
           <span class="chip" data-k="lvl.dpeak">حتى نهاية ساعة الذروة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
         <div class="note" style="margin-top:10px" data-k="lvl.no_permanent">لا إيقاف دائم. أقصاه إعادة تشغيل.</div>
@@ -701,6 +770,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       </div>
     </div>
 
+    <div class="note" id="pause-demo" hidden>
+      <p data-k="pause.resume_report" data-tmpl="pause.resume_report" data-k-args='{"restored":0,"isolated":0,"pending":1}'>أثناء الإسكات: أُصلح ٠ · عُزل ٠ · قيد المعالجة ١</p>
+      <button class="btn ghost sm" data-goto="remediation" data-k="alert.confirmed.cta">متابعة المعالجة</button>
+    </div>
     <div class="app mt">
       <div class="shield gray">
         <svg width="64" height="64" viewBox="0 0 24 24" class="i" style="width:64px;height:64px;stroke-width:1.4;color:var(--text3)"><use href="#i-shield"/></svg>
@@ -717,19 +790,19 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 1d. الاستثناء الجراحي — قاعدة واحدة، لا الكل (D45 · §4.8) ══════════ -->
   <section class="sec review-only screen" id="screen-exception" data-screen="exception">
     <div class="crumb">
-      <button class="back" data-goto="proactive"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="proactive"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.proactive">الحماية الاستباقية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="exception.title">الاستثناءات</span>
     </div>
-    <h2><svg class="i"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات — قاعدة واحدة، لا الكل</span></h2>
+    <h2><svg class="i"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات</span></h2>
     <p class="hint" data-k="exception.sub">إن احتاج عملك قاعدة تخالف الأصل، اسمح بها وحدها. الباقي يبقى كما هو.</p>
 
     <!-- الشارة الحيّة: تُرى بلا تمرير ولا نقر (§6.1 القاعدة 1) -->
     <div class="excbadge" style="margin-bottom:14px">
       <svg class="i" style="width:18px;height:18px"><use href="#i-pause"/></svg>
       <span class="grow">
-        <b data-k="exception.badge" data-k-args='{"rule":"Windows Script Host"}' data-tmpl="exception.badge">Windows Script Host مسموحة · حتى 14:30</b>
+        <b data-k="exception.badge" data-k-args='{"rule":"Windows Script Host","until":"14:30"}' data-tmpl="exception.badge">Windows Script Host مسموحة · حتى 14:30</b>
         <span class="when" data-k="exception.live_note">بقرارك · الباقي فعّال كما هو · تستطيع الإبطال في أي لحظة</span>
       </span>
       <button class="act" data-k="exception.action.revoke">أبطِل</button>
@@ -738,9 +811,11 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <div class="excgrid">
       <!-- A1 · WSH — مسموحة الآن -->
       <div class="exccard live">
-        <div class="nm"><svg class="i"><use href="#i-pause"/></svg><span data-k="exception.rule.a1.wsh">تشغيل سكربتات Windows</span></div>
-        <div class="ds" data-k="exception.rule.a1.wsh.desc">ملفات .vbs و .js تعمل مقيّدة ما لم تكن موقّعة من ناشر معروف.</div>
-        <div class="st" data-k="exception.state.allowed_until" data-tmpl="exception.state.allowed_until" data-k-args='{"until":"14:30"}'>مسموحة حتى 14:30</div>
+        <details class="list-tip">
+          <summary class="nm"><svg class="i"><use href="#i-pause"/></svg><span data-k="exception.rule.a1.wsh">تشغيل سكربتات Windows</span></summary>
+          <span role="tooltip" data-k="exception.rule.a1.wsh.desc">ملفات .vbs و .js تعمل مقيّدة ما لم تكن موقّعة من ناشر معروف.</span>
+        </details>
+        <div class="st" data-k="exception.state.allowed_until" data-tmpl="exception.state.allowed_until" data-k-args='{"rule":"Windows Script Host","until":"14:30"}'>مسموحة حتى 14:30</div>
         <div class="conseq" data-k="exception.consequence.allow" data-tmpl="exception.consequence.allow" data-k-args='{"rule":"Windows Script Host","until":"14:30"}'>ستعمل Windows Script Host بلا قيد حتى 14:30 ثم تعود. الباقي لا يتغيّر.</div>
         <div class="row">
           <button class="btn ghost sm" data-k="exception.action.revoke">أبطِل</button>
@@ -751,8 +826,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
       <!-- A1 · PowerShell — خامل، يُظهر الشرائح -->
       <div class="exccard">
-        <div class="nm"><svg class="i"><use href="#i-info"/></svg><span data-k="exception.rule.a1.powershell">أوامر PowerShell</span></div>
-        <div class="ds" data-k="exception.rule.a1.powershell.desc">PowerShell يعمل في الوضع المقيّد. استثناؤه لا يفتح Windows Script Host.</div>
+        <details class="list-tip">
+          <summary class="nm"><svg class="i"><use href="#i-info"/></svg><span data-k="exception.rule.a1.powershell">أوامر PowerShell</span></summary>
+          <span role="tooltip" data-k="exception.rule.a1.powershell.desc">PowerShell يعمل في الوضع المقيّد. استثناؤه لا يفتح Windows Script Host.</span>
+        </details>
         <div class="st" data-k="exception.state.on">فعّالة</div>
         <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"PowerShell","until":"14:30"}'>ستعمل PowerShell بلا تنبيه حتى 14:30 ثم تعود. لن يُمنع شيء في هذه المدة.</div>
         <div class="chips">
@@ -768,8 +845,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
       <!-- A1 · ماكرو Office -->
       <div class="exccard">
-        <div class="nm"><svg class="i"><use href="#i-folder"/></svg><span data-k="exception.rule.a1.macros">ماكرو Office</span></div>
-        <div class="ds" data-k="exception.rule.a1.macros.desc">المستندات غير الموقّعة لا تُشغّل ماكرو. استثناؤه لا يمسّ السكربتات.</div>
+        <details class="list-tip">
+          <summary class="nm"><svg class="i"><use href="#i-folder"/></svg><span data-k="exception.rule.a1.macros">ماكرو Office</span></summary>
+          <span role="tooltip" data-k="exception.rule.a1.macros.desc">المستندات غير الموقّعة لا تُشغّل ماكرو. استثناؤه لا يمسّ السكربتات.</span>
+        </details>
         <div class="st" data-k="exception.state.on">فعّالة</div>
         <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"ماكرو Office","until":"14:30"}'>ستعمل ماكرو Office بلا تنبيه حتى 14:30 ثم تعود. لن يُمنع شيء في هذه المدة.</div>
         <div class="row">
@@ -781,8 +860,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
       <!-- A3 · التنزيلات -->
       <div class="exccard">
-        <div class="nm"><svg class="i"><use href="#i-folder"/></svg><span data-k="exception.rule.a3.downloads">اشتباه مجلد التنزيلات</span></div>
-        <div class="ds" data-k="exception.rule.a3.downloads.desc">كل ملف جديد في التنزيلات يُعدّ مشتبهًا حتى يُثبت العكس.</div>
+        <details class="list-tip">
+          <summary class="nm"><svg class="i"><use href="#i-folder"/></svg><span data-k="exception.rule.a3.downloads">اشتباه مجلد التنزيلات</span></summary>
+          <span role="tooltip" data-k="exception.rule.a3.downloads.desc">كل ملف جديد في التنزيلات يُعدّ مشتبهًا حتى يُثبت العكس.</span>
+        </details>
         <div class="st" data-k="exception.state.on">فعّالة</div>
         <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"اشتباه التنزيلات","until":"14:30"}'>سيعمل اشتباه التنزيلات بلا تنبيه حتى 14:30 ثم يعود. لن يُمنع شيء في هذه المدة.</div>
         <div class="row">
@@ -794,8 +875,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
       <!-- A4 · الفحص الدوري -->
       <div class="exccard">
-        <div class="nm"><svg class="i"><use href="#i-pulse"/></svg><span data-k="exception.rule.a4.periodic">الفحص الدوري</span></div>
-        <div class="ds" data-k="exception.rule.a4.periodic.desc">فحص صامت كل ساعتين لملفات الإقلاع والمفاتيح الحساسة.</div>
+        <details class="list-tip">
+          <summary class="nm"><svg class="i"><use href="#i-pulse"/></svg><span data-k="exception.rule.a4.periodic">الفحص الدوري</span></summary>
+          <span role="tooltip" data-k="exception.rule.a4.periodic.desc">فحص صامت كل ساعتين لملفات الإقلاع والمفاتيح الحساسة.</span>
+        </details>
         <div class="st" data-k="exception.state.on">فعّالة</div>
         <div class="conseq" data-k="exception.consequence.relax" data-tmpl="exception.consequence.relax" data-k-args='{"rule":"الفحص الدوري","until":"14:30"}'>سيعمل الفحص الدوري بلا تنبيه حتى 14:30 ثم يعود. لن يُمنع شيء في هذه المدة.</div>
         <div class="row">
@@ -807,8 +890,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
       <!-- A6 · الحذر — مُرخّاة فقط، بلا زر سماح -->
       <div class="exccard">
-        <div class="nm"><svg class="i"><use href="#i-scale"/></svg><span data-k="exception.rule.a6.doubt">الحذر عند الشك</span></div>
-        <div class="ds" data-k="exception.rule.a6.doubt.desc">عند الشك يمنع أولًا ثم يسأل. يُرخّى فقط، ولا يُسمح به كاملًا.</div>
+        <details class="list-tip">
+          <summary class="nm"><svg class="i"><use href="#i-scale"/></svg><span data-k="exception.rule.a6.doubt">الحذر عند الشك</span></summary>
+          <span role="tooltip" data-k="exception.rule.a6.doubt.desc">عند الشك يمنع أولًا ثم يسأل. يُرخّى فقط، ولا يُسمح به كاملًا.</span>
+        </details>
         <div class="st" data-k="exception.state.on">فعّالة</div>
         <div class="conseq" data-k="exception.refused.not_allowed">هذه القاعدة لا تُسمح بالكامل — تُرخّى فقط.</div>
         <div class="row">
@@ -819,14 +904,14 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
     <div class="excnote">
       <b data-k="exception.lines_title">أربعة لا تُستثنى:</b>
-      <span data-k="exception.lines_body">حكم الجدار 1 (مؤكد يُعزل حتى تحت الاستثناء) · حماية العبث · القاعدة الثانية (استثناء WSH لا يفتح PowerShell) · «مشتبه بشدة» وأعلى. والتراجع بضغطة واحدة، بلا كلمة مرور، دائمًا.</span>
+      <span data-k="exception.lines_body">حكم الجدار 1 (لا استثناء يسمح بتشغيل ملف مصاب مؤكد) · حماية العبث · القاعدة الثانية (استثناء WSH لا يفتح PowerShell) · «مشتبه بشدة» وأعلى. والتراجع بضغطة واحدة، بلا كلمة مرور، دائمًا.</span>
     </div>
   </section>
 
   <!-- ══════════ 2. التنبيهات ══════════ -->
   <section class="sec screen" id="screen-alerts" data-screen="alerts">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.alerts">مركز التنبيهات</span>
@@ -835,20 +920,18 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <p class="hint" data-k="sec.alerts.hint">نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب</p>
 
     <div class="alerts">
-      <!-- مؤكد: لا حذف، لا استرجاع — فقط عرض صندوق العزل -->
+      <!-- تأكيد الإصابة يمنع التشغيل ولا يقرر مصير الملف. -->
       <div class="alert confirmed">
         <div class="t"><svg class="i"><use href="#i-stop"/></svg><span><span class="badge conf" data-k="badge.confirmed">مؤكد</span>&nbsp;
           <span data-k="alert.confirmed.title">أوقفنا تهديدًا معروفًا</span></span></div>
-        <p class="b" data-k="alert.confirmed.body">عُزل PhotoTool.exe — لم يُحذف.</p>
+        <p class="b" data-k="alert.confirmed.body" data-k-args='{"file":"sample.dat"}'>تأكدت إصابة sample.dat. أوقفنا تشغيله ولم نحذفه.</p>
         <div class="pathrow">
           <span class="plabel" data-k="path.label">المسار</span>
-          <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\PhotoTool.exe</span>
-          <button class="pcopy" title="copy" data-copy="C:\Users\Ahmed\Downloads\PhotoTool.exe"><svg class="i"><use href="#i-copy"/></svg></button>
+          <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\sample.dat</span>
+          <button class="pcopy" title="copy" data-copy="C:\Users\Ahmed\Downloads\sample.dat"><svg class="i"><use href="#i-copy"/></svg></button>
         </div>
         <div class="row">
-          <button class="btn primary" data-k="alert.confirmed.cta">فتح صندوق العزل</button>
-          <span class="tip" tabindex="0" data-tipkey="tip.quarantine" data-k="word.isolated">معزول</span>
-          <span class="why" data-k="action.why">لماذا؟</span>
+          <button class="btn primary" data-goto="remediation" data-list-tip="recovery.tip" data-k="alert.confirmed.cta">متابعة المعالجة</button>
         </div>
       </div>
 
@@ -856,7 +939,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert high">
         <div class="t"><svg class="i"><use href="#i-alert"/></svg><span><span class="badge conf" data-k="badge.high">مشتبه بشدة</span>&nbsp;
           <span data-k="alert.suspicious.title">برنامج يحاول الوصول إلى ملفاتك</span></span></div>
-        <p class="b" data-k="alert.suspicious.body">PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.</p>
+        <p class="b" data-k="alert.suspicious.body" data-k-args='{"file":"PhotoTool.exe"}'>PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.</p>
         <div class="row">
           <button class="btn ghost" data-k="button.allow">السماح</button>
           <button class="btn primary" data-k="button.block">المنع</button>
@@ -869,7 +952,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert medium">
         <div class="t"><svg class="i"><use href="#i-key"/></svg><span><span class="badge med" data-k="badge.pua">خطر متوسط</span>&nbsp;
           <span data-k="alert.pua.title">يبدو أنها أداة كسر حماية</span></span></div>
-        <p class="b" data-k="alert.pua.body">setup-key.exe يتجاوز حماية ترخيص برنامج مدفوع.</p>
+        <p class="b" data-k="alert.pua.body" data-k-args='{"file":"setup-key.exe"}'>setup-key.exe يتجاوز حماية ترخيص برنامج مدفوع.</p>
         <div class="pathrow">
           <span class="plabel" data-k="path.label">المسار</span>
           <span class="pval" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</span>
@@ -877,7 +960,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
                   data-copy="C:\Users\Ahmed\Downloads\setup-key.exe"><svg class="i"><use href="#i-copy"/></svg></button>
         </div>
         <div class="row">
-          <button class="btn ghost" data-k="alert.pua.quarantine">انقله جانبًا</button>
+          <button class="btn ghost" data-goto="quarantine" data-k="alert.pua.quarantine">انقله جانبًا</button>
           <button class="btn primary" data-k="alert.pua.allowed">اسمح به</button>
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
@@ -887,7 +970,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
       <div class="alert low">
         <div class="t"><svg class="i"><use href="#i-info"/></svg><span><span class="badge low" data-k="badge.low">مشتبه</span>&nbsp;
           <span data-k="alert.unsure.title">هذا البرنامج غير مألوف</span></span></div>
-        <p class="b" data-k="alert.unsure.body">newapp.exe جديد هنا ويتصرف بغرابة.</p>
+        <p class="b" data-k="alert.unsure.body" data-k-args='{"file":"newapp.exe"}'>newapp.exe جديد هنا ويتصرف بغرابة.</p>
         <div class="row">
           <button class="btn ghost" data-k="button.allow">السماح</button>
           <button class="btn primary" data-k="button.block">المنع</button>
@@ -902,17 +985,74 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     </div>
   </section>
 
+  <section class="sec screen" id="screen-remediation" data-screen="remediation">
+    <div class="crumb">
+      <button class="back" data-back data-goto="alerts"><svg class="i sm"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <span data-k="nav.alerts">مركز التنبيهات</span> / <span class="here" data-k="recovery.title">المعالجة</span>
+    </div>
+    <h2><svg class="i"><use href="#i-shield-check"/></svg><span data-k="recovery.title">المعالجة</span></h2>
+    <p class="demo-notice" data-k="proactive.demo.note">هذه محاكاة لخطوات آلية. لا تُفحص ملفاتك ولا تتغيّر إعدادات ويندوز.</p>
+    <div class="remediation-box">
+      <bdi dir="ltr">sample.dat</bdi>
+      <ol class="recovery-steps">
+        <li data-step="scan" data-k="recovery.scan">الفحص بالجدران الثلاثة</li>
+        <li data-step="neutralize" data-k="recovery.neutralize">تحييد الخطر</li>
+        <li data-step="clean" data-k="recovery.clean">تطهير الملف</li>
+        <li data-step="repair" data-k="recovery.repair">إصلاح الضرر</li>
+        <li data-step="verify" data-k="recovery.verify">التحقق النهائي</li>
+      </ol>
+      <p id="recovery-status" role="status" data-k="proactive.demo.ready">عند فحص إصابة مؤكدة، تُمنع الأنشطة التسعة حتى ينجح الإصلاح.</p>
+      <p id="recovery-error" role="status" hidden data-k="proactive.demo.failed">لم تنجح الخطوة. يبقى المنع حتى تنجح المعالجة.</p>
+      <div class="demo-controls">
+        <label for="recovery-case" data-k="recovery.case">حالة التجربة</label>
+        <select id="recovery-case">
+          <option value="recoverable" data-k="recovery.match">ملف قابل للتطهير</option>
+          <option value="standalone" data-k="recovery.case_malware">برمجية مستقلة</option>
+          <option value="unmatched" data-k="recovery.case_unknown">لا وصفة مطابقة</option>
+          <option value="missing" data-k="recovery.case_missing">القاعدة غائبة</option>
+          <option value="invalid" data-k="recovery.case_invalid">فشل التحقق</option>
+        </select>
+        <button type="button" class="btn primary sm" id="recovery-next" data-k="proactive.demo.start">حاكِ إصابة مؤكدة</button>
+      </div>
+      <div id="recovery-result" hidden role="status">
+        <p><strong id="file-result" data-k="recovery.file_ok">طُهّر الملف وأُصلح واجتاز التحقق.</strong> <span id="file-reason" hidden></span></p>
+        <button class="btn ghost sm" id="recovery-vault" hidden data-goto="quarantine" data-k="nav.quarantine">صندوق العزل</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ══════════ 2b. صندوق العزل ══════════ -->
-  <section class="sec review-only" data-partof="quarantine">
+  <section class="sec screen review-only" id="screen-quarantine" data-screen="quarantine">
+    <div class="crumb">
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <span data-k="nav.home">الرئيسية</span>
+      <span style="color:var(--text3)">/</span>
+      <span class="here" data-k="nav.quarantine">صندوق العزل</span>
+    </div>
     <h2><svg class="i"><use href="#i-folder"/></svg><span data-k="quarantine.title">3 · صندوق العزل — هنا فقط يوجد «حذف»</span></h2>
     <p class="hint" data-k="quarantine.hint">كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا</p>
+    <p style="color:var(--text2);font-size:14px"
+       data-k="quarantine.opened_from">هنا البرمجيات الخبيثة نفسها والملفات التي تعذّر تطهيرها بأمان، وما نقلتَه بنفسك.</p>
 
     <div class="app" style="max-width:620px">
+      <div class="qitem" id="q-demo" hidden>
+        <div class="qmain">
+          <div class="qname">sample.dat</div>
+          <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\sample.dat</div>
+          <div class="qmeta"><span id="q-demo-reason" data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+        </div>
+        <div class="qacts">
+          <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
+          <button class="btn ghost sm" data-k="quarantine.restore">استرجاع</button>
+          <button class="btn danger sm" data-k="quarantine.delete">حذف نهائي</button>
+        </div>
+      </div>
+
       <div class="qitem">
         <div class="qmain">
-          <div class="qname">PhotoTool.exe</div>
-          <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\PhotoTool.exe</div>
-          <div class="qmeta"><span data-k="q.reason1">تهديد مؤكد</span> · <span data-k="quarantine.retention">يُحفظ 30 يومًا</span></div>
+          <div class="qname">malware-only.bin</div>
+          <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\malware-only.bin</div>
+          <div class="qmeta"><span data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -925,7 +1065,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         <div class="qmain">
           <div class="qname">setup-key.exe</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</div>
-          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention">يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -942,7 +1082,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <p class="hint" data-k="sec.usb.hint">شريط تقدم واحد + مرحلة واحدة · RTL-aware</p>
     <div class="usb">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:12px">
-        <strong style="font-size:14px;display:flex;align-items:center;gap:8px"><svg class="i" style="color:var(--text2)"><use href="#i-usb"/></svg><span data-k="usb.scanning">جارٍ فحص USB_32GB…</span></strong>
+        <strong style="font-size:14px;display:flex;align-items:center;gap:8px"><svg class="i" style="color:var(--text2)"><use href="#i-usb"/></svg><span data-k="usb.scanning" data-k-args='{"name":"USB_32GB"}'>جارٍ فحص USB_32GB…</span></strong>
         <span style="font-size:13px;color:var(--text3)" data-k="usb.priority_done">تم فحص الملفات الخطرة</span>
       </div>
       <div class="bar"><i></i></div>
@@ -955,34 +1095,116 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 6. الحماية الاستباقية — مدخل بطاقات الاستثناء ══════════ -->
   <section class="sec screen review-only" id="screen-proactive" data-screen="proactive">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.proactive">الحماية الاستباقية</span>
     </div>
     <h2><svg class="i"><use href="#i-pause"/></svg><span data-k="proactive.title">الحماية الاستباقية</span></h2>
-    <p class="hint" data-k="proactive.sub">ست قواعد. لكل واحدة مفتاحها، ولا واحدة تفتح الأخرى.</p>
-    <p><button class="btn primary" data-goto="exception"><svg class="i sm"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات — قاعدة واحدة، لا الكل</span></button></p>
-  </section>
-
-  <!-- ══════════ 8. صندوق العزل — الشاشة، لا البطاقة ══════════ -->
-  <section class="sec screen review-only" id="screen-quarantine" data-screen="quarantine">
-    <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
-      <span data-k="nav.home">الرئيسية</span>
-      <span style="color:var(--text3)">/</span>
-      <span class="here" data-k="nav.quarantine">صندوق العزل</span>
+    <p class="surface-intro" data-k="proactive.sub">السماح بنشاط هنا لا يلغي فحص الملفات أو قواعد جدار الحماية.</p>
+    <div class="remediation-box">
+      <p class="demo-notice" data-k="proactive.demo.note">هذه محاكاة لخطوات آلية. لا تُفحص ملفاتك ولا تتغيّر إعدادات ويندوز.</p>
+      <p id="remediation-status" role="status" data-k="proactive.demo.ready">عند فحص إصابة مؤكدة، تُمنع الأنشطة التسعة حتى ينجح الإصلاح.</p>
+      <p id="remediation-error" role="status" hidden data-k="proactive.demo.failed">لم تنجح الخطوة. يبقى المنع حتى تنجح المعالجة.</p>
+      <details id="remediation-demo">
+        <summary data-k="proactive.demo.title">محاكاة الاحتواء</summary>
+        <div class="demo-controls">
+          <label for="demo-mode" data-k="proactive.demo.mode">وضع الحماية في التجربة</label>
+          <select id="demo-mode">
+            <option value="on" data-k="wall.proactive.on">فعّال</option>
+            <option value="muted" data-k="lvl1.name">إسكات التنبيهات</option>
+            <option value="off" data-k="lvl2.name">إيقاف الحماية</option>
+          </select>
+          <button type="button" class="btn ghost sm" id="demo-next" data-k="proactive.demo.start">حاكِ إصابة مؤكدة</button>
+          <button type="button" class="btn ghost sm" id="demo-fail" hidden data-k="proactive.demo.fail">تعذّرت الخطوة</button>
+        </div>
+      </details>
     </div>
-    <h2><svg class="i"><use href="#i-folder"/></svg><span data-k="quarantine.title">3 · صندوق العزل — هنا فقط يوجد «حذف»</span></h2>
-    <p class="hint" data-k="quarantine.hint">كل شيء يبقى حتى تقرر أنت · لا حذف تلقائي أبدًا</p>
-    <p style="color:var(--text2);font-size:14px"
-       data-k="quarantine.opened_from">يُفتح من التنبيه، ومن العدّاد في الرئيسية — لا من قائمة مخفية.</p>
+    <h3 class="surface-heading" id="tier-mandatory" data-k="proactive.tier.mandatory">خطورة شديدة · منع تلقائي</h3>
+    <ul class="surface-list" data-tier="mandatory" aria-labelledby="tier-mandatory">
+      <li data-surface="office_child">
+        <details class="list-tip">
+          <summary id="surface-office_child" data-k="proactive.surface.office_child">مفسّرات الأوامر من Office</summary>
+          <span role="tooltip" data-k="proactive.surface.office_child.tip">بدء cmd أو PowerShell أو mshta من Word أو Excel، وليس كل عمليات Office الفرعية.</span>
+        </details>
+        <span class="surface-state" id="state-office_child" data-k="proactive.state.blocked">ممنوع</span>
+      </li>
+      <li data-surface="wmi_subscription">
+        <details class="list-tip">
+          <summary id="surface-wmi_subscription" data-k="proactive.surface.wmi_subscription">اشتراكات WMI الدائمة</summary>
+          <span role="tooltip" data-k="proactive.surface.wmi_subscription.tip">إنشاء اشتراك أحداث دائم من مصدر غير موثوق، لا استعلامات WMI العادية.</span>
+        </details>
+        <span class="surface-state" id="state-wmi_subscription" data-k="proactive.state.blocked">ممنوع</span>
+      </li>
+      <li data-surface="system_tools">
+        <details class="list-tip">
+          <summary id="surface-system_tools" data-k="proactive.surface.system_tools">أدوات النظام مع محتوى غير موثوق</summary>
+          <span role="tooltip" data-k="proactive.surface.system_tools.tip">استخدام mshta أو certutil أو regsvr32 مع مدخل غير موثوق من مجلد مؤقت أو الإنترنت.</span>
+        </details>
+        <span class="surface-state" id="state-system_tools" data-k="proactive.state.blocked">ممنوع</span>
+      </li>
+    </ul>
+    <h3 class="surface-heading" id="tier-recommended" data-k="proactive.tier.recommended">خطورة متوسطة · يُنصح بالمنع</h3>
+    <ul class="surface-list" data-tier="recommended" aria-labelledby="tier-recommended">
+      <li data-surface="scheduled_task">
+        <details class="list-tip">
+          <summary id="surface-scheduled_task" data-k="proactive.surface.scheduled_task">المهام المجدولة</summary>
+          <span role="tooltip" data-k="proactive.surface.scheduled_task.tip">إنشاء مهمة أو تعديلها؛ لا تتوقف المهام القائمة بمجرد اختيار المنع.</span>
+        </details>
+        <span class="surface-state" id="state-scheduled_task" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-scheduled_task surface-scheduled_task" aria-describedby="state-scheduled_task"><span id="action-scheduled_task" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="com_registration">
+        <details class="list-tip">
+          <summary id="surface-com_registration" data-k="proactive.surface.com_registration">تسجيل مكوّنات COM</summary>
+          <span role="tooltip" data-k="proactive.surface.com_registration.tip">تغيير تسجيل مكوّن COM للمستخدم الحالي، لا تعطيل COM في ويندوز.</span>
+        </details>
+        <span class="surface-state" id="state-com_registration" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-com_registration surface-com_registration" aria-describedby="state-com_registration"><span id="action-com_registration" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="registry_autorun">
+        <details class="list-tip">
+          <summary id="surface-registry_autorun" data-k="proactive.surface.registry_autorun">مفاتيح بدء التشغيل</summary>
+          <span role="tooltip" data-k="proactive.surface.registry_autorun.tip">إضافة إدخال إلى Run أو RunOnce في السجل أو تغييره.</span>
+        </details>
+        <span class="surface-state" id="state-registry_autorun" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-registry_autorun surface-registry_autorun" aria-describedby="state-registry_autorun"><span id="action-registry_autorun" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="service_driver">
+        <details class="list-tip">
+          <summary id="surface-service_driver" data-k="proactive.surface.service_driver">تثبيت الخدمات والتعريفات</summary>
+          <span role="tooltip" data-k="proactive.surface.service_driver.tip">إنشاء خدمة أو تثبيت تعريف جديد؛ لا تُوقَف الخدمات والتعريفات العاملة.</span>
+        </details>
+        <span class="surface-state" id="state-service_driver" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-service_driver surface-service_driver" aria-describedby="state-service_driver"><span id="action-service_driver" data-k="button.block">المنع</span></button>
+      </li>
+    </ul>
+    <h3 class="surface-heading" id="tier-optional" data-k="proactive.tier.optional">خطورة أقل · منع اختياري</h3>
+    <ul class="surface-list" data-tier="optional" aria-labelledby="tier-optional">
+      <li data-surface="inbound_smb_rdp">
+        <details class="list-tip">
+          <summary id="surface-inbound_smb_rdp" data-k="proactive.surface.inbound_smb_rdp">اتصالات SMB وRDP الواردة</summary>
+          <span role="tooltip" data-k="proactive.surface.inbound_smb_rdp.tip">اتصالات واردة جديدة للمشاركة أو سطح المكتب البعيد؛ السماح لا يفتح منفذًا.</span>
+        </details>
+        <span class="surface-state" id="state-inbound_smb_rdp" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-inbound_smb_rdp surface-inbound_smb_rdp" aria-describedby="state-inbound_smb_rdp"><span id="action-inbound_smb_rdp" data-k="button.block">المنع</span></button>
+      </li>
+      <li data-surface="wsh_script">
+        <details class="list-tip">
+          <summary id="surface-wsh_script" data-k="proactive.surface.wsh_script">سكربتات ويندوز</summary>
+          <span role="tooltip" data-k="proactive.surface.wsh_script.tip">تشغيل ملفات ‎.js و‎.vbs و‎.wsf عبر WSH. تبقى فحوص السكربت سارية.</span>
+        </details>
+        <span class="surface-state" id="state-wsh_script" data-k="proactive.state.allowed">مسموح</span>
+        <button type="button" class="btn ghost sm" data-set-block aria-labelledby="action-wsh_script surface-wsh_script" aria-describedby="state-wsh_script"><span id="action-wsh_script" data-k="button.block">المنع</span></button>
+      </li>
+    </ul>
+    <div><button class="btn primary" data-goto="exception" data-list-tip="tip.exception"><svg class="i sm"><use href="#i-key"/></svg><span data-k="exception.title">الاستثناءات</span></button></div>
   </section>
 
   <!-- ══════════ 9. الإعدادات ══════════ -->
   <section class="sec screen review-only" id="screen-settings" data-screen="settings">
     <div class="crumb">
-      <button class="back" data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="home"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.home">الرئيسية</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.settings">الإعدادات</span>
@@ -993,8 +1215,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <div class="sechead"><svg class="i"><use href="#i-eye"/></svg><span data-k="settings.appearance">المظهر</span></div>
     <div class="setrows">
       <div class="setrow">
-        <div class="txt"><div class="t" data-k="settings.appearance">المظهر</div>
-          <div class="d" data-k="settings.appearance.body">فاتح أو داكن. يتبع النظام افتراضيًا.</div></div>
+        <details class="txt list-tip">
+          <summary class="t" data-k="settings.appearance">المظهر</summary>
+          <span role="tooltip" data-k="settings.appearance.body">فاتح أو داكن. يتبع النظام افتراضيًا.</span>
+        </details>
         <div class="act seg" role="group" aria-label="theme">
           <button aria-pressed="false" data-k="settings.theme_light">فاتح</button>
           <button aria-pressed="true" data-k="settings.theme_system">حسب النظام</button>
@@ -1002,16 +1226,18 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
         </div>
       </div>
       <div class="setrow">
-        <div class="txt"><div class="t" data-k="settings.notifications">الإشعارات</div>
-          <div class="d" data-k="settings.notifications.body">ثلاثة في اليوم كحد أقصى. الأهم أولًا.</div></div>
+        <details class="txt list-tip">
+          <summary class="t" data-k="settings.notifications">الإشعارات</summary>
+          <span role="tooltip" data-k="settings.notifications.body">ثلاثة في اليوم كحد أقصى. الأهم أولًا.</span>
+        </details>
         <div class="act menu">
           <button class="btn ghost sm" data-menu="1" aria-expanded="false"><span data-k="menu.more">المزيد</span> <span aria-hidden="true">···</span></button>
           <div class="items">
             <button data-k="settings.theme_system">حسب النظام</button>
             <div class="sep"></div>
-            <button data-goto="privacy" data-k="nav.privacy">الخصوصية</button>
-            <button data-goto="language" data-k="nav.language">اللهجة واللغة</button>
-            <button data-goto="numbers" data-k="num.title">الأرقام</button>
+            <div><button data-goto="privacy" data-list-tip="privacy.sub" data-k="nav.privacy">الخصوصية</button></div>
+            <div><button data-goto="language" data-list-tip="lang.sub" data-k="nav.language">اللهجة واللغة</button></div>
+            <div><button data-goto="numbers" data-list-tip="num.sub" data-k="num.title">الأرقام</button></div>
           </div>
         </div>
       </div>
@@ -1020,8 +1246,10 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <div class="sechead"><svg class="i"><use href="#i-key"/></svg><span data-k="settings.behavior">السلوك</span></div>
     <div class="setrows">
       <div class="setrow">
-        <div class="txt"><div class="t" data-k="settings.startup">يبدأ مع ويندوز</div>
-          <div class="d" data-k="settings.startup.body">يعمل في الخلفية منذ الإقلاع. يمكنك إيقافه.</div></div>
+        <details class="txt list-tip">
+          <summary class="t" data-k="settings.startup">يبدأ مع ويندوز</summary>
+          <span role="tooltip" data-k="settings.startup.body">يعمل في الخلفية منذ الإقلاع. يمكنك إيقافه.</span>
+        </details>
         <div class="act seg" role="group" aria-label="startup">
           <button aria-pressed="true" data-k="button.on">مفعّل</button>
           <button aria-pressed="false" data-k="button.off">متوقف</button>
@@ -1041,13 +1269,25 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
           <div class="d" data-k="settings.database.date">آخر تحديث</div></div>
         <div class="act"><button class="btn ghost sm" data-goto="language" data-k="nav.language">اللهجة واللغة</button></div>
       </div>
+      <div class="setrow">
+        <details class="txt list-tip">
+          <summary class="t" data-k="settings.repair_db">قاعدة الإصلاح</summary>
+          <span role="tooltip" data-tmpl="settings.repair_db.help" data-k-args='{"mb":100}' data-k="settings.repair_db.help">وصفات حسب العائلة. تُرفق بالبرنامج؛ وإذا تجاوزت الحزمة ١٠٠ م.ب تُنزّل منفصلة.</span>
+        </details>
+        <span class="component-status" id="repair-db-status" data-k="settings.repair_db.status">v1/r1 · وصفتان تجريبيتان</span>
+      </div>
     </div>
+    <details class="component-install">
+      <summary data-k="settings.repair_db.install">التثبيت المنفصل</summary>
+      <p data-k="settings.repair_db.instructions" data-k-args='{"package":"odina-repair-v1-r1.zip"}'>فكّ odina-repair-v1-r1.zip من إصدار Odina المطابق بجوار البرنامج، مع الحفاظ على المجلدات.</p>
+      <a href="https://github.com/bifa90/Odina/releases" target="_blank" rel="noopener noreferrer" data-k="settings.repair_db.releases">حزم الإصدارات</a>
+    </details>
   </section>
 
   <!-- ══════════ 10. الخصوصية ══════════ -->
   <section class="sec screen review-only" id="screen-privacy" data-screen="privacy">
     <div class="crumb">
-      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.settings">الإعدادات</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.privacy">الخصوصية</span>
@@ -1070,7 +1310,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 11. اللهجة واللغة ══════════ -->
   <section class="sec screen review-only" id="screen-language" data-screen="language">
     <div class="crumb">
-      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.settings">الإعدادات</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="nav.language">اللهجة واللغة</span>
@@ -1078,16 +1318,16 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
     <h2><svg class="i"><use href="#i-info"/></svg><span data-k="lang.title">اللهجة واللغة</span></h2>
     <p class="hint" data-k="lang.sub">عشرة ألسنة. الترجمة تراها فورًا، والخط يتبع لغتك.</p>
     <div class="langs">
-      <button class="langcard" aria-pressed="true"><span class="nm">العربية<span class="code">ar</span></span><span class="smp" dir="rtl">عدينة — أنت محمي ١٢٣٤٥</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">English<span class="code">en</span></span><span class="smp" dir="ltr">Odina — you are protected</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">简体中文<span class="code">zh-Hans</span></span><span class="smp" dir="ltr">Odina — 你已受到保护</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">日本語<span class="code">ja</span></span><span class="smp" dir="ltr">Odina — 保護されています</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Español<span class="code">es</span></span><span class="smp" dir="ltr">Odina — estás protegido</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Русский<span class="code">ru</span></span><span class="smp" dir="ltr">Odina — вы защищены</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">हिन्दी<span class="code">hi</span></span><span class="smp" dir="ltr">Odina — आप सुरक्षित हैं</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Deutsch<span class="code">de</span></span><span class="smp" dir="ltr">Odina — Sie sind geschützt</span><span class="st">مسودة</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Français<span class="code">fr</span></span><span class="smp" dir="ltr">Odina — vous êtes protégé</span><span class="st">مسودة</span></button>
-      <button class="langcard" aria-pressed="false"><span class="nm">Português<span class="code">pt-BR</span></span><span class="smp" dir="ltr">Odina — você está protegido</span><span class="st">مسودة</span></button>
+      <button class="langcard" value="ar" aria-pressed="true"><span class="nm">العربية<span class="code">ar</span></span><span class="smp" dir="rtl">عدينة — أنت محمي ١٢٣٤٥</span></button>
+      <button class="langcard" value="en" aria-pressed="false"><span class="nm">English<span class="code">en</span></span><span class="smp" dir="ltr">Odina — you are protected</span></button>
+      <button class="langcard" value="zh-Hans" aria-pressed="false"><span class="nm">简体中文<span class="code">zh-Hans</span></span><span class="smp" dir="ltr">Odina — 你已受到保护</span></button>
+      <button class="langcard" value="ja" aria-pressed="false"><span class="nm">日本語<span class="code">ja</span></span><span class="smp" dir="ltr">Odina — 保護されています</span></button>
+      <button class="langcard" value="es" aria-pressed="false"><span class="nm">Español<span class="code">es</span></span><span class="smp" dir="ltr">Odina — estás protegido</span></button>
+      <button class="langcard" value="ru" aria-pressed="false"><span class="nm">Русский<span class="code">ru</span></span><span class="smp" dir="ltr">Odina — вы защищены</span></button>
+      <button class="langcard" value="hi" aria-pressed="false"><span class="nm">हिन्दी<span class="code">hi</span></span><span class="smp" dir="ltr">Odina — आप सुरक्षित हैं</span></button>
+      <button class="langcard" value="de" aria-pressed="false"><span class="nm">Deutsch<span class="code">de</span></span><span class="smp" dir="ltr">Odina — Sie sind geschützt</span><span class="st">مسودة</span></button>
+      <button class="langcard" value="fr" aria-pressed="false"><span class="nm">Français<span class="code">fr</span></span><span class="smp" dir="ltr">Odina — vous êtes protégé</span><span class="st">مسودة</span></button>
+      <button class="langcard" value="pt-BR" aria-pressed="false"><span class="nm">Português<span class="code">pt-BR</span></span><span class="smp" dir="ltr">Odina — você está protegido</span><span class="st">مسودة</span></button>
     </div>
     <p style="margin-top:14px"><button class="btn ghost" data-goto="numbers">
       <svg class="i sm"><use href="#i-db"/></svg><span data-k="num.title">الأرقام</span></button></p>
@@ -1157,7 +1397,7 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
   <!-- ══════════ 13. الأرقام — نظامان، والاختيار للمستخدم (§6أ.6) ══════════ -->
   <section class="sec screen review-only" id="screen-numbers" data-screen="numbers">
     <div class="crumb">
-      <button class="back" data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
+      <button class="back" data-back data-goto="settings"><svg class="i sm" style="width:15px;height:15px"><use href="#i-arrow-r"/></svg><span data-k="back">رجوع</span></button>
       <span data-k="nav.settings">الإعدادات</span>
       <span style="color:var(--text3)">/</span>
       <span class="here" data-k="num.title">الأرقام</span>
@@ -1250,11 +1490,16 @@ html[data-theme="dark"] .appbar .nb{color:#0B1416}
 
 </div>
 
+<template id="nav-tip">
+  <details class="list-tip">
+    <summary class="tip-icon"><svg class="i sm" aria-hidden="true"><use href="#i-info"/></svg><span class="sr-only" data-k="help.tip.title">تلميح فوري</span></summary>
+    <span role="tooltip"></span>
+  </details>
+</template>
 <script src="locales.js"></script>
 <script>
 /* ══════════ النصوص: locales.js وحده — لا نسخة ثانية ══════════ */
-const DIR = {};
-LANGS.forEach(l => { DIR[l] = RTL_LANGS.includes(l) ? 'rtl' : 'ltr'; });
+const langPicker = document.getElementById('lang');
 
 /* ══════════ الألوان + حساب التباين ══════════ */
 const PALETTE = [
@@ -1295,12 +1540,16 @@ function renderPalette(){
 
 /* ══════════ التطبيق ══════════ */
 function applyLang(code){
-  document.body.dataset.lang = code;
-  document.documentElement.lang = code;
-  document.documentElement.dir = DIR[code] || 'ltr';
-  /* locales.js هو المصدر: نسخة واحدة من كل نص، يولّدها tools/gen-locale-js.py
-     من locales/<lang>/odina.ftl. القاموس المحلي لا يغطّي إلا مفاتيح المعاينة. */
-  const dict = (window.ODINA_STRINGS || {})[code] || {};
+  if (!window.ODINA_ORDER.includes(code)) code = 'ar';
+  const dict = window.ODINA_STRINGS[code];
+  langPicker.value = code;
+  document.documentElement.lang = document.body.dataset.lang = code;
+  document.documentElement.dir = code === 'ar' ? 'rtl' : 'ltr';
+  document.getElementById('draftflag').hidden = !window.ODINA_DRAFT.includes(code);
+  document.querySelectorAll('.langcard').forEach(btn => {
+    btn.setAttribute('aria-pressed', String(btn.value === code));
+  });
+  try { localStorage.setItem('odina.lang', code); } catch (e) {}
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k = el.dataset.k;
     if (!dict[k]) return;
@@ -1314,7 +1563,10 @@ function applyLang(code){
   });
   if (typeof setModeLabel==='function') setModeLabel();
 }
-document.getElementById('lang').addEventListener('change', e=>applyLang(e.target.value));
+langPicker.addEventListener('change', () => applyLang(langPicker.value));
+document.querySelectorAll('.langcard').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.value));
+});
 
 const modeBtn = document.getElementById('mode');
 function setModeLabel(){
@@ -1328,29 +1580,112 @@ modeBtn.addEventListener('click', ()=>{ document.body.classList.toggle('real'); 
 /* ══════════ التنقل بين الشاشات (§6أ.3) ══════════
    كل مدخل ظاهر في الخريطة يعمل هنا: href حقيقي أو زر data-goto.
    والرجوع يعيد المستخدم إلى نفس الموضع لا إلى أعلى الصفحة. */
+const topbar = document.querySelector('.topbar');
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--toolbar-height', topbar.offsetHeight + 'px');
+}).observe(topbar);
 const backStack = [];
 
-function goto(id, opts) {
-  const target = document.getElementById('screen-' + id);
-  if (!target) return;
-  if (!opts || !opts.replace) backStack.push(window.scrollY);
-  target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  target.setAttribute('tabindex', '-1');
-  target.focus({ preventScroll: true });
-  history.replaceState(null, '', '#' + id);
+/* List descriptions come from Fluent like any other [data-k]. A summary is
+   the help target, never a navigation/action button or a glossary search. */
+const navTip = document.getElementById('nav-tip').content;
+document.querySelectorAll('button[data-list-tip]').forEach((link, i) => {
+  const tip = navTip.firstElementChild.cloneNode(true);
+  const label = tip.querySelector('[data-k]');
+  label.id = 'tip-label-' + i;
+  link.id ||= 'tip-link-' + i;
+  tip.querySelector('summary').setAttribute('aria-labelledby', label.id + ' ' + link.id);
+  tip.querySelector('[role="tooltip"]').dataset.k = link.dataset.listTip;
+  link.parentElement.classList.add('tip-pair');
+  link.after(tip);
+});
+
+let activeListTip = null;
+let tipPinned = false;
+function closeListTip() {
+  if (!activeListTip) return false;
+  activeListTip.open = false;
+  activeListTip = null;
+  tipPinned = false;
+  return true;
+}
+// Keep the explanation on screen, including under the sticky desktop toolbar.
+function placeListTip() {
+  const bubble = activeListTip?.querySelector('[role="tooltip"]');
+  if (!bubble?.offsetParent || activeListTip.closest('.exccard,.surface-list')) return;
+  const row = bubble.offsetParent.getBoundingClientRect();
+  const above = row.top - Math.max(0, topbar.getBoundingClientRect().bottom);
+  activeListTip.classList.toggle('below', above < bubble.offsetHeight && innerHeight - row.bottom > above);
+}
+window.addEventListener('scroll', placeListTip, { passive: true });
+window.addEventListener('resize', placeListTip);
+function showListTip(tip) {
+  if (activeListTip === tip) return;
+  closeListTip();
+  activeListTip = tip;
+  tip.open = true;
+  placeListTip();
+}
+document.querySelectorAll('details.list-tip').forEach((tip, i) => {
+  const summary = tip.querySelector('summary');
+  const text = tip.querySelector('[role="tooltip"]');
+  const pair = tip.closest('.tip-pair');
+  const group = pair || tip;
+  text.id = 'list-description-' + i;
+  const triggers = pair ? [pair.querySelector('[data-list-tip]'), summary] : [summary];
+  for (const trigger of triggers) {
+    trigger.setAttribute('aria-describedby', text.id);
+    trigger.addEventListener('pointerenter', e => {
+      if (e.pointerType !== 'touch') showListTip(tip);
+    });
+    trigger.addEventListener('focus', () => {
+      if (trigger.matches(':focus-visible')) showListTip(tip);
+    });
+  }
+  const hoverArea = tip.matches('.setrow > .list-tip') ? tip.parentElement : group;
+  hoverArea.addEventListener('pointerleave', e => {
+    if (e.pointerType !== 'touch' && activeListTip === tip && !tipPinned && !group.matches(':focus-within')) {
+      closeListTip();
+    }
+  });
+  group.addEventListener('focusout', e => {
+    if (activeListTip === tip && !group.contains(e.relatedTarget)) closeListTip();
+  });
+  summary.addEventListener('click', e => {
+    e.preventDefault(); // A tap pins the hint even if focus or hover just showed it.
+    if (activeListTip === tip && (tipPinned || e.detail === 0)) closeListTip();
+    else { showListTip(tip); tipPinned = true; }
+  });
+});
+document.addEventListener('pointerdown', e => {
+  if (activeListTip && !activeListTip.contains(e.target)) closeListTip();
+});
+
+function goBack() {
+  const previous = backStack.pop();
+  if (!previous) return false;
+  history.replaceState(null, '', previous.url);
+  previous.trigger.focus({ preventScroll: true });
+  closeListTip(); // Restoring focus is not a new help request.
+  window.scrollTo({ top: previous.y, behavior: 'auto' });
+  return true;
 }
 
 document.querySelectorAll('[data-goto]').forEach(btn => {
   btn.addEventListener('click', e => {
     e.preventDefault();
-    const id = btn.getAttribute('data-goto');
-    if (id === 'home' && backStack.length) {
-      const y = backStack.pop();
-      document.getElementById('screen-home').scrollIntoView();
-      window.scrollTo({ top: y, behavior: 'auto' });
-      return;
-    }
-    goto(id);
+    closeListTip();
+    if (btn.hasAttribute('data-back') && goBack()) return;
+    const target = document.getElementById('screen-' + btn.dataset.goto);
+    if (!target) return;
+    // The menu item disappears on navigation; return focus to its visible toggle.
+    const trigger = btn.closest('.menu')?.querySelector('[data-menu]') || btn;
+    backStack.push({ trigger, y: window.scrollY, url: location.href });
+    history.replaceState(null, '', '#' + target.id);
+    target.setAttribute('tabindex', '-1');
+    target.focus({ preventScroll: true });
+    const behavior = matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+    target.scrollIntoView({ behavior, block: 'start' });
   });
 });
 
@@ -1363,8 +1698,9 @@ document.querySelectorAll('[data-menu]').forEach(btn => {
     btn.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
 });
-document.addEventListener('click', () => {
+document.addEventListener('click', e => {
   document.querySelectorAll('.menu.open').forEach(m => {
+    if (m.contains(e.target.closest('.list-tip'))) return;
     m.classList.remove('open');
     const b = m.querySelector('[data-menu]');
     if (b) b.setAttribute('aria-expanded', 'false');
@@ -1372,6 +1708,7 @@ document.addEventListener('click', () => {
 });
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
+  if (closeListTip()) { e.preventDefault(); return; }
   const open = document.querySelector('.menu.open');
   if (open) {
     open.classList.remove('open');
@@ -1379,10 +1716,7 @@ document.addEventListener('keydown', e => {
     if (b) { b.setAttribute('aria-expanded', 'false'); b.focus(); }
     return;
   }
-  if (backStack.length) {
-    document.getElementById('screen-home').scrollIntoView();
-    window.scrollTo({ top: backStack.pop(), behavior: 'auto' });
-  }
+  goBack();
 });
 
 /* ══════════ «لماذا؟» — الشرح عند الطلب فقط (§6أ.1) ══════════
@@ -1409,10 +1743,9 @@ document.querySelectorAll('[data-why]').forEach(b => {
    كل نص فيه { $var } يمر من هنا. القيمة تُقرأ من data-k-args،
    وتُنسَّق بأرقام المستخدم قبل أن تدخل الجملة — لا بعدها. */
 function formatNumber(value) {
+  // Times, names and device labels are opaque strings, even when they contain digits.
+  if (typeof value !== 'number') return value;
   const s = String(value);
-  /* الوقت والتاريخ لا يتبعان نظام الأرقام: «١٤:٣٠» تُقرأ خطأً كـ«١٤ و٣٠»,
-     بينما «14:30» تُقرأ كساعة في كل مكان. العدّادات تتبعه، واللحظة لا. */
-  if (s.indexOf(':') !== -1 || s.indexOf('/') !== -1 || s.indexOf('-') !== -1) return s;
   return numeralStyle === 'hindi' ? s.replace(/[0-9]/g, d => HINDI[+d]) : s;
 }
 
@@ -1458,11 +1791,6 @@ document.querySelectorAll('.numopt').forEach(b => {
   b.addEventListener('click', () => applyNumerals(b.dataset.num));
 });
 
-/* كل عنصر يعرض رقمًا يعلن قيمته الخام هنا مرة واحدة */
-document.querySelectorAll('.appbar .nb, .numopt .digits').forEach(el => {
-  if (!el.hasAttribute('data-numeral')) el.setAttribute('data-numeral', el.textContent.trim());
-});
-
 let savedNum = 'arabic';
 try { savedNum = localStorage.getItem('odina.numerals') || 'arabic'; } catch (e) {}
 applyNumerals(savedNum);
@@ -1493,9 +1821,8 @@ themeBtn.addEventListener('click', ()=>{
   const root = document.documentElement;
   const dark = root.dataset.theme === 'dark';
   root.dataset.theme = dark ? 'light' : 'dark';
-  themeBtn.textContent = dark
-    ? (document.body.dataset.lang==='ar'?'الوضع الداكن':'Dark mode')
-    : (document.body.dataset.lang==='ar'?'الوضع الفاتح':'Light mode');
+  themeBtn.dataset.k = dark ? 'settings.theme_dark' : 'settings.theme_light';
+  themeBtn.textContent = window.ODINA_STRINGS[currentLang()][themeBtn.dataset.k];
   renderPalette();
 });
 
@@ -1571,7 +1898,10 @@ document.addEventListener('click', async (e)=>{
   }
 });
 
-applyLang('ar');
+let initialLang = 'ar';
+try { initialLang = localStorage.getItem('odina.lang') || 'ar'; } catch (e) {}
+applyLang(initialLang);
 </script>
+<script src="proactive-preview.js"></script>
 </body>
 </html>

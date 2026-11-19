@@ -53,6 +53,7 @@ SCREENS: list[tuple[str, str, tuple[str, ...]]] = [
                 "shield.")),
     ("alerts", "التنبيهات", ("alert.", "alerts.", "badge.", "button.", "path.", "word.",
                              "error.")),
+    ("remediation", "المعالجة", ("recovery.",)),
     ("quarantine", "صندوق العزل", ("quarantine.", "q.")),
     ("usb", "USB", ("usb.",)),
     ("pause", "الإيقاف", ("pause.", "disable.", "lvl.", "lvl1.", "lvl2.", "tip.lvl1",
