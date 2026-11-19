@@ -3,3 +3,6 @@ components/repair/*.tsv text eol=lf
 
 # G1 compares the same corpus bytes on Windows and Linux.
 tests/fixtures/safe/* text eol=lf
+
+# Printable reports include compressed streams and byte offsets, not text.
+*.pdf binary
