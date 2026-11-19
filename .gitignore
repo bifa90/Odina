@@ -34,3 +34,6 @@ firebase.json.bak
 # Python bytecode (tools/ci/*.py is run by hand and by the gates)
 __pycache__/
 *.pyc
+
+# Local B9 comparison outputs (not a dataset to publish)
+odina-b9-*/
