@@ -191,7 +191,7 @@ impl Cache {
             .get(&key)
             .is_some_and(|r| r.verdict != "alert")
     }
-    pub(super) fn record(&mut self, key: u64, verdict: Verdict, hashes: &FileHashes) {
+    pub(super) fn record(&mut self, key: u64, verdict: Verdict, streamed: Option<&FileHashes>) {
         if self.current.len() == LIMIT {
             return;
         }
@@ -200,10 +200,12 @@ impl Cache {
             Verdict::Monitor => "monitor",
             _ => "alert",
         };
-        let sha = if hashes.full.is_empty() {
-            "-"
-        } else {
-            &hashes.full
+        // Keep the last observed digest on a no-read hit, for local history
+        // only. It is not a measurement of this pass and never reaches V5.
+        let sha = match streamed {
+            Some(h) if !h.full.is_empty() => h.full.as_str(),
+            Some(_) => "-",
+            None => self.previous.get(&key).map_or("-", |r| r.sha.as_str()),
         };
         self.current.insert(
             key,

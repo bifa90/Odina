@@ -76,7 +76,7 @@ pub(super) fn scan(
                     continue;
                 }
                 preliminary.hashes.size = s.len;
-                c.record(k, preliminary.score.verdict, &preliminary.hashes);
+                c.record(k, preliminary.score.verdict, None);
                 work.hits += 1;
                 return Ok((preliminary, file));
             }
@@ -96,7 +96,7 @@ pub(super) fn scan(
             if stamp(&file) != Some(s) || bytes != s.len {
                 continue;
             }
-            c.record(k, report.score.verdict, &report.hashes);
+            c.record(k, report.score.verdict, Some(&report.hashes));
         }
         return Ok((report, file));
     }

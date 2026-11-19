@@ -24,7 +24,7 @@ const CATALOG: &[Signature] = &[Signature {
 }];
 
 pub fn matches(hashes: &FileHashes) -> bool {
-    CATALOG.iter().any(|s| hashes.full == s.sha256)
+    !hashes.full.is_empty() && CATALOG.iter().any(|s| hashes.full == s.sha256)
 }
 
 pub struct PrefixFilter {

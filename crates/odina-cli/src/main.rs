@@ -65,10 +65,11 @@ EXIT CODES:
     1   the command itself failed (missing file, unreadable, bad usage)
 
 A directory is scanned one level deep unless --recursive is given.
-This binary never blocks, isolates, or deletes anything. It only reads.
+This binary never blocks, isolates, or deletes input files.
 
-`check` exists only in the instrumented build. It scans the same way, writes
-one local JSON file of measurements, and sends nothing anywhere.";
+`check` exists only in the instrumented build. It uses the same decision rules,
+writes one local JSON report and, only with --cache-dir, a private local index.
+Keep the index and report outside the scan target. Nothing is sent anywhere.";
 
 /// Everything the report needs, assembled in one place so the two output
 /// formats cannot drift apart.
@@ -276,14 +277,12 @@ fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-/// One decision path for both commands. `check` caps the full digest; a
-/// skipped digest is never a V5 match. `scan` hashes the whole input.
+/// Public digest-reporting path: never use an index or omit requested hashes.
 fn scan(path: &Path, max_full_digest: Option<u64>) -> std::io::Result<Report> {
     scan_opened(path, &mut std::fs::File::open(path)?, max_full_digest)
 }
 
-/// The caller owns the handle so report-only measurements need not reopen a
-/// potentially different file at the same path after hashing.
+/// Hash a handle and pass its evidence to the same decision as `check`.
 fn scan_opened(
     path: &Path,
     file: &mut std::fs::File,

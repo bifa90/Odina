@@ -259,3 +259,37 @@ fn negative_cold_and_warm_passes_keep_counts_and_avoid_sha_without_changing_scan
     );
     assert!(!corpus.join("unsafe").exists());
 }
+
+#[cfg(feature = "instrument")]
+#[test]
+fn a_hit_retains_the_last_observed_digest_but_a_new_path_or_length_misses() {
+    let dir = Scratch::new("index-key");
+    let cache = dir.0.join("private-index");
+    let out = dir.0.join("measurement.json");
+    let path = dir.0.join("note.txt");
+    let bytes = b"X5O!P%@A just a prefix";
+    fs::write(&path, bytes).unwrap();
+    let digest = odina_core::hashing::hash_bytes(bytes).full;
+    let cold = indexed(&path, &cache, &out, 0);
+    assert!(cold.contains(r#""sha_files":1"#) && cold.contains(r#""reports":[]"#));
+    let idx = cache.join("index-v1.tsv");
+    let native = idx.is_file();
+    if native {
+        assert!(fs::read_to_string(&idx).unwrap().contains(&digest));
+        let warm = indexed(&path, &cache, &out, 0);
+        assert!(warm.contains(r#""cache_hits":1"#) && !warm.contains(&digest));
+        assert!(fs::read_to_string(&idx).unwrap().contains(&digest));
+    }
+    let renamed = dir.0.join("renamed.txt");
+    fs::rename(path, &renamed).unwrap();
+    let moved = indexed(&renamed, &cache, &out, 0);
+    assert!(moved.contains(r#""cache_hits":0,"bloom_negatives":0,"sha_files":1"#));
+    fs::write(&renamed, b"a").unwrap();
+    let resized = indexed(&renamed, &cache, &out, 0);
+    assert!(
+        resized.contains(r#""cache_hits":0,"bloom_negatives":1,"sha_files":0,"streamed_bytes":1"#)
+    );
+    if native {
+        assert!(!fs::read_to_string(idx).unwrap().contains(&digest));
+    }
+}

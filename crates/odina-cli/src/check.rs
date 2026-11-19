@@ -13,11 +13,11 @@
 //! The file it writes is one JSON object:
 //!
 //! ```text
-//! { ...perf object from odina-instrument..., "reports": [ ...odina-report/v1... ] }
+//! { ...perf fields..., "work": { ...decision counters... }, "reports": [ ...odina-report/v1... ] }
 //! ```
 //!
-//! No socket, no URL, no clock beyond the date, and no file name anywhere: the
-//! report objects carry hashes and patterns.
+//! No socket, URL or filename in the export. `--cache-dir` additionally keeps
+//! a private local index, never part of that export.
 
 #[cfg(feature = "instrument")]
 mod cache;
