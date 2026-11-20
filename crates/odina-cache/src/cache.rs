@@ -24,7 +24,7 @@ struct Row {
 type Rows = HashMap<u64, Row>;
 
 pub(super) struct Cache {
-    dir: PathBuf,
+    dir: Option<PathBuf>,
     cwd: PathBuf,
     previous: Rows,
     current: Rows,
@@ -90,7 +90,15 @@ fn invalid(msg: &str) -> io::Error {
 }
 
 impl Cache {
-    pub(super) fn open(dir: &Path, target: &Path, out: &Path) -> io::Result<Self> {
+    pub(super) fn memory() -> io::Result<Self> {
+        Ok(Self {
+            dir: None,
+            cwd: std::env::current_dir()?,
+            previous: Rows::new(),
+            current: Rows::new(),
+        })
+    }
+    pub(super) fn open(dir: &Path, target: &Path, out: Option<&Path>) -> io::Result<Self> {
         // Resolve existing parents before creating anything; never put even an
         // empty directory in the corpus, and never export the index as JSON.
         let cwd = std::env::current_dir()?;
@@ -122,18 +130,21 @@ impl Cache {
             Err(e) => return Err(e),
         };
         let target = target.canonicalize()?;
-        let out = match fs::symlink_metadata(out) {
-            Ok(m) if !m.is_file() => return Err(invalid("--out cannot be a directory or link")),
-            Ok(_) => out.canonicalize()?,
-            Err(e) if e.kind() == io::ErrorKind::NotFound => named(out)?,
-            Err(e) => return Err(e),
-        };
-        if dir.starts_with(&target)
-            || target.starts_with(&dir)
-            || out.starts_with(&dir)
-            || out.starts_with(&target)
-        {
-            return Err(invalid("cache must be separate from the input and --out"));
+        if dir.starts_with(&target) || target.starts_with(&dir) {
+            return Err(invalid("cache must be separate from the input"));
+        }
+        if let Some(out) = out {
+            let out = match fs::symlink_metadata(out) {
+                Ok(m) if !m.is_file() => {
+                    return Err(invalid("--out cannot be a directory or link"))
+                }
+                Ok(_) => out.canonicalize()?,
+                Err(e) if e.kind() == io::ErrorKind::NotFound => named(out)?,
+                Err(e) => return Err(e),
+            };
+            if out.starts_with(&dir) || out.starts_with(&target) {
+                return Err(invalid("--out must be outside cache and target"));
+            }
         }
         let create = &mut fs::DirBuilder::new();
         #[cfg(unix)]
@@ -168,7 +179,7 @@ impl Cache {
         }
         let previous = load(&dir.join(FILE)).unwrap_or_default();
         Ok(Self {
-            dir,
+            dir: Some(dir),
             cwd,
             previous,
             current: Rows::new(),
@@ -215,11 +226,21 @@ impl Cache {
             },
         );
     }
-    pub(super) fn finish(self) -> io::Result<()> {
-        if self.current == self.previous {
-            return Ok(());
+    pub(super) fn finish_pass(&mut self) -> io::Result<()> {
+        // Rows describe one completed inventory. Do not reload or rebuild a
+        // resident index between requests; never expose a row as a verdict.
+        let published = match &self.dir {
+            Some(dir) if self.current != self.previous => self.publish(dir),
+            _ => Ok(()),
+        };
+        if published.is_ok() {
+            std::mem::swap(&mut self.previous, &mut self.current);
         }
-        let tmp = self.dir.join(format!(".index-{}.tmp", std::process::id()));
+        self.current.clear();
+        published
+    }
+    fn publish(&self, dir: &Path) -> io::Result<()> {
+        let tmp = dir.join(format!(".index-{}.tmp", std::process::id()));
         let mut options = OpenOptions::new();
         options.write(true).create_new(true);
         #[cfg(unix)]
@@ -237,7 +258,7 @@ impl Cache {
             out.flush()?;
             out.get_ref().sync_all()?;
             drop(out);
-            fs::rename(&tmp, self.dir.join(FILE))
+            fs::rename(&tmp, dir.join(FILE))
         };
         let result = publish();
         if result.is_err() {

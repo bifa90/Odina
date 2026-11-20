@@ -40,14 +40,18 @@
 mod check;
 
 mod repair;
+#[cfg(feature = "instrument")]
+mod resident;
 
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+use odina_core::assessment::{assess, Assessment as Report};
 use odina_core::g1_reference;
-use odina_core::hashing::{hash_bytes, hash_reader, FileHashes};
-use odina_core::heuristics::{guess_path_flags, name_shape, path_score};
-use odina_core::scoring::{score_with_known_bad, Evidence, Indicator, Score, Thresholds};
+use odina_core::hashing::{hash_bytes, hash_reader};
+use odina_core::Score;
+#[cfg(test)]
+use odina_core::{score_with_known_bad, Evidence, FileHashes, Indicator, Thresholds};
 
 const USAGE: &str = "\
 odina — scan one file and print the decision (gate G1)
@@ -57,6 +61,9 @@ USAGE:
     odina repair-db [--demo]       # verify external data; optional in-memory repair exercise
     odina selftest                 # in memory: writes nothing to disk
     odina check <path> [--out <file>] [--cache-dir <private-directory>]   # instrumented build only
+    odina serve <path> --service NAME [--cache-dir <private-directory>]
+    odina status|scan-now|stop --service NAME
+    odina check <path> --service NAME --out <new-file>
     odina --version | --help
 
 EXIT CODES:
@@ -70,17 +77,6 @@ This binary never blocks, isolates, or deletes input files.
 `check` exists only in the instrumented build. It uses the same decision rules,
 writes one local JSON report and, only with --cache-dir, a private local index.
 Keep the index and report outside the scan target. Nothing is sent anywhere.";
-
-/// Everything the report needs, assembled in one place so the two output
-/// formats cannot drift apart.
-struct Report {
-    path: PathBuf,
-    hashes: FileHashes,
-    known_bad: bool,
-    score: Score,
-    name_score: f32,
-    path_score: f32,
-}
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -101,6 +97,10 @@ fn main() -> ExitCode {
         Some("repair-db") => repair::command(&args[1..]),
         // The refusal lives here, not inside the module, so the public build
         // really has no `check` code: the module is not compiled at all.
+        #[cfg(feature = "instrument")]
+        Some(cmd @ ("serve" | "status" | "scan-now" | "stop")) => {
+            resident::command(cmd, &args[1..])
+        }
         Some("check") => {
             #[cfg(feature = "instrument")]
             {
@@ -289,38 +289,6 @@ fn scan_opened(
     max_full_digest: Option<u64>,
 ) -> std::io::Result<Report> {
     Ok(assess(path, hash_reader(file, max_full_digest)?))
-}
-
-/// Common decision for public scan, exact candidates, and prefilter negatives.
-/// In this engine only V5 consumes content; a new content indicator MUST also
-/// be added to the evidence requirements in check::engine.
-fn assess(path: &Path, hashes: FileHashes) -> Report {
-    let file_name = path
-        .file_name()
-        .map(|n| n.to_string_lossy().into_owned())
-        .unwrap_or_default();
-    let name_score = name_shape(&file_name).score();
-    let path_flags = guess_path_flags(path);
-    let path_score = path_score(path_flags);
-
-    let mut evidence = Evidence::new();
-    evidence.set(Indicator::NamePattern, name_score);
-    evidence.set(Indicator::PathPattern, path_score);
-    // Indicators 5-8 and 10 need a database or a parser that does not exist
-    // yet. They stay at zero — an unmeasured indicator is not evidence.
-
-    let known_bad = g1_reference::matches(&hashes);
-
-    let score = score_with_known_bad(&evidence, &Thresholds::default(), None, known_bad);
-
-    Report {
-        path: path.to_path_buf(),
-        hashes,
-        known_bad,
-        score,
-        name_score,
-        path_score,
-    }
 }
 
 fn verdict_label(score: &Score) -> (&'static str, &'static str) {

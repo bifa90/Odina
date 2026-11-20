@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 bifa90 — Odina
 use super::{cache::Cache, stamp::stamp, FULL_DIGEST_CAP};
-use crate::{assess, Report};
+use odina_core::assessment::{assess, Assessment};
 use odina_core::{g1_reference::PrefixFilter, FileHashes};
 use std::{
     fs::{File, OpenOptions},
@@ -12,14 +12,14 @@ use std::{
 /// Completed decision-stream work, including completed passes retried due to
 /// concurrent writes. No names, identities, actual disk-I/O or CPU estimates.
 #[derive(Default)]
-pub(super) struct Work {
+pub struct Work {
     hits: u64,
     negatives: u64,
     sha: u64,
     bytes: u64,
 }
 impl Work {
-    pub(super) fn json(&self) -> String {
+    pub fn json(&self) -> String {
         format!(
             "{{\"cache_hits\":{},\"bloom_negatives\":{},\"sha_files\":{},\"streamed_bytes\":{}}}",
             self.hits, self.negatives, self.sha, self.bytes
@@ -60,7 +60,7 @@ pub(super) fn scan(
     filter: &PrefixFilter,
     cache: &mut Option<Cache>,
     work: &mut Work,
-) -> io::Result<(Report, File)> {
+) -> io::Result<(Assessment, File)> {
     for _ in 0..2 {
         let mut file = open_regular(path)?; // even hits must still be openable
         let initial = cache.as_ref().and_then(|_| stamp(&file));

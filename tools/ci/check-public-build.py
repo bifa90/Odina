@@ -48,6 +48,7 @@ import sys
 from pathlib import Path
 
 INSTR_CRATES = ("odina-report", "odina-instrument")
+PRIVATE_CRATES = (*INSTR_CRATES, "odina-cache", "odina-resident")
 
 # Crates that would give any part of the product a way to talk to a network.
 NETWORK_CRATES = (
@@ -90,7 +91,7 @@ class Gate:
         text = self.read("crates/odina-cli/Cargo.toml")
         if not text:
             return
-        for crate in INSTR_CRATES:
+        for crate in PRIVATE_CRATES:
             pattern = re.compile(
                 "^" + re.escape(crate) + r"\s*=\s*\{([^}]*)\}", re.MULTILINE
             )
@@ -130,7 +131,7 @@ class Gate:
             return
         deps = re.search(r"^\[dependencies\]\s*$(.*?)(?=^\[|\Z)", text, re.M | re.S)
         body = deps.group(1) if deps else ""
-        for crate in INSTR_CRATES:
+        for crate in PRIVATE_CRATES:
             if re.search(rf"^{re.escape(crate)}\b", body, re.M):
                 self.fail(f"odina-core depends on {crate}; the engine must not measure")
 
@@ -204,7 +205,7 @@ class Gate:
             )
             return
         graph = out.stdout
-        for crate in INSTR_CRATES:
+        for crate in PRIVATE_CRATES:
             if re.search(rf"\b{re.escape(crate)} v", graph):
                 self.fail(
                     f"{crate} appears in the default build graph of odina-cli; "

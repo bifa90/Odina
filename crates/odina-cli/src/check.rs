@@ -19,13 +19,11 @@
 //! No socket, URL or filename in the export. `--cache-dir` additionally keeps
 //! a private local index, never part of that export.
 
+use odina_cache::FULL_DIGEST_CAP;
 #[cfg(feature = "instrument")]
-mod cache;
+use odina_cache::{Scanner, Work};
 #[cfg(feature = "instrument")]
-mod engine;
-#[cfg(feature = "instrument")]
-mod stamp;
-
+use odina_instrument::{Meter, PerfReport, ScanStats};
 use std::fs::File;
 use std::path::{Path, PathBuf};
 
@@ -204,11 +202,6 @@ pub struct Walked {
     pub truncated: bool,
 }
 
-/// Above this size, the whole-file digest is skipped and only head and tail
-/// are hashed. 512 MiB is roughly when reading the file stops being free
-/// compared to everything else a scan does.
-pub const FULL_DIGEST_CAP: u64 = 512 * 1024 * 1024;
-
 /// How many directories one walk may visit. A Downloads folder is far below
 /// this; the number exists only so that a pathological tree cannot run for
 /// hours while the user watches nothing happen.
@@ -307,12 +300,12 @@ pub fn walk(dir: &Path) -> Walked {
 /// check build and this crate's tests.
 #[cfg(feature = "instrument")]
 pub fn command(args: &[String]) -> std::process::ExitCode {
-    use odina_instrument::{Meter, PerfReport, ScanStats};
     use std::process::ExitCode;
 
     let mut out_path = default_out();
     let mut target: Option<String> = None;
     let mut cache_dir: Option<PathBuf> = None;
+    let mut service = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -324,6 +317,14 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                 }
                 eprintln!("odina: --out needs a file name");
                 return ExitCode::FAILURE;
+            }
+            "--service" if service.is_none() => {
+                let Some(name) = args.get(i + 1).filter(|s| !s.starts_with("--")) else {
+                    eprintln!("odina: --service needs an instance name");
+                    return ExitCode::FAILURE;
+                };
+                service = Some(name.as_str());
+                i += 1;
             }
             "--cache-dir" => {
                 let Some(v) = args.get(i + 1).filter(|v| !v.starts_with("--")) else {
@@ -352,22 +353,51 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         return ExitCode::FAILURE;
     }
 
+    if let Some(name) = service {
+        if cache_dir.is_some() {
+            eprintln!("odina: the resident owns its cache; set --cache-dir on serve");
+            return ExitCode::FAILURE;
+        }
+        return super::resident::client_check(name, path, &out_path);
+    }
+    // Keep the original B9 interval: includes opening and publishing the index.
     let idle = Meter::now();
     let started = std::time::Instant::now();
-
-    let mut index = match cache_dir
-        .as_ref()
-        .map(|dir| cache::Cache::open(dir, path, &out_path))
-        .transpose()
-    {
-        Ok(index) => index,
+    let mut scanner = match Scanner::one_shot(path, &out_path, cache_dir.as_deref()) {
+        Ok(s) => s,
         Err(e) => {
-            eprintln!("odina: cannot use private scan cache: {e}");
+            eprintln!("odina: cannot open scan session: {e}");
             return ExitCode::FAILURE;
         }
     };
-    let filter = odina_core::g1_reference::PrefixFilter::from_catalog();
-    let mut work = engine::Work::default();
+    match run_pass(&mut scanner, path, idle, started, usize::MAX) {
+        Ok((code, json)) => {
+            if let Err(e) = std::fs::write(&out_path, json) {
+                eprintln!("odina: cannot write {}: {e}", out_path.display());
+                return ExitCode::FAILURE;
+            }
+            println!("الملف: {}", out_path.display());
+            println!("لم يُرسل شيء: هذا الملف على قرصك، وأنت من يقرر إرساله.");
+            ExitCode::from(code)
+        }
+        Err(e) => {
+            eprintln!("odina: {e}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+/// Same inventory, scoring, export and exit semantics for both transports.
+#[cfg(feature = "instrument")]
+pub(super) fn run_pass(
+    scanner: &mut Scanner,
+    path: &Path,
+    idle: Meter,
+    started: std::time::Instant,
+    max_export: usize,
+) -> std::io::Result<(u8, String)> {
+    let mut work = Work::default();
+    let mut report_bytes = 0usize;
     let mut stats = ScanStats::default();
     let mut exported: Vec<String> = Vec::new();
 
@@ -406,7 +436,7 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         if total >= 500 && done % 500 == 0 {
             eprintln!("odina: {done}/{total}");
         }
-        match engine::scan(file, &filter, &mut index, &mut work) {
+        match scanner.scan_file(file, &mut work) {
             Ok((scanned, mut handle)) => {
                 stats.files += 1;
                 stats.bytes += scanned.hashes.size;
@@ -422,7 +452,10 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                     (pe_hash, attributes_for(&handle, file))
                 }) {
                     if let Ok(json) = report.to_json_checked() {
-                        exported.push(json);
+                        report_bytes = report_bytes.saturating_add(json.len() + 1);
+                        if report_bytes <= max_export {
+                            exported.push(json);
+                        }
                     }
                 } else if scanned.score.interrupts() {
                     // Counted in its verdict band, but not exportable without sha256.
@@ -444,10 +477,11 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         );
     }
 
-    if let Some(c) = index {
-        if let Err(e) = c.finish() {
-            eprintln!("odina: could not publish cache; rescan next time: {e}");
-        }
+    if let Err(e) = scanner.finish_pass() {
+        eprintln!("odina: could not publish cache; rescan next time: {e}");
+    }
+    if report_bytes > max_export {
+        return Err(std::io::Error::other("report too large"));
     }
     stats.elapsed_ms = started.elapsed().as_millis() as u64;
     let after = Meter::now();
@@ -462,25 +496,18 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
     perf.fill_from_scan(stats, &idle, Some(&after));
 
     let json = assemble(&perf.to_json(), &exported, &work.json());
-    if let Err(err) = std::fs::write(&out_path, json.as_bytes()) {
-        eprintln!("odina: cannot write {}: {err}", out_path.display());
-        return ExitCode::FAILURE;
-    }
-
     println!("الفحص: {} ملفًا · {} بايت", stats.files, stats.bytes);
     println!("النتائج: {}", perf.summary());
     println!(
         "التقارير المصدَّرة: {} (فقط ما يستدعي تنبيهًا)",
         exported.len()
     );
-    println!("الملف: {}", out_path.display());
-    println!("لم يُرسل شيء: هذا الملف على قرصك، وأنت من يقرر إرساله.");
-
-    if stats.confirmed > 0 || stats.high_risk > 0 {
-        ExitCode::from(2)
+    let code = if stats.confirmed > 0 || stats.high_risk > 0 {
+        2
     } else {
-        ExitCode::SUCCESS
-    }
+        0
+    };
+    Ok((code, json))
 }
 
 #[cfg(test)]
@@ -538,13 +565,9 @@ mod tests {
     #[cfg(feature = "instrument")]
     #[test]
     fn a_missing_file_has_no_scan_or_export() {
-        assert!(engine::scan(
-            Path::new("/nonexistent/file.exe"),
-            &odina_core::g1_reference::PrefixFilter::from_catalog(),
-            &mut None,
-            &mut engine::Work::default()
-        )
-        .is_err());
+        let path = Path::new("/nonexistent/file.exe");
+        let mut s = Scanner::one_shot(path, Path::new("ignored"), None).unwrap();
+        assert!(s.scan_file(path, &mut Work::default()).is_err());
     }
 
     #[test]

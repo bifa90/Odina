@@ -57,14 +57,8 @@ fn check(path: &Path, dir: &Scratch, expected_exit: i32) -> String {
     fs::read_to_string(out).expect("check must write the local report")
 }
 
-fn offline_vector() -> String {
-    [
-        "X5O!P%@AP[4\\PZX54(P^)7CC)7}$",
-        "EICAR-STANDARD-ANTIVIRUS-",
-        "TEST-FILE!$H+H*",
-    ]
-    .concat()
-}
+mod common;
+use common::offline_vector;
 
 #[test]
 fn exact_eicar_file_reaches_v5() {
