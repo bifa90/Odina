@@ -113,8 +113,8 @@ def wait_ready(child, status, timeout=3600):
             s = None
         if s and s["watching"] and s["phase"] == "idle":
             return s
-        if s and not s["subscribed"] and s["loss_incidents"]:
-            raise ValueError("native subscription unavailable; coverage unknown")
+        if s and s["monitor"] in ("offline", "incomplete_inventory"):
+            raise ValueError(f"resident coverage unknown: {s['monitor']}")
         if time.monotonic() >= by:
             raise ValueError("no current, quiescent inventory before deadline")
         time.sleep(.05)
@@ -122,7 +122,10 @@ def wait_ready(child, status, timeout=3600):
 
 
 # Python 3.11+: QPC on Windows, CLOCK_MONOTONIC on Linux, shared with the native publisher.
-clock = time.monotonic_ns
+# In CPython 3.11/3.12 on Windows, monotonic_ns uses GetTickCount64 (NOT QPC).
+# perf_counter_ns is the system-wide QPC on supported Windows Python versions.
+CLOCK_NAME = "perf_counter" if sys.platform == "win32" else "monotonic"
+clock = time.perf_counter_ns if sys.platform == "win32" else time.monotonic_ns
 
 
 def witnessed(get, start, state, size, prior_gen, timeout_ns):
@@ -151,6 +154,7 @@ def event_summary(rows):
             "unwitnessed_percent": 100 * (len(rows) - len(seen)) / len(rows),
             "at_or_above_10_ms": sum(r["published_ns"] - r["t0_ns"] >= 10_000_000 for r in seen),
             "mutation_to_publication_ms": span("published_ns", "t0_ns"),
+            "mutation_to_invalidation_ms": span("invalidated_ns", "t0_ns"),
             "mutation_to_receipt_ms": span("received_ns", "t0_ns"),
             "receipt_to_invalidation_ms": span("invalidated_ns", "received_ns"),
             "invalidation_to_publication_ms": span("published_ns", "invalidated_ns")}
@@ -228,7 +232,7 @@ def measure(args, psutil):
     result = {"schema": "odina-resident-lab/v2", "label": args.label, "platform": sys.platform,
               "observer_psutil": psutil.__version__, "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
               "linux_clock_ticks_per_second": os.sysconf("SC_CLK_TCK") if sys.platform == "linux" else None,
-              "clock": time.get_clock_info("monotonic").implementation, "event_deadline_seconds": args.event_timeout,
+              "clock": time.get_clock_info(CLOCK_NAME).implementation, "event_deadline_seconds": args.event_timeout,
               "expected_files": args.expect_files, "expected_bytes": args.expect_bytes, "idle_windows": []}
     with tempfile.TemporaryDirectory(dir=parent) as tmp, probe_dir(root, args.probe_changes) as d:
         tmp = Path(tmp)
@@ -269,9 +273,16 @@ def measure(args, psutil):
                 if d:
                     before = wait_ready(child, status)
                     groups, raw = events(binary, name, root, d, args.events_per_class, args.event_timeout)
-                    after = wait_ready(child, status)
+                    after = status()
+                    drain_by = time.monotonic() + args.event_timeout
+                    while after["phase"] != "idle" and time.monotonic() < drain_by:
+                        time.sleep(.01)
+                        after = status()
+                    delivered = after["events"] - before["events"]
                     result.update(events=groups, samples=raw, before_events=before, after_events=after,
-                                  isolated_event_window=(before["full_scans"] == after["full_scans"] and
+                                  isolated_event_window=(after["watching"] and after["phase"] == "idle" and
+                                                         0 < delivered <= after["consecutive_same_path_events"] and
+                                                         before["full_scans"] == after["full_scans"] and
                                                          before["loss_incidents"] == after["loss_incidents"]))
                 result["process_high_water_after_workload_bytes"] = high_water(child.pid, proc.memory_info())
                 calls(binary, "stop", "--service", name)

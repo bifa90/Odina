@@ -32,7 +32,8 @@ pub(crate) struct State {
     pub full_busy: bool,
     pub completed: u64, // completed MANUAL requests, as in IPC v1
     pub last: Option<u8>,
-    armed: bool, // native subscription (not sufficient for coverage)
+    terminal: bool, // unrecoverable native error: explicit restart after correcting the cause
+    armed: bool,    // native subscription (not sufficient for coverage)
     need_full: bool,
     baseline: bool, // complete inventory in this epoch
     fenced: bool,   // kernel stream drained through the end-of-inventory wake
@@ -42,6 +43,8 @@ pub(crate) struct State {
     full_scans: u64,
     delta_scans: u64,
     delta_errors: u64,
+    last_path: PathBuf,
+    same_path_run: u64,
     loss_incidents: u64,
     queue_overflows: u64,
     active_delta: bool,
@@ -76,6 +79,12 @@ impl State {
             self.invalidate_scope(); // discard only behind an epoch fence + mandatory inventory
         }
         self.seq += 1;
+        if self.last_path == path {
+            self.same_path_run += 1;
+        } else {
+            self.last_path.clone_from(&path);
+            self.same_path_run = 1;
+        }
         self.rows.remove(&path); // old verdict is no longer queryable, even if the scanner is busy
         let event = Event {
             remove,
@@ -198,9 +207,22 @@ impl State {
         } else {
             "unknown"
         };
+        let stream = if self.terminal {
+            "offline"
+        } else if !self.armed {
+            "subscribing"
+        } else if self.need_full || self.full_busy {
+            "reconciling"
+        } else if !self.baseline {
+            "incomplete_inventory"
+        } else if !self.covered {
+            "replaying"
+        } else {
+            "current"
+        };
         let last = self.last.map_or_else(|| "null".into(), |c| c.to_string());
         format!(
-            r#"{{"schema":"odina-resident/v2","phase":"{phase}","watching":{},"completed":{},"last_exit":{last},"subscribed":{},"coverage":"{}","epoch":{},"full_scans":{},"delta_scans":{},"pending":{},"events":{},"loss_incidents":{},"queue_overflows":{},"delta_errors":{}}}"#,
+            r#"{{"schema":"odina-resident/v2","phase":"{phase}","watching":{},"completed":{},"last_exit":{last},"subscribed":{},"coverage":"{}","monitor":"{stream}","epoch":{},"full_scans":{},"delta_scans":{},"pending":{},"events":{},"loss_incidents":{},"queue_overflows":{},"delta_errors":{},"consecutive_same_path_events":{}}}"#,
             self.covered,
             self.completed,
             self.armed,
@@ -212,7 +234,8 @@ impl State {
             self.seq,
             self.loss_incidents,
             self.queue_overflows,
-            self.delta_errors
+            self.delta_errors,
+            self.same_path_run
         )
     }
     pub fn lookup(&self, path: &Path) -> String {
@@ -279,6 +302,13 @@ impl Shared {
     }
     pub fn loss(&self) {
         let mut s = self.state.lock().unwrap();
+        s.armed = false;
+        s.invalidate_scope();
+        self.wake.notify_one();
+    }
+    pub fn offline(&self) {
+        let mut s = self.state.lock().unwrap();
+        s.terminal = true;
         s.armed = false;
         s.invalidate_scope();
         self.wake.notify_one();

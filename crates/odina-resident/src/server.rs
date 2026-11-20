@@ -174,7 +174,7 @@ pub fn serve(name: &str, root: &Path, ready: impl FnOnce(), scans: impl Scans) -
         let shared = &shared;
         threads.spawn(|| {
             if let Err(e) = watch::run(root, single, shared, &cancel) {
-                shared.loss();
+                shared.offline();
                 eprintln!("odina: watcher offline; coverage unknown: {e}");
             }
         });
