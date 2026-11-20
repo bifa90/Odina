@@ -112,3 +112,30 @@ mod tests {
         }
     }
 }
+#[cfg(all(test, any(target_os = "linux", windows)))]
+mod scope_tests {
+    use super::*;
+    #[test]
+    fn directory_drive_and_single_file_stay_in_operator_scope() {
+        let (disk, root, file, neighbor) = if cfg!(windows) {
+            ("C:/", "C:/tree", "C:/tree/a", "C:/treehouse/a")
+        } else {
+            ("/", "/tree", "/tree/a", "/treehouse/a")
+        };
+        assert_eq!(
+            scope_key(Path::new(disk), false, disk.as_bytes()),
+            Some(PathBuf::new())
+        );
+        assert_eq!(
+            scope_key(Path::new(root), false, file.as_bytes()).as_deref(),
+            Some(Path::new("a"))
+        );
+        assert_eq!(
+            scope_key(Path::new(file), true, file.as_bytes()).as_deref(),
+            Some(Path::new("a"))
+        );
+        assert!(scope_key(Path::new(root), false, disk.as_bytes()).is_none());
+        assert!(scope_key(Path::new(root), false, neighbor.as_bytes()).is_none());
+        assert!(scope_key(Path::new(file), true, root.as_bytes()).is_none());
+    }
+}

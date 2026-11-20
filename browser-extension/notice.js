@@ -33,6 +33,8 @@
   deep.onclick = async e => {
     if (!e.isTrusted || !offer.ticket || deep.disabled) return;
     deep.disabled = true;
+    deep.hidden = true;
+    dismiss.textContent = t('close'); // closing does not cancel a consented read
     const {url, ticket} = offer;
     offer = {}; // consume once, before any await; nothing persisted by the worker
     $('state').textContent = t('working');

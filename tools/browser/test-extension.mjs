@@ -38,7 +38,7 @@ test('exact extension IDs, context menu + native messaging only; no page or netw
 test('single item; remote clicks, including remote frames, never reach the host',async()=>{
   const h=harness();await h.api.runtime.onInstalled.run();await h.api.runtime.onStartup.run();assert.equal(h.menus.length,1);
   assert.equal(h.menus[0].title,'فحص بـ Odina');assert.deepEqual(Array.from(h.menus[0].contexts),['link','page']);
-  for(const [page,link,extra] of [[local,'https://example.invalid'],['https://example.invalid',local],[local,local,{frameUrl:'https://example.invalid'}],[local,'file://server.invalid/share'],[local,'file:////host/share'],[local,'file:///a?secret']]) assert.equal(await h.click(page,link,extra),'unknown');
+  for(const [page,link,extra] of [[local,'https://example.invalid'],['https://example.invalid',local],[local,local,{frameUrl:'https://example.invalid'}],[local,local,{frameId:1}],[local,'file://server.invalid/share'],[local,'file:////host/share'],[local,'file:///a?secret']]) assert.equal(await h.click(page,link,extra),'unknown');
   assert.equal(h.frames.length,0);assert.equal(h.windows.length,0);
   assert.equal(await h.click(local),'clean');h.answer({result:'unknown'});assert.equal(await h.click(local,local),'unknown');
   assert.equal(h.frames.length,2);assert.equal(h.windows.length,0);

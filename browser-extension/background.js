@@ -21,7 +21,8 @@ function isLocal(url) {
 
 // Also the entry point timed by the browser harness. No navigation/download listener.
 async function inspectClick(info) {
-  if (info.menuItemId !== menu || !isLocal(info.pageUrl) || (info.frameUrl && !isLocal(info.frameUrl))) return 'unknown';
+  if (info.menuItemId !== menu || !isLocal(info.pageUrl)) return 'unknown';
+  if ((info.frameId > 0 || info.frameUrl) && !isLocal(info.frameUrl)) return 'unknown';
   const url = info.linkUrl ?? info.frameUrl ?? info.pageUrl;
   if (!isLocal(url)) return 'unknown'; // never forward HTTP(S), even to the native host
   let id;

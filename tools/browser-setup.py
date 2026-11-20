@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
 """Offline, per-user packaging/registration. No elevation, network, policy or browser preference changes."""
+
 import argparse
 import json
 import os
@@ -13,8 +14,12 @@ import sys
 ROOT = Path(__file__).resolve().parent.parent
 EXT = ROOT / 'browser-extension'
 NAME = 'org.odina.context'
-VENDORS = {'chrome': ('google-chrome', r'Google\Chrome'), 'chromium': ('chromium', 'Chromium'),
-           'edge': ('microsoft-edge', r'Microsoft\Edge'), 'firefox': ('mozilla', 'Mozilla')}
+VENDORS = {
+    'chrome': ('google-chrome', r'Google\Chrome'),
+    'chromium': ('chromium', 'Chromium'),
+    'edge': ('microsoft-edge', r'Microsoft\Edge'),
+    'firefox': ('mozilla', 'Mozilla'),
+}
 WIN = sys.platform == 'win32'
 
 
@@ -35,7 +40,8 @@ def new_file(path, text, mode=0o600):
     path.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
     # Never truncate an existing manifest or follow a destination link.
     with os.fdopen(
-            os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, mode), 'w', encoding='utf-8', newline='\n') as f:
+        os.open(path, os.O_CREAT | os.O_EXCL | os.O_WRONLY, mode), 'w', encoding='utf-8', newline='\n'
+    ) as f:
         f.write(text)
     return path
 
@@ -53,7 +59,9 @@ def pack(browser, dest):
 
 def location(browser):
     if WIN:
-        return Path(os.environ['LOCALAPPDATA']) / 'Odina' / 'NativeMessagingHosts' / browser / (NAME + '.json')
+        return (
+            Path(os.environ['LOCALAPPDATA']) / 'Odina' / 'NativeMessagingHosts' / browser / (NAME + '.json')
+        )
     if browser == 'firefox':
         return Path.home() / '.mozilla/native-messaging-hosts' / (NAME + '.json')
     config = Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config')
@@ -66,6 +74,7 @@ def reg_key(browser):
 
 def reg_get(key, name=''):
     import winreg as w
+
     try:
         with w.OpenKey(w.HKEY_CURRENT_USER, key) as k:
             return w.QueryValueEx(k, name)[0]
@@ -75,12 +84,14 @@ def reg_get(key, name=''):
 
 def reg_set(key, name, value):
     import winreg as w
+
     with w.CreateKey(w.HKEY_CURRENT_USER, key) as k:
         w.SetValueEx(k, name, 0, w.REG_SZ, value)
 
 
 def reg_delete(key):
     import winreg as w
+
     w.DeleteKey(w.HKEY_CURRENT_USER, key)
 
 
@@ -93,7 +104,9 @@ def binary_path(raw):
 
 def register(browser, binary=None):
     dest = location(browser)
-    template = json.loads((EXT / 'hosts' / ('firefox.json' if browser == 'firefox' else 'chromium.json')).read_text())
+    template = json.loads(
+        (EXT / 'hosts' / ('firefox.json' if browser == 'firefox' else 'chromium.json')).read_text()
+    )
     key = reg_key(browser)
     if binary is not None:
         if WIN and reg_get(key) is not None:
