@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
 """External Linux/Windows observer. Run with a release instrumented binary, psutil, and a stable test corpus.
-No attachment to an existing process; no writes inside the corpus. No IPC during idle sampling.
+Owns its child. No IPC during idle. Only --probe-changes writes a disposable benign file in a new private test directory inside the root.
 """
 import argparse
+from contextlib import contextmanager
 import hashlib
 import json
 import math
@@ -77,9 +78,144 @@ def idle(p, seconds):
             "read_ops_delta": end[2] - begin[2], "write_ops_delta": end[3] - begin[3],
             "samples": samples, "max_sample_gap_seconds": gap,
             "window": window,
-            "idle_cpu_this_window": ("pass" if cpu == 0 else "fail") if qualified else "inconclusive",
+            "idle_cpu_this_window": ("pass" if 100 * cpu / wall < 0.1 else "fail") if qualified else "inconclusive",
             "memory_this_workload": ("pass" if end[4] < 50_000_000 else "fail")
             if qualified and end[4] is not None else "inconclusive"}
+
+
+def percentiles(values):
+    values = sorted(values)
+    return {k: values[math.ceil(q * len(values)) - 1] if values else None
+            for k, q in (("p50", .5), ("p95", .95), ("p99", .99), ("max", 1))}
+
+
+@contextmanager
+def probe_dir(root, enabled):
+    if not enabled:
+        yield None
+        return
+    if not root.is_dir():
+        raise ValueError("--probe-changes needs a writable directory, not a file")
+    # Install the empty directory before subscription; never pick/modify an owner's file.
+    d = Path(tempfile.mkdtemp(prefix="odina-probe-", dir=root))
+    try:
+        yield d
+    finally:
+        d.rmdir()  # never recursively remove unexpected entries
+
+
+def wait_ready(child, status, timeout=3600):
+    by = time.monotonic() + timeout
+    while child.poll() is None:
+        try:
+            s = status()
+        except ValueError:  # binding has not finished yet
+            s = None
+        if s and s["watching"] and s["phase"] == "idle":
+            return s
+        if s and not s["subscribed"] and s["loss_incidents"]:
+            raise ValueError("native subscription unavailable; coverage unknown")
+        if time.monotonic() >= by:
+            raise ValueError("no current, quiescent inventory before deadline")
+        time.sleep(.05)
+    raise ValueError("owned resident exited before measurement")
+
+
+# Python 3.11+: QPC on Windows, CLOCK_MONOTONIC on Linux, shared with the native publisher.
+clock = time.monotonic_ns
+
+
+def witnessed(get, start, state, size, prior_gen, timeout_ns):
+    deadline = start + timeout_ns
+    while True:
+        r = get()
+        now = clock()
+        if (r.get("origin") == "event" and r["state"] == state and r["bytes"] == size
+                and r["verdict"] == ("clean" if state == "complete" else None)
+                and r["generation"] > prior_gen and r["received_ns"] >= start):
+            a, b, c = (r[k] for k in ("received_ns", "invalidated_ns", "published_ns"))
+            if not start <= a <= b <= c <= now:
+                raise ValueError("timestamp order/clock domain mismatch; no latency claim")
+            if c <= deadline:
+                return r
+        if now >= deadline:
+            return None
+        time.sleep(.001)  # retrieval only; not included in the publisher's timestamp
+
+
+def event_summary(rows):
+    seen = [r for r in rows if r["published_ns"] is not None]
+    def span(end, begin):
+        return percentiles([(r[end] - r[begin]) / 1e6 for r in seen])
+    return {"attempted": len(rows), "witnessed": len(seen), "missed_by_deadline": len(rows) - len(seen),
+            "unwitnessed_percent": 100 * (len(rows) - len(seen)) / len(rows),
+            "at_or_above_10_ms": sum(r["published_ns"] - r["t0_ns"] >= 10_000_000 for r in seen),
+            "mutation_to_publication_ms": span("published_ns", "t0_ns"),
+            "mutation_to_receipt_ms": span("received_ns", "t0_ns"),
+            "receipt_to_invalidation_ms": span("invalidated_ns", "received_ns"),
+            "invalidation_to_publication_ms": span("published_ns", "invalidated_ns")}
+
+
+def events(binary, name, root, d, count, timeout):
+    # One logical mutation at a time. Distinct lengths + generation + T1>=T0 + expected
+    # verdict prevent a late receipt, an intermediate empty CREATE, or old row from passing.
+    p = d / "probe.dat"
+    key = p.relative_to(root)
+    def get():
+        return json.loads(calls(binary, "verdict", key, "--service", name)[1])
+    rows = {k: [] for k in ("create", "modify", "delete")}
+    gen = 0
+    owned = False
+    try:
+        for _ in range(count):
+            for kind, size in (("create", 64), ("modify", 65), ("delete", 0)):
+                if kind == "create":
+                    start = clock()  # conservative: immediately BEFORE the mutating syscall
+                    with p.open("xb", buffering=0) as handle:
+                        owned = True
+                        if handle.write(b"A" * 64) != 64:
+                            raise OSError("short probe write")
+                elif kind == "modify":
+                    with p.open("ab", buffering=0) as handle:
+                        start = clock()
+                        if handle.write(b"B") != 1:
+                            raise OSError("short append")
+                else:
+                    start = clock()
+                    p.unlink()
+                    owned = False
+                returned = clock()  # retain syscall/close interval; never start timer after publication
+                r = witnessed(get, start, "deleted" if kind == "delete" else "complete", size, gen, int(timeout * 1e9))
+                fields = ("epoch", "generation", "received_ns", "invalidated_ns", "published_ns")
+                rows[kind].append({"t0_ns": start, "mutation_return_ns": returned,
+                                   **{k: r[k] if r else None for k in fields}})
+                if r:
+                    gen = r["generation"]
+    finally:
+        if owned:
+            p.unlink(missing_ok=True)
+    return {k: event_summary(v) for k, v in rows.items()}, rows
+
+
+def gates(result):
+    idle_windows = result["idle_windows"]
+    tags = [w[k] for w in idle_windows for k in ("idle_cpu_this_window", "memory_this_workload")]
+    ig = "fail" if "fail" in tags else "pass" if len(idle_windows) >= 3 and all(t == "pass" for t in tags) else "inconclusive"
+    eg = "not_measured"
+    if result.get("events"):
+        groups = result["events"].values()
+        if (not result["isolated_event_window"] or any(v["missed_by_deadline"] or v["at_or_above_10_ms"] for v in groups)):
+            eg = "fail"
+        elif min(v["attempted"] for v in groups) >= 1000:
+            eg = "pass"
+        else:
+            eg = "inconclusive"
+    peak = result["process_high_water_after_workload_bytes"]
+    total = "fail" if "fail" in (eg, ig) or (peak is not None and peak >= 50_000_000) else (
+        "pass" if eg == ig == "pass" and peak is not None else "inconclusive")
+    if not result["corpus_matches_expected"]:
+        total = "inconclusive"
+    return {"idle_three_windows": ig, "strict_response": eg, "workload": total}
 
 
 def measure(args, psutil):
@@ -89,12 +225,12 @@ def measure(args, psutil):
             or not (root.is_dir() or root.is_file())):
         raise ValueError("output must be a NEW file outside a regular scan target")
     name = "measure-" + secrets.token_hex(8)
-    result = {"schema": "odina-resident-lab/v1", "platform": sys.platform, "observer_psutil": psutil.__version__,
-              "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
+    result = {"schema": "odina-resident-lab/v2", "label": args.label, "platform": sys.platform,
+              "observer_psutil": psutil.__version__, "binary_sha256": hashlib.sha256(binary.read_bytes()).hexdigest(),
               "linux_clock_ticks_per_second": os.sysconf("SC_CLK_TCK") if sys.platform == "linux" else None,
-              "event_to_invalidation_ms": None, "event_to_verdict_ms": None,
-              "event_latency_status": "unmeasured: no filesystem watcher in skeleton"}
-    with tempfile.TemporaryDirectory(dir=parent) as tmp:
+              "clock": time.get_clock_info("monotonic").implementation, "event_deadline_seconds": args.event_timeout,
+              "expected_files": args.expect_files, "expected_bytes": args.expect_bytes, "idle_windows": []}
+    with tempfile.TemporaryDirectory(dir=parent) as tmp, probe_dir(root, args.probe_changes) as d:
         tmp = Path(tmp)
         def scan(tag, remote):
             f = tmp / (tag + ".json")
@@ -103,53 +239,54 @@ def measure(args, psutil):
             return signature(json.loads(f.read_text(encoding="utf-8")), rc)
         base = scan("reference", False)
         with subprocess.Popen([str(binary), "serve", str(root), "--service", name, "--cache-dir", str(tmp / "index")],
-                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL) as child:
+                              stdout=subprocess.DEVNULL) as child:
             def status():
                 return json.loads(calls(binary, "status", "--service", name)[1])
             try:
-                ready_by = time.monotonic() + 15
-                while child.poll() is None:
-                    try:
-                        if status()["phase"] == "idle":
-                            break
-                    except ValueError:
-                        pass
-                    if time.monotonic() >= ready_by:
-                        raise ValueError("resident did not become ready")
-                    time.sleep(0.05)  # startup only
-                if child.poll() is not None:
-                    raise ValueError("resident exited before measurement")
-                for tag in ("initial", "repeat"):
+                wait_ready(child, status)
+                for tag in ("first", "repeat"):
                     if base != scan(tag, True):
                         raise ValueError("counts, reports or exit code changed; rejecting sample")
+                    wait_ready(child, status)
                 result["counts_and_alerts_match"] = True
                 result["files"], result["bytes"] = base[0]["files"], base[0]["bytes"]
-                before = status()
-                if before["phase"] != "idle" or before["completed"] != 2 or before["watching"]:
-                    raise ValueError("unexpected job state for this skeleton")
-                result["idle"] = idle(psutil.Process(child.pid), args.idle_seconds)
-                if status() != before:
-                    raise ValueError("resident state changed during idle window")
+                result["corpus_matches_expected"] = (args.expect_files in (None, result["files"]) and
+                                                     args.expect_bytes in (None, result["bytes"]))
+                proc = psutil.Process(child.pid)
+                for _ in range(args.windows):
+                    before = wait_ready(child, status)
+                    w = idle(proc, args.idle_seconds)  # zero IPC inside this interval
+                    if status() != before:
+                        w.update(window="activity_during_idle", idle_cpu_this_window="inconclusive", memory_this_workload="inconclusive")
+                    result["idle_windows"].append(w)
+                before = wait_ready(child, status)
                 rtts = []
                 for _ in range(30):
-                    t = time.perf_counter_ns()
-                    if status() != before:
-                        raise ValueError("unexpected status")
-                    rtts.append((time.perf_counter_ns() - t) / 1_000_000)
-                rtts.sort()
-                result["status_cli_round_trip_ms"] = {k: rtts[math.ceil(q * len(rtts)) - 1] for
-                                                      k, q in (("p50", .50), ("p95", .95), ("p99", .99), ("max", 1))}
+                    t = clock()
+                    status()
+                    rtts.append((clock() - t) / 1e6)
+                result["status_cli_round_trip_ms"] = percentiles(rtts)  # diagnostic, never a response gate
+                if d:
+                    before = wait_ready(child, status)
+                    groups, raw = events(binary, name, root, d, args.events_per_class, args.event_timeout)
+                    after = wait_ready(child, status)
+                    result.update(events=groups, samples=raw, before_events=before, after_events=after,
+                                  isolated_event_window=(before["full_scans"] == after["full_scans"] and
+                                                         before["loss_incidents"] == after["loss_incidents"]))
+                result["process_high_water_after_workload_bytes"] = high_water(child.pid, proc.memory_info())
                 calls(binary, "stop", "--service", name)
                 if child.wait(timeout=10) != 0:
                     raise ValueError("unclean service shutdown")
             finally:
                 if child.poll() is None:
-                    child.kill()  # only the child this tool created
+                    child.kill()  # only a child we created, never an existing instance
                     child.wait()
+    result["gates"] = gates(result)
     with out.open("x", encoding="utf-8") as f:
         json.dump(result, f, indent=2, allow_nan=False)
         f.write("\n")
-    print(json.dumps(result, indent=2))
+    print(json.dumps({"out": str(out), "files": result["files"], "events": result.get("events"), "gates": result["gates"]}, indent=2))
+    return result
 
 
 def main():
@@ -157,16 +294,24 @@ def main():
     p.add_argument("--binary", required=True, type=Path)
     p.add_argument("--root", required=True, type=Path)
     p.add_argument("--out", required=True, type=Path)
+    p.add_argument("--label", default="local")
+    p.add_argument("--expect-files", type=int)
+    p.add_argument("--expect-bytes", type=int)
     p.add_argument("--idle-seconds", type=int, default=600)
+    p.add_argument("--windows", type=int, default=3)
+    p.add_argument("--probe-changes", action="store_true", help="write only our disposable benign probe inside root")
+    p.add_argument("--events-per-class", type=int, default=1000)
+    p.add_argument("--event-timeout", type=float, default=2, help="deadline per logical mutation (seconds)")
     args = p.parse_args()
-    if args.idle_seconds < 1 or sys.platform not in ("linux", "win32"):
-        p.error("need Linux or Windows and at least one second")
+    if (min(args.idle_seconds, args.windows, args.events_per_class) < 1 or not 0 < args.event_timeout <= 60 or
+            sys.platform not in ("linux", "win32") or sys.version_info < (3, 11)):
+        p.error("need Python 3.11+, Linux/Windows, positive counts and a deadline <= 60 seconds")
     try:
         import psutil
     except ImportError:
         p.error("install psutil==7.2.2 in the observer's Python environment (not in the service)")
     try:
-        measure(args, psutil)
+        measure(args, psutil)  # 0 = measurement delivered (including failed gates), not acceptance
     except (OSError, ValueError, KeyError, psutil.Error, subprocess.TimeoutExpired) as e:
         p.exit(1, f"measurement stopped: {e}\n")
 

@@ -6,7 +6,10 @@ on:
     paths:
       - 'crates/odina-resident/**'
       - 'crates/odina-cache/**'
-      - 'crates/odina-cli/src/resident.rs'
+      - 'crates/odina-cli/**'
+      - 'crates/odina-core/**'
+      - 'tools/perf/test-resident-gap.py'
+      - 'tools/perf/test_verify_resident.py'
       - 'tools/perf/verify-resident.py'
       - '.github/workflows/resident-lab.yml'
   workflow_dispatch:
@@ -27,7 +30,10 @@ jobs:
         with:
           python-version: '3.12'
       - name: G1 and resident integration in release mode
-        run: cargo test --locked --release -p odina-cli --features instrument --test g1 --test resident
+        shell: bash
+        run: |
+          cargo test --locked --release -p odina-resident
+          cargo test --locked --release -p odina-cli --features instrument --test g1 --test resident 2>&1 | tee native.log
       - name: Exercise external observer, not a benchmark acceptance run
         shell: bash
         env:
@@ -36,13 +42,25 @@ jobs:
           python -m pip install --only-binary=:all: psutil==7.2.2
           bin=target/release/odina
           if [[ "$RUNNER_OS" == Windows ]]; then bin+=.exe; fi
-          python tools/perf/verify-resident.py --binary "$bin" --root tests/fixtures/safe --out smoke.json --idle-seconds 3
+          python -m unittest discover -s tools/perf -p 'test_verify_resident.py'
+          python tools/perf/test-resident-gap.py --binary "$bin"
+          python tools/perf/verify-resident.py --binary "$bin" --root tests/fixtures/safe --out smoke.json --idle-seconds 3 --windows 1 --probe-changes --events-per-class 12 --expect-files 20
           python - <<'PY'
           import json
           from pathlib import Path
           j = json.loads(Path('smoke.json').read_text())
           assert j['counts_and_alerts_match'] and j['files'] == 20
-          assert j['idle']['samples'] >= 2 and j['idle']['peak_sampled_rss_bytes'] > 0
-          assert j['idle']['window'] != 'ten_minutes_or_longer'
-          assert j['event_to_verdict_ms'] is None and j['event_to_invalidation_ms'] is None
+          w, = j['idle_windows']
+          assert w['samples'] >= 2 and w['peak_sampled_rss_bytes'] > 0 and w['window'] != 'ten_minutes_or_longer'
+          assert j['isolated_event_window'] and j['after_events']['watching']
+          assert j['before_events']['full_scans'] == j['after_events']['full_scans'] == 3
+          assert all(g['witnessed'] == 12 and g['missed_by_deadline'] == 0 for g in j['events'].values())
+          assert j['gates']['workload'] != 'pass'  # no hosted-runner latency/idle acceptance gate
           PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resident-smoke-${{ matrix.os }}
+          path: |
+            smoke.json
+            native.log
