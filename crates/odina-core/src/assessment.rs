@@ -16,6 +16,8 @@ pub struct Assessment {
     pub path_score: f32,
 }
 
+/// In this catalog only V5 consumes content. If another indicator needs
+/// bytes, request its evidence in the file scanner before any early return.
 pub fn assess(path: &Path, hashes: FileHashes) -> Assessment {
     let file_name = path
         .file_name()

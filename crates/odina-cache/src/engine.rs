@@ -11,20 +11,12 @@ use std::{
 
 /// Completed decision-stream work, including completed passes retried due to
 /// concurrent writes. No names, identities, actual disk-I/O or CPU estimates.
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Work {
-    hits: u64,
-    negatives: u64,
-    sha: u64,
-    bytes: u64,
-}
-impl Work {
-    pub fn json(&self) -> String {
-        format!(
-            "{{\"cache_hits\":{},\"bloom_negatives\":{},\"sha_files\":{},\"streamed_bytes\":{}}}",
-            self.hits, self.negatives, self.sha, self.bytes
-        )
-    }
+    pub cache_hits: u64,
+    pub bloom_negatives: u64,
+    pub sha_files: u64,
+    pub streamed_bytes: u64,
 }
 
 fn open_regular(path: &Path) -> io::Result<File> {
@@ -77,18 +69,18 @@ pub(super) fn scan(
                 }
                 preliminary.hashes.size = s.len;
                 c.record(k, preliminary.score.verdict, None);
-                work.hits += 1;
+                work.cache_hits += 1;
                 return Ok((preliminary, file));
             }
         }
         let (hashes, bytes) =
             filter.check_reader(&mut file, FULL_DIGEST_CAP, preliminary.score.interrupts())?;
-        work.bytes += bytes;
+        work.streamed_bytes += bytes;
         let report = if let Some(hashes) = hashes {
-            work.sha += 1;
+            work.sha_files += 1;
             assess(path, hashes)
         } else {
-            work.negatives += 1;
+            work.bloom_negatives += 1;
             preliminary.hashes.size = bytes;
             preliminary
         };

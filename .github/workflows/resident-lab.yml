@@ -1,0 +1,48 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+name: Resident observer
+on:
+  pull_request:
+    paths:
+      - 'crates/odina-resident/**'
+      - 'crates/odina-cache/**'
+      - 'crates/odina-cli/src/resident.rs'
+      - 'tools/perf/verify-resident.py'
+      - '.github/workflows/resident-lab.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  observe:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: G1 and resident integration in release mode
+        run: cargo test --locked --release -p odina-cli --features instrument --test g1 --test resident
+      - name: Exercise external observer, not a benchmark acceptance run
+        shell: bash
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          python -m pip install --only-binary=:all: psutil==7.2.2
+          bin=target/release/odina
+          if [[ "$RUNNER_OS" == Windows ]]; then bin+=.exe; fi
+          python tools/perf/verify-resident.py --binary "$bin" --root tests/fixtures/safe --out smoke.json --idle-seconds 3
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          j = json.loads(Path('smoke.json').read_text())
+          assert j['counts_and_alerts_match'] and j['files'] == 20
+          assert j['idle']['samples'] >= 2 and j['idle']['peak_sampled_rss_bytes'] > 0
+          assert j['idle']['window'] != 'ten_minutes_or_longer'
+          assert j['event_to_verdict_ms'] is None and j['event_to_invalidation_ms'] is None
+          PY

@@ -495,7 +495,11 @@ pub(super) fn run_pass(
     );
     perf.fill_from_scan(stats, &idle, Some(&after));
 
-    let json = assemble(&perf.to_json(), &exported, &work.json());
+    let work_json = format!(
+        "{{\"cache_hits\":{},\"bloom_negatives\":{},\"sha_files\":{},\"streamed_bytes\":{}}}",
+        work.cache_hits, work.bloom_negatives, work.sha_files, work.streamed_bytes
+    );
+    let json = assemble(&perf.to_json(), &exported, &work_json);
     println!("الفحص: {} ملفًا · {} بايت", stats.files, stats.bytes);
     println!("النتائج: {}", perf.summary());
     println!(
