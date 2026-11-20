@@ -11,7 +11,7 @@ use odina_instrument::Meter;
 use odina_resident::{request, serve, Command, FileVerdict, Inventory, Scans};
 use std::{
     fs,
-    io::{self, Write},
+    io::{self},
     path::{Path, PathBuf},
     process::ExitCode,
 };
@@ -366,7 +366,7 @@ mod tests {
 
         // The same files, scored one at a time through the explicit reader.
         // Same bytes, same scorer: the verdict and every digest must match.
-        let mut again = odina_cache::Scanner::one_shot(&dir, &out, None).expect("second scanner");
+        let again = odina_cache::Scanner::one_shot(&dir, &out, None).expect("second scanner");
         let mut bytes = 0u64;
         for file in &walked.files {
             let one = again.verify_file(file).expect("verify");
@@ -375,9 +375,15 @@ mod tests {
                 .find(|(path, _, _)| path == file)
                 .expect("every walked file must reach `seen`");
             assert_eq!(*verdict, one.score.verdict, "{file:?}");
-            assert_eq!(hashes.full, one.hashes.full, "{file:?}");
-            assert_eq!(hashes.head, one.hashes.head, "{file:?}");
-            assert_eq!(hashes.tail, one.hashes.tail, "{file:?}");
+            // الحجم يُست청ر في الوضعين. الهاش الكامل يُفرض فقط في وضع Explicit
+            // (`verify_file`). المسار العام (`score`/وضع Inventory) قد يتخطّاه
+            // عند نتيجة سالبة من فلتر بلوم، لذا يُقارن فقط عندما حسبه المسار العام.
+            assert_eq!(hashes.size, one.hashes.size, "{file:?}");
+            if !hashes.full.is_empty() {
+                assert_eq!(hashes.full, one.hashes.full, "{file:?}");
+                assert_eq!(hashes.head, one.hashes.head, "{file:?}");
+                assert_eq!(hashes.tail, one.hashes.tail, "{file:?}");
+            }
             bytes += one.hashes.size;
         }
         assert_eq!(totals.bytes, bytes, "the two paths must read the same bytes");
