@@ -143,6 +143,13 @@ def browser_lab(base, urls, host, n):
                 if r.url.startswith(('https:', 'http:', 'ws:', 'wss:'))
                 else None,
             )
+
+            def watch_sockets(page):
+                page.on('websocket', lambda _: net.append('websocket'))
+
+            ctx.on('page', watch_sockets)
+            for current_page in ctx.pages:
+                watch_sockets(current_page)
             sw = (
                 ctx.service_workers[0]
                 if ctx.service_workers
@@ -182,20 +189,23 @@ def browser_lab(base, urls, host, n):
             sw.evaluate(
                 """() => {chrome.runtime.sendNativeMessage=async()=>({result:'suspicious',ticket:'abcdef0123456789'})}"""
             )
+            calls = []
+            ctx.expose_binding('witnessOp', lambda _, op: calls.append(op))
+            ctx.add_init_script("""if (location.protocol==='chrome-extension:' && location.pathname==='/notice.html') {
+              chrome.runtime.sendNativeMessage=async(_,m)=>{await witnessOp(m.op);return {result:'threat'};};
+            }""")
             for consent in (False, True):
                 with ctx.expect_page(timeout=5000) as popup:
                     assert sw.evaluate(script, [local, urls['clean']])[0] == 'suspicious'
                 p = popup.value
                 expect(p.locator('#deep')).to_be_visible()
                 expect(p.locator('#dismiss')).to_be_focused()
-                p.evaluate("""() => {globalThis.calls=0; chrome.runtime.sendNativeMessage=async(_,m)=>{
-                  if(m.op!=='deep')throw Error(); calls++; return {result:'threat'}; };}""")
-                assert p.evaluate('calls') == 0
+                assert not calls
                 if consent:
                     p.locator('#deep').click()  # trusted browser input, no direct .onclick() call
                     expect(p.locator('#quarantine')).to_be_visible()
                     expect(p.locator('#quarantine')).to_be_disabled()
-                    assert p.evaluate('calls') == 1
+                    assert calls == ['deep']
                 p.locator('#dismiss').click()
             assert not net, 'unexpected browser request'
             return {
@@ -327,6 +337,19 @@ def main():
         p.error('--deny-network requires Linux libseccomp')
     with tempfile.TemporaryDirectory(prefix='odina-browser-lab-') as scratch:
         result = witness(args, Path(scratch).resolve())
+    gates = {
+        g + '_quick_lt100ms': ('pass' if result[g]['clean']['at_least_100ms'] == 0 else 'fail')
+        if g in result
+        else 'not_measured'
+        for g in ['native', 'browser']
+    }
+    whole = result.get('firefox', {}).get('samples', [])
+    gates['firefox_menu_lt100ms'] = (
+        ('pass' if all(s['dispatch_to_reply_ms'] < 100 for s in whole) else 'fail')
+        if whole
+        else 'not_measured'
+    )
+    result['gates'] = gates
     with args.out.open('x', encoding='utf-8') as f:
         json.dump(result, f, indent=2)
         f.write('\n')
@@ -344,7 +367,10 @@ def main():
             + str(result['firefox'])
         )
     # This is a strict gate for THIS sample set; don't drop scheduler outliers.
-    return int(any(result[g]['clean']['at_least_100ms'] for g in ['browser', 'native'] if g in result))
+    print('Measured gates:', gates)
+    if any(result[g]['clean']['at_least_100ms'] for g in ['browser', 'native'] if g in result):
+        return 1
+    return 3 if gates['firefox_menu_lt100ms'] == 'fail' else 0
 
 
 if __name__ == '__main__':

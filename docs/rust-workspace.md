@@ -9,7 +9,7 @@
 ## 1. ما بُني الآن — وحدوده
 
 ```
-Cargo.toml                 # مساحة العمل: ستة أعضاء
+Cargo.toml                 # مساحة العمل: سبعة أعضاء
 crates/odina-core/
   Cargo.toml               # تبعية واحدة: sha2
   src/lib.rs               # السطح العام
@@ -21,6 +21,7 @@ crates/odina-core/
   src/proactive.rs         # الأنشطة التسعة، تفضيلات المستخدم، ومهام الاحتواء (D46)
   tests/eicar.rs           # المتجه المعروف + مسار القرار كاملًا
 crates/odina-cache/          # Scanner والفهرس ووسوم المقبض؛ لا CLI
+crates/odina-browser-host/   # جسر رسائل المتصفح المحدودة؛ لا تصفح أو تجزئة داخل المضيف
 crates/odina-resident/       # عامل مسح واحد ومراقب أصلي وIPC محلي (Linux/Windows)
 crates/odina-cli/
   src/main.rs              # `odina scan <path> [--json] [-r]` — بوابة G1

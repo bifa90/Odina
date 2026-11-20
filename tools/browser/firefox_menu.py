@@ -31,13 +31,18 @@ def observe(base, urls, host, setup):
     listener = 'api.contextMenus.onClicked.addListener(inspectClick);'
     source = bg.read_text(encoding='utf-8')
     assert source.count(listener) == 1
+    received = "const response = await api.runtime.sendNativeMessage(host, {op: 'inspect', url});"
+    assert source.count(received) == 1
+    source = source.replace(
+        received, received + ' globalThis.labNative=performance.timeOrigin+performance.now();'
+    )
     bg.write_text(
         source.replace(
             listener,
             """const witness=new BroadcastChannel('lab-menu-clock');
       api.contextMenus.onClicked.addListener(async info=>{
-        const entered=performance.timeOrigin+performance.now(); const kind=await inspectClick(info);
-        witness.postMessage({kind,entered,done:performance.timeOrigin+performance.now()});
+        globalThis.labNative=null; const entered=performance.timeOrigin+performance.now(); const kind=await inspectClick(info);
+        witness.postMessage({kind,entered,native:globalThis.labNative,done:performance.timeOrigin+performance.now()});
       });""",
         ),
         encoding='utf-8',
@@ -52,6 +57,7 @@ def observe(base, urls, host, setup):
         for p in ext.rglob('*'):
             if p.is_file():
                 z.write(p, p.relative_to(ext))
+    urls = {**urls, 'remote': 'https://example.invalid/never-opened'}
     index = base / 'links.html'
     index.write_text(
         ' '.join(f'<a id="{k}" href="{html.escape(v, quote=True)}">{k}</a>' for k, v in urls.items()),
@@ -92,6 +98,7 @@ def observe(base, urls, host, setup):
             ('clean', 'clean'),
             ('clean', 'clean'),
             ('missing', 'unknown'),
+            ('remote', 'unknown'),
             ('dir', 'threat'),
         ]:
             driver.execute_script("document.querySelector('output').textContent=''")
@@ -116,9 +123,17 @@ def observe(base, urls, host, setup):
             )
             assert receipt['kind'] == expected, (case, receipt['kind'])
             assert chosen <= receipt['entered'] <= receipt['done'], 'incomparable browser clocks'
+            native = receipt['native']
+            assert (native is None) == (case == 'remote')
+            if native is not None:
+                assert receipt['entered'] <= native <= receipt['done']
             records.append(
                 {
                     'case': case,
+                    'before_listener_ms': round(receipt['entered'] - chosen, 3),
+                    'listener_to_native_ms': None
+                    if native is None
+                    else round(native - receipt['entered'], 3),
                     'result': expected,
                     'dispatch_to_reply_ms': round(receipt['done'] - chosen, 3),
                     'listener_to_reply_ms': round(receipt['done'] - receipt['entered'], 3),

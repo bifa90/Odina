@@ -43,7 +43,7 @@ impl State {
         if !self.covered {
             return UNKNOWN.into();
         }
-        let (file, row) = if let Some(r) = self.rows.get(key) {
+        let (file, row) = if let Some(r) = self.rows.get(key).filter(|r| r.value.is_some()) {
             match r.value.map(|v| v.band) {
                 Some("confirmed") => return r#"{"result":"threat"}"#.into(),
                 Some("clean") => return r#"{"result":"clean"}"#.into(),
@@ -149,6 +149,14 @@ mod tests {
             ("b/a", "suspicious"),
         ] {
             s.seed(0, Path::new(p), FileVerdict { band, bytes: 1 });
+        }
+        // A witnessed deletion of a former FILE named b is not evidence about
+        // a subsequently created directory b/ containing current positive rows.
+        s.change("b".into(), true, 0);
+        if let Some(super::super::Task::One(epoch, k, e)) = s.next() {
+            s.publish(epoch, &k, e, None);
+        } else {
+            panic!("deletion not queued");
         }
         assert_eq!(s.inspect(Path::new("a")), UNKNOWN);
         assert_eq!(s.inspect(Path::new("a/f")), r#"{"result":"clean"}"#);

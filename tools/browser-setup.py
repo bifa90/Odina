@@ -52,6 +52,8 @@ def pack(browser, dest):
         shutil.copyfile(EXT / f, dest / f)
     source = 'manifest.firefox.json' if browser == 'firefox' else 'manifest.json'
     shutil.copyfile(EXT / source, dest / 'manifest.json')
+    for f in ('LICENSE', 'NOTICE'):
+        shutil.copyfile(ROOT / f, dest / f)
     for locale, messages in catalogs():
         new_file(dest / '_locales' / locale / 'messages.json', json_text(messages))
     return dest
@@ -136,7 +138,7 @@ def register(browser, binary=None):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     subs = p.add_subparsers(dest='action', required=True)
-    for action in ('pack', 'install', 'uninstall', 'check-locales'):
+    for action in ('pack', 'install', 'uninstall', 'check-locales', 'sync-locales'):
         s = subs.add_parser(action)
         if action in ('pack', 'install', 'uninstall'):
             s.add_argument('--browser', choices=VENDORS, required=True)
@@ -148,10 +150,14 @@ def main():
     try:
         if args.action == 'pack':
             print(pack(args.browser, args.out))
-        elif args.action == 'check-locales':
+        elif args.action in ('sync-locales', 'check-locales'):
             for locale, messages in catalogs():
-                p = EXT / '_locales' / locale / 'messages.json'
-                if p.read_text(encoding='utf-8') != json_text(messages):
+                catalog = EXT / '_locales' / locale / 'messages.json'
+                if args.action == 'sync-locales':
+                    catalog.parent.mkdir(parents=True, exist_ok=True)
+                    with catalog.open('w', encoding='utf-8', newline='\n') as f:
+                        f.write(json_text(messages))
+                elif catalog.read_text(encoding='utf-8') != json_text(messages):
                     raise ValueError(f'browser catalog {locale} differs from its Fluent source')
         elif WIN or sys.platform == 'linux':
             print(register(args.browser, getattr(args, 'binary', None)))
