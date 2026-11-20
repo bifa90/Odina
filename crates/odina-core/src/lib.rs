@@ -22,6 +22,7 @@ pub mod proactive;
 pub mod remediation;
 pub mod repair_db;
 pub mod scoring;
+pub mod threat_db;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};
 pub use heuristics::{guess_path_flags, name_shape, path_score, NameShape, PathFlags};
