@@ -3,7 +3,7 @@
 # Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
 """Public-build gate — the public binary must contain no measurement code.
 
-§34.3 rule 4 of `docs/odina-agent-prompt-v17.md` says, in one line:
+§34.3 rule 4 of `docs/odina-agent-prompt-v18.md` says, in one line:
 
 > CI verifies the public release contains **no** instrumentation code —
 > a textual check **and** a binary check.
