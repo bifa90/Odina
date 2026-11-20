@@ -55,8 +55,6 @@ impl Scanner {
             c.set_db_version(db_version);
         }
     }
-        }
-    }
     pub fn forget(&mut self, path: &Path) {
         if let Some(c) = &mut self.index {
             c.forget(path);
