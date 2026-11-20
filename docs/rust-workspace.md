@@ -21,7 +21,7 @@ crates/odina-core/
   src/proactive.rs         # الأنشطة التسعة، تفضيلات المستخدم، ومهام الاحتواء (D46)
   tests/eicar.rs           # المتجه المعروف + مسار القرار كاملًا
 crates/odina-cache/          # Scanner والفهرس ووسوم المقبض؛ لا CLI
-crates/odina-resident/       # دورة حياة عامل واحد وIPC محلي (Linux/Windows)
+crates/odina-resident/       # عامل مسح واحد ومراقب أصلي وIPC محلي (Linux/Windows)
 crates/odina-cli/
   src/main.rs              # `odina scan <path> [--json] [-r]` — بوابة G1
   src/check.rs             # `odina check` — لا يُصرَّف إلا مع --features instrument
@@ -38,7 +38,7 @@ crates/odina-instrument/
   src/meter.rs             # ذاكرة · CPU · I/O من عدّادات النظام
 ```
 
-[حدود الخدمة المقيمة وخطة اختبارها](design/resident-service-v1.md). لا تستورد مكتبتا القرار والفهرس غلاف سطر الأوامر، ولا تدخل الخدمة في شجرة روابط النسخة العامة.
+[المراقبة الآنية وبروتوكول اختبار الخدمة المقيمة](perf/resident-w2.md). لا تستورد مكتبتا القرار والفهرس غلاف سطر الأوامر، ولا تدخل الخدمة في شجرة روابط النسخة العامة.
 
 **لماذا تُضاف الحزم تدريجيًا؟** لأن `cargo build` يجب أن يكون أخضر عند **كل** التزام. حزمة تُضاف قبل أن تُصرَّف تجعل البناء أحمر بلا سبب، ثم يتعلّم الفريق تجاهل الأحمر.
 
