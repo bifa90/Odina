@@ -112,7 +112,12 @@ fn suspect_requires_its_own_unconsumed_receipt_and_only_one_file_is_verified() {
         assert!(Instant::now() < by);
         thread::yield_now();
     }
-    let path = base.to_str().unwrap().replace('\\', "/");
+    // Browsers select the long, ordinary spelling; TEMP may be an 8.3 alias on Windows.
+    let path = root.to_str().unwrap();
+    let path = path
+        .strip_prefix(r"\\?\")
+        .unwrap_or(path)
+        .replace('\\', "/");
     let url = format!(
         "file://{}/{}",
         if cfg!(windows) {

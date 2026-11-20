@@ -529,7 +529,7 @@ settings.repair_db.install = Separate installation
 settings.repair_db.instructions = Extract { $package } from the matching Odina release beside the program. Keep the folder structure.
 settings.repair_db.releases = Release packages
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Scan with Odina
 browser.description = Checks your local selection only when you ask.
 browser.suspect = This file is suspicious.

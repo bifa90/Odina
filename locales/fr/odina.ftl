@@ -498,7 +498,7 @@ settings.repair_db.install = Installation séparée
 settings.repair_db.instructions = Décompressez { $package } de la même version d’Odina à côté du programme, en conservant les dossiers.
 settings.repair_db.releases = Paquets publiés
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Analyser avec Odina
 browser.description = Vérifie la sélection locale uniquement à votre demande.
 browser.suspect = Ce fichier est suspect.

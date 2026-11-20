@@ -73,7 +73,12 @@ pub(crate) fn scope_key(root: &Path, single: bool, arg: &[u8]) -> Option<PathBuf
     let path = local_selection(std::str::from_utf8(arg).ok()?)?;
     // The service uses canonical verbatim disk paths on Windows, not user-supplied prefixes.
     #[cfg(windows)]
-    let path = PathBuf::from(format!(r"\\?\{}", path.to_str()?.replace('/', r"\")));
+    let normal_root = {
+        let r = root.to_str()?;
+        local_selection(r.strip_prefix(r"\\?\").unwrap_or(r))?
+    };
+    #[cfg(windows)]
+    let root = normal_root.as_path();
     let rel = path.strip_prefix(root).ok()?;
     if single {
         return rel

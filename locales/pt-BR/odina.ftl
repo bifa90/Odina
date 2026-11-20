@@ -498,7 +498,7 @@ settings.repair_db.install = Instalação separada
 settings.repair_db.instructions = Extraia { $package } da versão correspondente do Odina ao lado do programa, mantendo as pastas.
 settings.repair_db.releases = Pacotes publicados
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Verificar com Odina
 browser.description = Verifica a seleção local somente quando você solicita.
 browser.suspect = Este arquivo é suspeito.

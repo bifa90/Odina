@@ -537,7 +537,7 @@ settings.repair_db.install = التثبيت المنفصل
 settings.repair_db.instructions = فكّ { $package } من إصدار Odina المطابق بجوار البرنامج، مع الحفاظ على المجلدات.
 settings.repair_db.releases = حزم الإصدارات
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = فحص بـ Odina
 browser.description = يستعلم عن التحديد المحلي عند طلبك فقط.
 browser.suspect = هذا الملف مشبوه.

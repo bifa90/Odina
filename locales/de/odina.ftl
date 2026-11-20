@@ -498,7 +498,7 @@ settings.repair_db.install = Separat installieren
 settings.repair_db.instructions = Entpacken Sie { $package } aus der passenden Odina-Version neben dem Programm. Behalten Sie die Ordnerstruktur bei.
 settings.repair_db.releases = Veröffentlichte Pakete
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Mit Odina prüfen
 browser.description = Prüft Ihre lokale Auswahl nur auf Anfrage.
 browser.suspect = Diese Datei ist verdächtig.

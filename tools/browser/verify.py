@@ -214,7 +214,11 @@ def main():
         result=witness(args,Path(scratch).resolve())
     with args.out.open('x',encoding='utf-8') as f: json.dump(result,f,indent=2);f.write('\n')
     for group in ['native','browser']:
-        if group in result: print(group,{k:v for k,v in result[group]['clean'].items() if k!='samples_ms'})
+        if group in result:
+            stats={k:v for k,v in result[group]['clean'].items() if k!='samples_ms'}
+            print(group, stats)
+            if os.environ.get('GITHUB_ACTIONS'):
+                print(f'::notice title=Quick path {group}::{result[group].get("engine",platform.system())} {stats}')
     # This is a strict gate for THIS sample set; don't drop scheduler outliers.
     return int(any(result[g]['clean']['at_least_100ms'] for g in ['browser','native'] if g in result))
 

@@ -498,7 +498,7 @@ settings.repair_db.install = Отдельная установка
 settings.repair_db.instructions = Распакуйте { $package } из соответствующего выпуска Odina рядом с программой, сохранив структуру папок.
 settings.repair_db.releases = Пакеты выпусков
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Проверить в Odina
 browser.description = Проверяет выбранный локальный объект только по вашему запросу.
 browser.suspect = Этот файл подозрителен.

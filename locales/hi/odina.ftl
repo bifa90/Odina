@@ -498,7 +498,7 @@ settings.repair_db.install = अलग स्थापना
 settings.repair_db.instructions = इसी Odina रिलीज़ का { $package } प्रोग्राम के पास निकालें। फ़ोल्डरों का क्रम न बदलें।
 settings.repair_db.releases = रिलीज़ पैकेज
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Odina से जाँचें
 browser.description = आपके कहने पर ही स्थानीय चयन की जाँच करता है।
 browser.suspect = यह फ़ाइल संदिग्ध है।

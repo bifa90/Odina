@@ -63,6 +63,7 @@ SCREENS: list[tuple[str, str, tuple[str, ...]]] = [
     ("trust", "أسس الثقة", ("trust.", "notes.", "sec.", "visual.")),
     ("update", "التحديث", ("update.",)),
     ("signing", "سياسة التوقيع", ("signing.",)),
+    ("browser", "قائمة المتصفح", ("browser.",)),
     ("map", "خريطة البرنامج", ("map.", "nav.", "back", "menu.")),
     ("help", "الشرح عند الطلب", ("help.", "tips.", "tip.")),
     ("numbers", "الأرقام", ("num.",)),

@@ -498,7 +498,7 @@ settings.repair_db.install = 個別に導入
 settings.repair_db.instructions = 同じバージョンの Odina の { $package } を、フォルダー構成を保ってプログラムと同じ場所に展開します。
 settings.repair_db.releases = リリース一覧
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = Odina でスキャン
 browser.description = 選択したローカル項目を、操作時にのみ確認します。
 browser.suspect = 不審なファイルです。

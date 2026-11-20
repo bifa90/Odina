@@ -498,7 +498,7 @@ settings.repair_db.install = 单独安装
 settings.repair_db.instructions = 从对应的 Odina 版本取得 { $package }，解压到程序所在目录，并保留文件夹结构。
 settings.repair_db.releases = 发行包
 
-# Browser context menu (D48)
+## Browser context menu (D48)
 browser.menu = 使用 Odina 扫描
 browser.description = 仅在你主动操作时检查选中的本地项目。
 browser.suspect = 此文件可疑。

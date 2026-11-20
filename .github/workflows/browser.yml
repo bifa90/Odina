@@ -36,7 +36,7 @@ jobs:
         run: |
           cargo build --locked --release -p odina-cli --features instrument -p odina-browser-host
           cargo test --locked --release -p odina-cli --features instrument --test g1 --test resident
-          cargo test --locked --release -p odina-browser-host -p odina-resident -p odina-cache
+          cargo test --locked --release -p odina-browser-host -p odina-resident -p odina-cache 2>&1 | tee consent.log || { echo "::error title=Native consent::$(grep -A5 'panicked at' consent.log | head -7 | tr '\n' ' ')"; exit 1; }
           node --test tools/browser/test-extension.mjs
           python tools/browser-setup.py check-locales
       - name: Install test browser (test environment only)
@@ -59,3 +59,4 @@ jobs:
           path: |
             browser-lab.json
             browser-lab.log
+            consent.log
