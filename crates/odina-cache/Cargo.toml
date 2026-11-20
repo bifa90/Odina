@@ -11,6 +11,10 @@ repository.workspace = true
 
 [dependencies]
 odina-core = { path = "../odina-core" }
+# The pass loop lives here so the resident service and the CLI cannot drift
+# apart on "what does a scan score". This is the only edge between the cache
+# and the loop; the cache adds hints, the loop does not need to know how.
+odina-scan = { path = "../odina-scan" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 libc = "0.2"

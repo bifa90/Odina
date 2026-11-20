@@ -40,7 +40,6 @@
 mod check;
 
 mod repair;
-#[cfg(feature = "instrument")]
 mod resident;
 
 use std::path::{Path, PathBuf};
@@ -60,12 +59,13 @@ USAGE:
     odina scan <path> [--json] [--recursive]
     odina repair-db [--demo]       # verify external data; optional in-memory repair exercise
     odina selftest                 # in memory: writes nothing to disk
-    odina check <path> [--out <file>] [--cache-dir <private-directory>]   # instrumented build only
-    # Resident prototype: instrumented build only
+    # The resident service is part of the product, not a lab tool: it is in
+    # every build.
     odina serve <path> --service NAME [--cache-dir <private-directory>]
     odina status|scan-now|stop --service NAME
     odina verdict <relative-path> --service NAME
-    odina check <path> --service NAME --out <new-file>
+    odina check <path> [--out <file>] [--cache-dir <private-directory>]   # instrumented build only
+    odina check <path> --service NAME --out <new-file>                    # instrumented build only
     odina --version | --help
 
 EXIT CODES:
@@ -97,7 +97,8 @@ fn main() -> ExitCode {
         }
         Some("selftest") => selftest(),
         Some("repair-db") => repair::command(&args[1..]),
-        #[cfg(feature = "instrument")]
+        // The resident service ships in every build. It is the core of a
+        // virus guard, not a lab tool; only the report layer is measured.
         Some(cmd @ ("serve" | "status" | "scan-now" | "stop" | "verdict")) => {
             resident::command(cmd, &args[1..])
         }
@@ -234,10 +235,17 @@ fn scan_dir(dir: &Path, json: bool, recursive: bool) -> ExitCode {
 /// Every file under `dir`, skipping anything that could make the walk hang or
 /// run forever.
 ///
-/// The rules are the ones `odina check` uses (see `check::walk`), applied here
-/// so both commands agree: a link is never entered — `Path::is_dir` follows
-/// junctions and one of them pointing at an ancestor is an infinite walk — and
-/// a non-regular file is never opened, because a named pipe blocks on open.
+/// List every file under `dir`, mirroring `odina_scan::walk`'s rules so
+/// `scan_dir` and the resident pass agree: symlinks are never entered
+/// (`Path::is_dir` follows junctions, and one pointing at an ancestor is an
+/// infinite walk), non-regular files are never opened (a named pipe blocks on
+/// open), and results are sorted for a stable report.
+///
+/// This is intentionally not routed through `odina_scan::pass`: `pass` owns an
+/// entire inventory (walk, `Totals`, index boundaries) and reports through a
+/// callback, whereas `scan_dir` wants a plain sorted path list it scores file
+/// by file and prints in its own tabular format. Two shallow listings with the
+/// same skip rules, not two pass loops.
 fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
     let mut files = Vec::new();
     let mut stack = vec![dir.to_path_buf()];
@@ -278,7 +286,14 @@ fn collect_files(dir: &Path, recursive: bool) -> std::io::Result<Vec<PathBuf>> {
     Ok(files)
 }
 
-/// Public digest-reporting path: never use an index or omit requested hashes.
+/// Public digest-reporting path for a single file: open, hash, assess. `odina
+/// scan <file>` is single-shot by design, so it never touches an index and
+/// never omits a requested hash.
+///
+/// Not routed through `odina_scan::pass`: `pass` walks a whole tree and folds
+/// it into `Totals` + an index boundary, while `scan` answers about one path
+/// and returns a `Report` — a different shape entirely. Same decision as
+/// `check` (`assess` over `hash_reader`), different loop.
 fn scan(path: &Path, max_full_digest: Option<u64>) -> std::io::Result<Report> {
     scan_opened(path, &mut std::fs::File::open(path)?, max_full_digest)
 }

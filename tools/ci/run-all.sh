@@ -42,6 +42,7 @@ if [[ $FAST -eq 0 ]]; then
   run fonts  python3 tools/ci/check-fonts.py --quiet
 fi
 run docs     python3 tools/ci/check-docs.py --quiet
+run doc-lint python3 tools/ci/check-doc-consistency.py --quiet
 run exc-ui   python3 tools/ci/check-exception-ui.py --quiet
 run ui-law   python3 tools/ci/check-ui-constitution.py --quiet
 run loc-js   python3 tools/gen-locale-js.py --check --quiet

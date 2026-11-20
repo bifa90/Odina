@@ -18,18 +18,24 @@ path = "src/main.rs"
 odina-core = { path = "../odina-core" }
 # Optional on purpose: the public build must not merely avoid calling this
 # code, it must not contain it. `cargo tree` on a default build shows neither
-# crate below, which is what `tools/ci/check-public-build.py` asserts.
+# crate below, which is what `tools/ci/check-public-build.py` asserts. These
+# two are now the ONLY crates the flag adds — see K1 in docs/roadmap.md.
 odina-report = { path = "../odina-report", optional = true }
 odina-instrument = { path = "../odina-instrument", optional = true }
 
-odina-cache = { path = "../odina-cache", optional = true }
-odina-resident = { path = "../odina-resident", optional = true }
+# The resident service is a CORE capability (v19 §1, D49), so neither the
+# service nor its cache may sit behind `instrument`. What stays measured is the
+# report and the meter; what ships to every user is a service that scans and a
+# CLI that scans, both through odina-scan's single pass loop.
+odina-scan = { path = "../odina-scan" }
+odina-cache = { path = "../odina-cache" }
+odina-resident = { path = "../odina-resident" }
 
 [features]
 default = []
 # The only difference between the two builds is this flag. There is no second
 # source tree, no fork, and no patched copy.
-instrument = ["odina-report", "odina-instrument", "dep:odina-cache", "dep:odina-resident"]
+instrument = ["odina-report", "odina-instrument"]
 
 [dev-dependencies]
 # The unit tests of the export path need the report writer even when the

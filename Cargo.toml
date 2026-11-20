@@ -10,7 +10,20 @@
 
 [workspace]
 resolver = "2"
-members = ["crates/odina-core", "crates/odina-cache", "crates/odina-resident", "crates/odina-report", "crates/odina-instrument", "crates/odina-cli", "crates/odina-browser-host"]
+members = [
+    "crates/odina-core",
+    "crates/odina-scan",
+    "crates/odina-cache",
+    "crates/odina-resident",
+    "crates/odina-report",
+    "crates/odina-instrument",
+    "crates/odina-cli",
+    "crates/odina-browser-host",
+]
+
+# odina-scan sits between the engine and everything that drives it. It is the
+# public pass loop: walk, score, stop. Adding report/instrument/cache to it
+# would undo the whole point of K1, which `check-public-build.py` now enforces.
 
 [workspace.package]
 version = "0.1.0"

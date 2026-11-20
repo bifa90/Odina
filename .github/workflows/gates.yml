@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, exc-ui, ui-law, loc-js, site, repair-pkg, rust-syn, public]
+        gate: [license, icons, contrast, i18n, pseudo, fonts, docs, doc-lint, exc-ui, ui-law, loc-js, site, repair-pkg, rust-syn, public]
 
     steps:
       - uses: actions/checkout@v4
@@ -74,6 +74,10 @@ jobs:
       - name: docs
         if: matrix.gate == 'docs'
         run: python3 tools/ci/check-docs.py
+
+      - name: doc-lint
+        if: matrix.gate == 'doc-lint'
+        run: python3 tools/ci/check-doc-consistency.py
 
       - name: exc-ui
         if: matrix.gate == 'exc-ui'
@@ -119,4 +123,9 @@ jobs:
         run: |
           python3 tools/ci/check-public-build.py
           cargo tree -p odina-cli --edges normal | tee /tmp/public-tree.txt
+          # The measurement layer must be absent, and the loop and the service
+          # must be present. K1 is a two-sided claim: dropping the flag must not
+          # drop the scanning.
           ! grep -E 'odina-(report|instrument) v' /tmp/public-tree.txt
+          grep -E 'odina-scan v' /tmp/public-tree.txt
+          grep -E 'odina-resident v' /tmp/public-tree.txt

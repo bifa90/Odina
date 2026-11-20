@@ -1,0 +1,19 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+
+[package]
+name = "odina-scan"
+description = "The public pass loop: walk a tree, score every file, stop. No report, no meter, no cache."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Exactly one dependency, and it is the engine. The three crates that must stay
+# out of the public build — odina-report, odina-instrument, odina-cache — are
+# absent on purpose; tools/ci/check-public-build.py fails if any of them is
+# added here, because adding one would put the measurement layer or a cache
+# back inside the resident service.
+[dependencies]
+odina-core = { path = "../odina-core" }

@@ -89,6 +89,7 @@ version = "0.1.0"
 dependencies = [
  "libc",
  "odina-core",
+ "odina-scan",
 ]
 
 [[package]]
@@ -100,6 +101,7 @@ dependencies = [
  "odina-instrument",
  "odina-report",
  "odina-resident",
+ "odina-scan",
 ]
 
 [[package]]
@@ -119,6 +121,13 @@ dependencies = [
 [[package]]
 name = "odina-report"
 version = "0.1.0"
+
+[[package]]
+name = "odina-scan"
+version = "0.1.0"
+dependencies = [
+ "odina-core",
+]
 
 [[package]]
 name = "odina-resident"

@@ -113,14 +113,14 @@ impl Gate {
         Some(match self {
             Gate::RamIdleMb => AtMost(20.0),
             Gate::RamUsbMb => AtMost(50.0),
-            Gate::CpuIdlePercent => AtMost(0.5), // rounding, not tolerance
+            Gate::CpuIdlePercent => AtMost(0.1), // D52: the policy line, not a rounding allowance
             Gate::CpuScanAvgPercent => Below(3.0),
             Gate::CpuScanPeakPercent => AtMost(5.0),
             Gate::UsbWakeMs => Below(50.0),
             Gate::P0Ms => Below(3000.0),
             Gate::P1Ms => Below(15000.0),
             Gate::ThroughputFilesPerSec | Gate::WdacPolicyMs => return None,
-            Gate::AmsiMs => Below(15.0),
+            Gate::AmsiMs => AtMost(15.0), // D66 says ≤, so the boundary passes
             Gate::LanguageSwitchMs => Below(100.0),
             Gate::LanguageMemoryMb => AtMost(3.0),
             Gate::IdleIoOpsPerMin => AtMost(0.0),
@@ -132,16 +132,16 @@ impl Gate {
         match self {
             Gate::RamIdleMb => "§34.2 RAM خمول < 20",
             Gate::RamUsbMb => "§34.2 RAM أثناء فحص USB ≤ 50",
-            Gate::CpuIdlePercent => "§34.2 CPU خمول = 0",
-            Gate::CpuScanAvgPercent => "§34.2 CPU أثناء الفحص < 3",
-            Gate::CpuScanPeakPercent => "§34.2 CPU ذروة ≤ 5",
+            Gate::CpuIdlePercent => "§34.2: D52 CPU خمول ≤ 0.1%",
+            Gate::CpuScanAvgPercent => "§34.2: D53 CPU فحص خلفي < 3%",
+            Gate::CpuScanPeakPercent => "§34.2: D53 CPU فحص USB ذروة ≤ 5%",
             Gate::UsbWakeMs => "§34.2 زمن استيقاظ USB < 50ms",
             Gate::P0Ms => "§34.2 زمن P0 < 3000ms",
             Gate::P1Ms => "§34.2 زمن P1 < 15000ms",
             Gate::ThroughputFilesPerSec => "§34.2 خط أساس الإنتاجية",
-            Gate::AmsiMs => "§34.2 AMSI < 15ms",
+            Gate::AmsiMs => "§34.2: D66 AMSI ≤ 15ms لكل سكربت",
             Gate::WdacPolicyMs => "§34.2 زمن تحديث سياسة WDAC (يُسجَّل)",
-            Gate::LanguageSwitchMs => "§34.2 تبديل اللغة < 100ms",
+            Gate::LanguageSwitchMs => "§34.2: D85 تبديل اللغة < 100ms",
             Gate::LanguageMemoryMb => "§34.2 ذاكرة اللغة ≤ 3MB",
             Gate::IdleIoOpsPerMin => "§34.2 I/O خمول = 0",
         }
@@ -524,6 +524,25 @@ mod tests {
         );
         assert_eq!(
             Measurement::measured(Gate::RamIdleMb, 20.5).status,
+            Status::Fail
+        );
+        // D52 and D66 chose the inclusive form on purpose: an idle CPU sitting
+        // exactly on 0.1% passes, and an AMSI hook costing exactly 15ms passes.
+        // The old 0.5% allowance was five times the published policy line.
+        assert_eq!(
+            Measurement::measured(Gate::CpuIdlePercent, 0.1).status,
+            Status::Pass
+        );
+        assert_eq!(
+            Measurement::measured(Gate::CpuIdlePercent, 0.11).status,
+            Status::Fail
+        );
+        assert_eq!(
+            Measurement::measured(Gate::AmsiMs, 15.0).status,
+            Status::Pass
+        );
+        assert_eq!(
+            Measurement::measured(Gate::AmsiMs, 15.1).status,
             Status::Fail
         );
     }

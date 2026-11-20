@@ -85,3 +85,13 @@ impl Scanner {
         self.index.as_mut().map_or(Ok(()), Cache::finish_pass)
     }
 }
+
+/// The public pass loop scores through this trait (`odina_scan::Read`). The
+/// cache's per-file counters are a measurement, so they are created and
+/// dropped here rather than leaking into the loop that must stay unmeasured.
+impl odina_scan::Read for Scanner {
+    fn score(&mut self, path: &Path) -> io::Result<Assessment> {
+        self.scan_file(path, &mut Work::default())
+            .map(|(assessment, _handle)| assessment)
+    }
+}
