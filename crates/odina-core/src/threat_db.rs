@@ -71,7 +71,7 @@ impl ThreatDb {
         if !meta.signature_verified {
             return Err(ThreatDbError::UnverifiedSignature);
         }
-        if sha256_bytes(payload) != meta.digest_sha256 {
+        if parse_hex_32(&sha256_hex(payload)) != Some(meta.digest_sha256) {
             return Err(ThreatDbError::DigestMismatch);
         }
 
