@@ -61,6 +61,7 @@ USAGE:
     odina repair-db [--demo]       # verify external data; optional in-memory repair exercise
     odina selftest                 # in memory: writes nothing to disk
     odina check <path> [--out <file>] [--cache-dir <private-directory>]   # instrumented build only
+    # Resident prototype: instrumented build only
     odina serve <path> --service NAME [--cache-dir <private-directory>]
     odina status|scan-now|stop --service NAME
     odina check <path> --service NAME --out <new-file>
@@ -95,12 +96,11 @@ fn main() -> ExitCode {
         }
         Some("selftest") => selftest(),
         Some("repair-db") => repair::command(&args[1..]),
-        // The refusal lives here, not inside the module, so the public build
-        // really has no `check` code: the module is not compiled at all.
         #[cfg(feature = "instrument")]
         Some(cmd @ ("serve" | "status" | "scan-now" | "stop")) => {
             resident::command(cmd, &args[1..])
         }
+        // The public refusal is outside the module, so it has no check code.
         Some("check") => {
             #[cfg(feature = "instrument")]
             {

@@ -51,19 +51,23 @@ fn run(cmd: &str, args: &[String]) -> io::Result<u8> {
             }
             _ => return Err(bad("serve <path> --service NAME [--cache-dir DIR]")),
         };
-        data_target(Path::new(root))?;
-        let root = Path::new(root).canonicalize()?;
-        let mut scanner = Scanner::resident(&root, dir)?;
+        // Canonicalize for scope binding only. Feeding Windows' verbatim path
+        // prefix (or a resolved alias) to the scorer/exporter would change the
+        // reported path pattern relative to a one-shot scan of the same input.
+        let root = Path::new(root);
+        data_target(root)?;
+        let scope = root.canonicalize()?;
+        let mut scanner = Scanner::resident(root, dir)?;
         serve(
             name,
-            &root,
+            &scope,
             || println!("READY odina-resident/v1 (manual scans; no watcher)"),
             || {
-                data_target(&root)?;
-                if root.canonicalize()? != root {
+                data_target(root)?;
+                if root.canonicalize()? != scope {
                     return Err(bad("configured root changed"));
                 }
-                check::run_pass(&mut scanner, &root, Meter::now(), Instant::now(), MAX_REPLY)
+                check::run_pass(&mut scanner, root, Meter::now(), Instant::now(), MAX_REPLY)
             },
         )?;
         return Ok(0);
