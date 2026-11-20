@@ -14,22 +14,23 @@ pub const HEAD_BYTES: usize = 4096;
 /// Bytes taken from the end of the file for `tail_hash`.
 pub const TAIL_BYTES: usize = 4096;
 
-/// The hash set for one file. Every field is a lowercase hex SHA-256.
+/// Digests for one file. Each available digest is lowercase hex SHA-256.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct FileHashes {
-    /// Digest of the entire file. Empty for files above the size limit.
+    /// Digest of the entire file, empty when capped or not requested.
     pub full: String,
     /// Digest of the first [`HEAD_BYTES`] bytes.
     pub head: String,
     /// Digest of the last [`TAIL_BYTES`] bytes.
     pub tail: String,
-    /// Size in bytes, as counted while reading — never trusted from metadata.
+    /// Logical bytes. The streaming reader counts to EOF; the check CLI can
+    /// also carry a revalidated file length on a zero-content-read index hit.
     pub size: u64,
 }
 
 impl FileHashes {
-    /// True when a head and tail were produced but the full digest was skipped
-    /// because the file exceeded the caller's limit.
+    /// No full digest is available. A missing digest is never positive V5
+    /// evidence (and never makes a report with a required SHA exportable).
     pub fn full_digest_skipped(&self) -> bool {
         self.full.is_empty()
     }

@@ -22,13 +22,17 @@ odina-core = { path = "../odina-core" }
 odina-report = { path = "../odina-report", optional = true }
 odina-instrument = { path = "../odina-instrument", optional = true }
 
+odina-cache = { path = "../odina-cache", optional = true }
+odina-resident = { path = "../odina-resident", optional = true }
+
 [features]
 default = []
 # The only difference between the two builds is this flag. There is no second
 # source tree, no fork, and no patched copy.
-instrument = ["odina-report", "odina-instrument"]
+instrument = ["odina-report", "odina-instrument", "dep:odina-cache", "dep:odina-resident"]
 
 [dev-dependencies]
 # The unit tests of the export path need the report writer even when the
 # feature is off, so the tests exercise the same code the check build ships.
 odina-report = { path = "../odina-report" }
+odina-cache = { path = "../odina-cache" }

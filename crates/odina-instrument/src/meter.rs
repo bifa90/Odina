@@ -124,7 +124,7 @@ fn cpu_time_windows() -> Option<Duration> {
     if rc == 0 {
         return None;
     }
-    let to_100ns = |t: &FileTime| ((t.high as u64) << 32 | t.low as u64) as u128;
+    let to_100ns = |t: &FileTime| (((t.high as u64) << 32) | t.low as u64) as u128;
     // FILETIME is in 100-nanosecond units.
     let total = to_100ns(&k) + to_100ns(&u);
     Some(Duration::from_nanos((total * 100) as u64))

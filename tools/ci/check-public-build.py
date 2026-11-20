@@ -15,11 +15,10 @@ looks innocent.
 
 Checked here:
 
-  1. In `crates/odina-cli/Cargo.toml`, `odina-report` and `odina-instrument`
-     are `optional = true`.
+  1. In `crates/odina-cli/Cargo.toml`, the report, instrumentation, cache
+     and resident packages are `optional = true`.
   2. The `instrument` feature is not in `default`.
-  3. `odina-core` has no dependency on either crate (the engine must not be
-     able to measure anything).
+  3. `odina-core` has no dependency on the cache, IPC or measurement layers.
   4. The `check` module in the CLI is gated by
      `cfg(any(feature = "instrument", test))`.
   5. No crate in the workspace depends on a network or HTTP client.
@@ -27,8 +26,8 @@ Checked here:
      string, and no call to a process-spawning API.
 
 When `cargo` is available (it is in CI, it is not in every dev sandbox), the
-script also runs `cargo tree -p odina-cli --edges normal` and fails if either
-instrumentation crate appears in the default build graph. That is the binary
+script also runs `cargo tree -p odina-cli --edges normal` and fails if any
+private crate appears in the default build graph. That is the binary
 half: `cargo tree` reports what the link step will actually contain, not what
 the source appears to say.
 
@@ -48,6 +47,7 @@ import sys
 from pathlib import Path
 
 INSTR_CRATES = ("odina-report", "odina-instrument")
+PRIVATE_CRATES = (*INSTR_CRATES, "odina-cache", "odina-resident")
 
 # Crates that would give any part of the product a way to talk to a network.
 NETWORK_CRATES = (
@@ -90,7 +90,7 @@ class Gate:
         text = self.read("crates/odina-cli/Cargo.toml")
         if not text:
             return
-        for crate in INSTR_CRATES:
+        for crate in PRIVATE_CRATES:
             pattern = re.compile(
                 "^" + re.escape(crate) + r"\s*=\s*\{([^}]*)\}", re.MULTILINE
             )
@@ -130,7 +130,7 @@ class Gate:
             return
         deps = re.search(r"^\[dependencies\]\s*$(.*?)(?=^\[|\Z)", text, re.M | re.S)
         body = deps.group(1) if deps else ""
-        for crate in INSTR_CRATES:
+        for crate in PRIVATE_CRATES:
             if re.search(rf"^{re.escape(crate)}\b", body, re.M):
                 self.fail(f"odina-core depends on {crate}; the engine must not measure")
 
@@ -204,7 +204,7 @@ class Gate:
             )
             return
         graph = out.stdout
-        for crate in INSTR_CRATES:
+        for crate in PRIVATE_CRATES:
             if re.search(rf"\b{re.escape(crate)} v", graph):
                 self.fail(
                     f"{crate} appears in the default build graph of odina-cli; "

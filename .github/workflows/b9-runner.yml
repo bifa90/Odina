@@ -1,0 +1,48 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Exercise the exact download/build command users run, not a B9 target-disk test.
+name: B9 verifier
+on:
+  pull_request:
+    paths:
+      - 'tools/perf/verify-b9.py'
+      - 'tools/perf/test_verify_b9.py'
+      - '.github/workflows/b9-runner.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Verify the two pinned release builds, G1 and all three measurement arms
+        env:
+          PYTHONUTF8: '1'
+        shell: bash
+        run: |
+          python tools/perf/test_verify_b9.py
+          python tools/perf/verify-b9.py --quick tests/fixtures/safe
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          j = json.loads(next(Path.cwd().glob('odina-b9-*/comparison.json')).read_text())
+          d = j['disks']['disk-1']
+          assert d['counts_and_alerts_match'] and d['quick']
+          assert all(len(r) == 1 and r[0]['files'] == 20 for r in d['runs'].values())
+          assert d['runs']['cold'][0]['work']['sha_files'] == 0
+          assert d['runs']['warm'][0]['work']['cache_hits'] == 20
+          assert d['runs']['warm'][0]['work']['streamed_bytes'] == 0
+          assert all(d[phase]['B9_this_workload'] == 'inconclusive' for phase in ('cold', 'warm'))
+          PY

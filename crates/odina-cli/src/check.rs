@@ -13,48 +13,40 @@
 //! The file it writes is one JSON object:
 //!
 //! ```text
-//! { ...perf object from odina-instrument..., "reports": [ ...odina-report/v1... ] }
+//! { ...perf fields..., "work": { ...decision counters... }, "reports": [ ...odina-report/v1... ] }
 //! ```
 //!
-//! No socket, no URL, no clock beyond the date, and no file name anywhere: the
-//! report objects carry hashes and patterns.
+//! No socket, URL or filename in the export. `--cache-dir` additionally keeps
+//! a private local index, never part of that export.
 
+use odina_cache::FULL_DIGEST_CAP;
+#[cfg(feature = "instrument")]
+use odina_cache::{Scanner, Work};
+#[cfg(feature = "instrument")]
+use odina_instrument::{Meter, PerfReport, ScanStats};
+use std::fs::File;
 use std::path::{Path, PathBuf};
 
-use odina_core::hashing::FileHashes;
-use odina_core::scoring::{Score, Verdict};
+use odina_core::scoring::Verdict;
 use odina_report::report::Report;
 use odina_report::{measure, pe};
 
 /// The app version written into every exported report.
 pub const APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-/// What a scan of one file produced, kept in one place so the text output and
-/// the report cannot drift apart.
-pub struct Scanned {
-    pub path: PathBuf,
-    pub hashes: FileHashes,
-    pub score: Score,
-    pub pe_hash: Option<String>,
-    pub attributes: measure::Attributes,
-}
-
-/// Read a PE import hash. `None` for anything that is not a PE, and for a file
-/// that cannot be read: a missing fingerprint is a missing measurement, not a
-/// failed scan.
-pub fn pe_info(path: &Path) -> Option<pe::PeInfo> {
+/// Probe only an exportable file, using the same handle that reached EOF in
+/// the hash reader. This avoids path-replacement races, not in-place edits.
+fn pe_info(reader: &mut File) -> Option<pe::PeInfo> {
     use std::io::{Read, Seek, SeekFrom};
 
-    let mut file = std::fs::File::open(path).ok()?;
-    let mut head = vec![0u8; 4096];
-    let n = file.read(&mut head).ok()?;
-    head.truncate(n);
-    if !pe::looks_like_pe(&head) {
+    reader.rewind().ok()?;
+    let mut head = [0u8; 4096];
+    let n = reader.read(&mut head).ok()?;
+    let head = &head[..n];
+    if !pe::looks_like_pe(head) {
         return None;
     }
-
-    let mut reader = std::fs::File::open(path).ok()?;
-    pe::parse(&head, |offset, len| {
+    pe::parse(head, |offset, len| {
         if len > 1 << 20 {
             return None; // a single read this large is not a header
         }
@@ -67,8 +59,8 @@ pub fn pe_info(path: &Path) -> Option<pe::PeInfo> {
 
 /// The three attributes, plus the one bit the filesystem does not carry on
 /// Unix: an executable extension.
-pub fn attributes_for(path: &Path) -> measure::Attributes {
-    let mut attrs = match std::fs::metadata(path) {
+fn attributes_for(file: &File, path: &Path) -> measure::Attributes {
+    let mut attrs = match file.metadata() {
         Ok(meta) => measure::attributes(&meta),
         Err(_) => measure::Attributes::default(),
     };
@@ -99,8 +91,17 @@ pub fn behavior_score(verdict: Verdict) -> f32 {
     }
 }
 
-/// Build the sixteen-field object for one file. Never touches the disk.
-pub fn report_for(s: &Scanned) -> Report {
+/// PE and attributes are export fields, NOT scoring inputs in this build.
+/// Do not collect either for silent verdicts or above-cap inputs that the
+/// schema cannot export. Keep the predicate upstream of every enrichment I/O.
+fn report_for(
+    s: &super::Report,
+    enrich: impl FnOnce() -> (Option<String>, measure::Attributes),
+) -> Option<Report> {
+    if !s.score.interrupts() || s.hashes.full_digest_skipped() {
+        return None;
+    }
+    let (pe_hash, attributes) = enrich();
     let name = s
         .path
         .file_name()
@@ -120,10 +121,10 @@ pub fn report_for(s: &Scanned) -> Report {
     if !s.hashes.tail.is_empty() {
         report.tail_hash = Some(s.hashes.tail.clone());
     }
-    report.pe_hash = s.pe_hash.clone();
-    report.attributes = Some(s.attributes);
+    report.pe_hash = pe_hash;
+    report.attributes = Some(attributes);
     report.behavior_score = Some(behavior_score(s.score.verdict));
-    report.with_name_and_path(&name, &path_text)
+    Some(report.with_name_and_path(&name, &path_text))
 }
 
 /// Default output file. A fixed name, so the user can find it, and no
@@ -137,7 +138,7 @@ pub fn default_out() -> PathBuf {
 }
 
 /// Splice the perf object and the report array into one balanced JSON object.
-pub fn assemble(perf_json: &str, reports: &[String]) -> String {
+pub fn assemble(perf_json: &str, reports: &[String], work_json: &str) -> String {
     let inner = perf_json
         .strip_prefix('{')
         .and_then(|s| s.strip_suffix('}'))
@@ -145,6 +146,8 @@ pub fn assemble(perf_json: &str, reports: &[String]) -> String {
     let mut out = String::with_capacity(inner.len() + 64);
     out.push('{');
     out.push_str(inner);
+    out.push_str(",\"work\":");
+    out.push_str(work_json);
     out.push_str(",\"reports\":[");
     out.push_str(&reports.join(","));
     out.push_str("]}");
@@ -199,11 +202,6 @@ pub struct Walked {
     pub truncated: bool,
 }
 
-/// Above this size, the whole-file digest is skipped and only head and tail
-/// are hashed. 512 MiB is roughly when reading the file stops being free
-/// compared to everything else a scan does.
-pub const FULL_DIGEST_CAP: u64 = 512 * 1024 * 1024;
-
 /// How many directories one walk may visit. A Downloads folder is far below
 /// this; the number exists only so that a pathological tree cannot run for
 /// hours while the user watches nothing happen.
@@ -252,7 +250,11 @@ pub fn walk(dir: &Path) -> Walked {
         };
 
         let mut paths: Vec<(bool, PathBuf)> = Vec::new();
-        for entry in entries.take(MAX_ENTRIES_PER_DIR) {
+        for (index, entry) in entries.enumerate() {
+            if index == MAX_ENTRIES_PER_DIR {
+                truncated = true;
+                break;
+            }
             let Ok(entry) = entry else {
                 read_errors += 1;
                 continue;
@@ -263,6 +265,21 @@ pub fn walk(dir: &Path) -> Walked {
                 read_errors += 1;
                 continue;
             };
+            #[cfg(windows)]
+            {
+                use std::os::windows::fs::MetadataExt;
+                match entry.metadata() {
+                    Ok(m) if m.file_attributes() & 0x400 != 0 => {
+                        links_skipped += 1;
+                        continue;
+                    }
+                    Err(_) => {
+                        read_errors += 1;
+                        continue;
+                    }
+                    _ => (),
+                }
+            }
             if kind.is_symlink() {
                 links_skipped += 1;
                 continue;
@@ -298,28 +315,16 @@ pub fn walk(dir: &Path) -> Walked {
     }
 }
 
-/// Reuse `scan`'s read, reference lookup and decision, then collect the
-/// additional measurements needed only by the local export.
-pub fn score_file(path: &Path) -> Option<Scanned> {
-    let scanned = super::scan(path, Some(FULL_DIGEST_CAP)).ok()?;
-    Some(Scanned {
-        path: scanned.path,
-        hashes: scanned.hashes,
-        score: scanned.score,
-        pe_hash: pe_info(path).map(|i| i.imphash),
-        attributes: attributes_for(path),
-    })
-}
-
 /// The command. Only reachable when the module is compiled, which is the
 /// check build and this crate's tests.
 #[cfg(feature = "instrument")]
 pub fn command(args: &[String]) -> std::process::ExitCode {
-    use odina_instrument::{Meter, PerfReport, ScanStats};
     use std::process::ExitCode;
 
     let mut out_path = default_out();
     let mut target: Option<String> = None;
+    let mut cache_dir: Option<PathBuf> = None;
+    let mut service = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -332,8 +337,27 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                 eprintln!("odina: --out needs a file name");
                 return ExitCode::FAILURE;
             }
-            a if !a.starts_with("--") => target = Some(a.to_string()),
-            _ => {}
+            "--service" if service.is_none() => {
+                let Some(name) = args.get(i + 1).filter(|s| !s.starts_with("--")) else {
+                    eprintln!("odina: --service needs an instance name");
+                    return ExitCode::FAILURE;
+                };
+                service = Some(name.as_str());
+                i += 1;
+            }
+            "--cache-dir" => {
+                let Some(v) = args.get(i + 1).filter(|v| !v.starts_with("--")) else {
+                    eprintln!("odina: --cache-dir needs a private directory outside the corpus");
+                    return ExitCode::FAILURE;
+                };
+                cache_dir = Some(PathBuf::from(v));
+                i += 1;
+            }
+            a if !a.starts_with("--") && target.is_none() => target = Some(a.to_string()),
+            _ => {
+                eprintln!("odina: unexpected check argument");
+                return ExitCode::FAILURE;
+            }
         }
         i += 1;
     }
@@ -348,9 +372,55 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         return ExitCode::FAILURE;
     }
 
+    if let Some(name) = service {
+        if cache_dir.is_some() {
+            eprintln!("odina: the resident owns its cache; set --cache-dir on serve");
+            return ExitCode::FAILURE;
+        }
+        return super::resident::client_check(name, path, &out_path);
+    }
+    // Keep the original B9 interval: includes opening and publishing the index.
     let idle = Meter::now();
     let started = std::time::Instant::now();
+    let mut scanner = match Scanner::one_shot(path, &out_path, cache_dir.as_deref()) {
+        Ok(s) => s,
+        Err(e) => {
+            eprintln!("odina: cannot open scan session: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+    match run_pass(&mut scanner, path, idle, started, usize::MAX, &mut |_| {}) {
+        Ok(odina_resident::Inventory {
+            code, report: json, ..
+        }) => {
+            if let Err(e) = std::fs::write(&out_path, json) {
+                eprintln!("odina: cannot write {}: {e}", out_path.display());
+                return ExitCode::FAILURE;
+            }
+            println!("الملف: {}", out_path.display());
+            println!("لم يُرسل شيء: هذا الملف على قرصك، وأنت من يقرر إرساله.");
+            ExitCode::from(code)
+        }
+        Err(e) => {
+            eprintln!("odina: {e}");
+            ExitCode::FAILURE
+        }
+    }
+}
 
+/// Same inventory, scoring, export and exit semantics for both transports.
+#[cfg(feature = "instrument")]
+pub(super) fn run_pass(
+    scanner: &mut Scanner,
+    path: &Path,
+    idle: Meter,
+    started: std::time::Instant,
+    max_export: usize,
+    seen: &mut dyn FnMut(&odina_core::assessment::Assessment),
+) -> std::io::Result<odina_resident::Inventory> {
+    scanner.begin_pass();
+    let mut work = Work::default();
+    let mut report_bytes = 0usize;
     let mut stats = ScanStats::default();
     let mut exported: Vec<String> = Vec::new();
 
@@ -389,8 +459,9 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         if total >= 500 && done % 500 == 0 {
             eprintln!("odina: {done}/{total}");
         }
-        match score_file(file) {
-            Some(scanned) => {
+        match scanner.scan_file(file, &mut work) {
+            Ok((scanned, mut handle)) => {
+                seen(&scanned);
                 stats.files += 1;
                 stats.bytes += scanned.hashes.size;
                 match scanned.score.verdict {
@@ -400,24 +471,22 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
                     Verdict::HighRisk => stats.high_risk += 1,
                     Verdict::Confirmed => stats.confirmed += 1,
                 }
-                // Only a file that would interrupt the user gets a report.
-                // Exporting clean files would turn a privacy-preserving design
-                // into a census of somebody's disk.
-                if scanned.score.interrupts() {
-                    // A file above the digest cap has no `sha256`, and the
-                    // schema requires one, so it cannot produce a valid
-                    // report. It is still counted in its verdict band above —
-                    // it was read and scored, and pretending otherwise would
-                    // break the accounting — but the omission is announced
-                    // rather than silent.
-                    if scanned.hashes.full_digest_skipped() {
-                        not_reported += 1;
-                    } else if let Ok(json) = report_for(&scanned).to_json_checked() {
-                        exported.push(json);
+                if let Some(report) = report_for(&scanned, || {
+                    let pe_hash = pe_info(&mut handle).map(|i| i.imphash);
+                    (pe_hash, attributes_for(&handle, file))
+                }) {
+                    if let Ok(json) = report.to_json_checked() {
+                        report_bytes = report_bytes.saturating_add(json.len() + 1);
+                        if report_bytes <= max_export {
+                            exported.push(json);
+                        }
                     }
+                } else if scanned.score.interrupts() {
+                    // Counted in its verdict band, but not exportable without sha256.
+                    not_reported += 1;
                 }
             }
-            None => {
+            Err(_) => {
                 stats.files += 1;
                 stats.unreadable += 1;
             }
@@ -432,6 +501,12 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
         );
     }
 
+    if let Err(e) = scanner.finish_pass() {
+        eprintln!("odina: could not publish cache; rescan next time: {e}");
+    }
+    if report_bytes > max_export {
+        return Err(std::io::Error::other("report too large"));
+    }
     stats.elapsed_ms = started.elapsed().as_millis() as u64;
     let after = Meter::now();
 
@@ -444,26 +519,27 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
     );
     perf.fill_from_scan(stats, &idle, Some(&after));
 
-    let json = assemble(&perf.to_json(), &exported);
-    if let Err(err) = std::fs::write(&out_path, json.as_bytes()) {
-        eprintln!("odina: cannot write {}: {err}", out_path.display());
-        return ExitCode::FAILURE;
-    }
-
+    let work_json = format!(
+        "{{\"cache_hits\":{},\"bloom_negatives\":{},\"sha_files\":{},\"streamed_bytes\":{}}}",
+        work.cache_hits, work.bloom_negatives, work.sha_files, work.streamed_bytes
+    );
+    let json = assemble(&perf.to_json(), &exported, &work_json);
     println!("الفحص: {} ملفًا · {} بايت", stats.files, stats.bytes);
     println!("النتائج: {}", perf.summary());
     println!(
         "التقارير المصدَّرة: {} (فقط ما يستدعي تنبيهًا)",
         exported.len()
     );
-    println!("الملف: {}", out_path.display());
-    println!("لم يُرسل شيء: هذا الملف على قرصك، وأنت من يقرر إرساله.");
-
-    if stats.confirmed > 0 || stats.high_risk > 0 {
-        ExitCode::from(2)
+    let code = if stats.confirmed > 0 || stats.high_risk > 0 {
+        2
     } else {
-        ExitCode::SUCCESS
-    }
+        0
+    };
+    Ok(odina_resident::Inventory {
+        code,
+        report: json,
+        enumerated: !stats.truncated && stats.read_errors == 0,
+    })
 }
 
 #[cfg(test)]
@@ -500,7 +576,7 @@ mod tests {
     #[test]
     fn the_assembled_file_is_one_balanced_object() {
         let perf = r#"{"schema":"odina-perf/v1","metrics":[]}"#;
-        let out = assemble(perf, &[r#"{"schema":"odina-report/v1"}"#.to_string()]);
+        let out = assemble(perf, &[r#"{"schema":"odina-report/v1"}"#.to_string()], "{}");
         assert!(out.starts_with('{') && out.ends_with('}'));
         assert_eq!(out.matches('{').count(), out.matches('}').count());
         assert_eq!(out.matches('[').count(), out.matches(']').count());
@@ -514,13 +590,16 @@ mod tests {
         let _ = std::fs::create_dir_all(&dir);
         let f = dir.join("a.txt");
         std::fs::write(&f, b"not a portable executable").unwrap();
-        assert!(pe_info(&f).is_none());
+        assert!(pe_info(&mut File::open(&f).unwrap()).is_none());
         let _ = std::fs::remove_file(&f);
     }
 
+    #[cfg(feature = "instrument")]
     #[test]
-    fn a_missing_file_is_a_missing_measurement_not_an_error() {
-        assert!(pe_info(Path::new("/nonexistent/file.exe")).is_none());
+    fn a_missing_file_has_no_scan_or_export() {
+        let path = Path::new("/nonexistent/file.exe");
+        let mut s = Scanner::one_shot(path, Path::new("ignored"), None).unwrap();
+        assert!(s.scan_file(path, &mut Work::default()).is_err());
     }
 
     #[test]
@@ -528,11 +607,40 @@ mod tests {
         let dir = std::env::temp_dir().join("odina-check-report");
         let _ = std::fs::create_dir_all(&dir);
         let f = dir.join("فاتورة.pdf.exe");
-        std::fs::write(&f, b"payload").unwrap();
+        // Data-only PE header with an empty import directory. Reading from
+        // EOF without rewinding the hashed handle would lose its imphash.
+        let nt = 0x40;
+        let mut bytes = [0u8; 0x40 + 24 + 112];
+        bytes[..2].copy_from_slice(b"MZ");
+        bytes[0x3c] = nt as u8;
+        bytes[nt..nt + 4].copy_from_slice(b"PE\0\0");
+        bytes[nt + 20] = 112;
+        bytes[nt + 24..nt + 26].copy_from_slice(&0x10bu16.to_le_bytes());
+        std::fs::write(&f, bytes).unwrap();
 
-        let scanned = score_file(&f).expect("readable");
-        let report = report_for(&scanned);
-        let json = report.to_json_checked().expect("valid");
+        let mut handle = File::open(&f).unwrap();
+        let mut scanned =
+            crate::scan_opened(&f, &mut handle, Some(FULL_DIGEST_CAP)).expect("readable");
+        assert!(report_for(&scanned, || panic!("no enrichment for a clean file")).is_none());
+        // Exercise the export path without using a malware sample.
+        scanned.score.verdict = Verdict::Confirmed;
+        let json = report_for(&scanned, || {
+            (
+                pe_info(&mut handle).map(|i| i.imphash),
+                attributes_for(&handle, &f),
+            )
+        })
+        .expect("interrupting verdict with a full digest")
+        .to_json_checked()
+        .expect("valid");
+        assert!(json.contains("\"attributes\""));
+        assert!(
+            json.contains(r#""pe_hash":"d41d8cd98f00b204e9800998ecf8427e""#),
+            "{json}"
+        );
+        drop(handle);
+        scanned.hashes.full.clear();
+        assert!(report_for(&scanned, || panic!("no enrichment above the cap")).is_none());
 
         assert!(!json.contains("فاتورة"), "{json}");
         assert!(!json.contains("odina-check-report"), "{json}");
@@ -708,7 +816,7 @@ mod tests {
         let _ = std::fs::create_dir_all(&dir);
         let f = dir.join("a.exe");
         std::fs::write(&f, b"x").unwrap();
-        assert!(attributes_for(&f).executable);
+        assert!(attributes_for(&File::open(&f).unwrap(), &f).executable);
         let _ = std::fs::remove_file(&f);
     }
 }
