@@ -1,0 +1,18 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+[package]
+name = "odina-browser-host"
+description = "One user gesture, one scoped local IPC request. No network or scan engine."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+odina-resident = { path = "../odina-resident" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+odina-cache = { path = "../odina-cache" }

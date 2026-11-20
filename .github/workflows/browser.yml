@@ -1,0 +1,61 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (c) 2026 bifa90 — Odina
+name: Browser context menu
+on:
+  pull_request:
+    paths:
+      - 'browser-extension/**'
+      - 'crates/**'
+      - 'tools/browser/**'
+      - 'tools/browser-setup.py'
+      - 'locales/**'
+      - 'Cargo.*'
+      - '.github/workflows/browser.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  integration:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Build host and resident, test G1 and one-shot consent
+        shell: bash
+        run: |
+          cargo build --locked --release -p odina-cli --features instrument -p odina-browser-host
+          cargo test --locked --release -p odina-cli --features instrument --test g1 --test resident
+          cargo test --locked --release -p odina-browser-host -p odina-resident -p odina-cache
+          node --test tools/browser/test-extension.mjs
+          python tools/browser-setup.py check-locales
+      - name: Install test browser (test environment only)
+        if: runner.os == 'Linux'
+        run: |
+          python -m pip install -r tools/ci/requirements-site.txt
+          python -m playwright install --with-deps --no-shell chromium
+      - name: Disposable profile or native pipe, offline functional + timing witness
+        shell: bash
+        env:
+          PYTHONUTF8: '1'
+        run: |
+          ext=.exe; args=()
+          if [[ "$RUNNER_OS" == Linux ]]; then ext=''; args=(--chromium --deny-network); fi
+          python tools/browser/verify.py --cli "target/release/odina$ext" --host "target/release/odina-browser-host$ext" --out browser-lab.json --samples 50 "${args[@]}" 2>&1 | tee browser-lab.log || { echo "::error title=Browser witness::$(tail -4 browser-lab.log | tr '\n' ' ')"; exit 1; }
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-witness-${{ matrix.os }}
+          path: |
+            browser-lab.json
+            browser-lab.log

@@ -9,7 +9,7 @@ use odina_core::assessment::{assess, Assessment};
 use odina_core::{g1_reference::PrefixFilter, FileHashes};
 use std::{
     fs::{File, OpenOptions},
-    io,
+    io::{self, Read},
     path::Path,
 };
 
@@ -51,13 +51,20 @@ fn open_regular(path: &Path) -> io::Result<File> {
     Ok(file)
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub(super) enum ReadMode {
+    Inventory,
+    Delta,
+    Explicit,
+}
 pub(super) fn scan(
     path: &Path,
     filter: &PrefixFilter,
     cache: &mut Option<Cache>,
     work: &mut Work,
-    delta: bool,
+    mode: ReadMode,
 ) -> io::Result<(Assessment, File)> {
+    let delta = mode != ReadMode::Inventory;
     for _ in 0..2 {
         let mut file = open_regular(path)?; // even hits must still be openable
         let proof = if delta {
@@ -65,6 +72,9 @@ pub(super) fn scan(
         } else {
             None
         };
+        if mode == ReadMode::Explicit && proof.is_some_and(|s| s.len > FULL_DIGEST_CAP) {
+            return Err(io::Error::other("explicit digest cap"));
+        }
         let initial = cache.as_ref().and_then(|_| stamp(&file));
         let key = initial.and_then(|s| cache.as_ref().map(|c| c.key(path, s)));
         let mut preliminary = assess(path, FileHashes::default());
@@ -86,8 +96,25 @@ pub(super) fn scan(
                 return Ok((preliminary, file));
             }
         }
-        let (hashes, bytes) =
-            filter.check_reader(&mut file, FULL_DIGEST_CAP, preliminary.score.interrupts())?;
+        let (hashes, bytes) = if mode == ReadMode::Explicit {
+            // Also bound a source that grows after fstat. A capped/partial digest
+            // must never turn a consented full verification into a negative.
+            let result = filter.check_reader(
+                file.by_ref().take(FULL_DIGEST_CAP + 1),
+                FULL_DIGEST_CAP,
+                true,
+            )?;
+            if result
+                .0
+                .as_ref()
+                .map_or(true, FileHashes::full_digest_skipped)
+            {
+                return Err(io::Error::other("incomplete explicit digest"));
+            }
+            result
+        } else {
+            filter.check_reader(&mut file, FULL_DIGEST_CAP, preliminary.score.interrupts())?
+        };
         work.streamed_bytes += bytes;
         let report = if let Some(hashes) = hashes {
             work.sha_files += 1;
@@ -114,4 +141,41 @@ pub(super) fn scan(
         return Ok((report, file));
     }
     Err(io::Error::other("file did not remain stable"))
+}
+#[cfg(test)]
+mod explicit_tests {
+    use super::*;
+    #[test]
+    fn explicit_negative_still_hashes_the_whole_file_and_never_uses_a_hint() {
+        let path = std::env::temp_dir().join(format!("odina-verify-one-{}", std::process::id()));
+        let f = OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .open(&path)
+            .unwrap();
+        drop(f);
+        let data = b"ordinary prefix, not a catalog candidate";
+        std::fs::write(&path, data).unwrap();
+        let mut w = Work::default();
+        let (a, file) = scan(
+            &path,
+            &PrefixFilter::from_catalog(),
+            &mut None,
+            &mut w,
+            ReadMode::Explicit,
+        )
+        .unwrap();
+        assert_eq!(a.hashes, odina_core::hashing::hash_bytes(data));
+        assert_eq!(
+            (
+                w.sha_files,
+                w.bloom_negatives,
+                w.cache_hits,
+                w.streamed_bytes
+            ),
+            (1, 0, 0, data.len() as u64)
+        );
+        drop(file);
+        std::fs::remove_file(path).unwrap();
+    }
 }

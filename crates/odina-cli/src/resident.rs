@@ -59,7 +59,7 @@ fn value(a: &odina_core::assessment::Assessment) -> FileVerdict {
     }
 }
 impl Session<'_> {
-    fn read_change(&mut self, rel: &Path) -> io::Result<FileVerdict> {
+    fn read_one(&mut self, rel: &Path, explicit: bool) -> io::Result<FileVerdict> {
         let named = self.named(rel);
         let expected = if self.single {
             self.scope.clone()
@@ -77,11 +77,15 @@ impl Session<'_> {
         // failure as well: a newly recorded private hint isn't a successful publication.
         let result = (|| {
             confined()?;
-            let a = self.scanner.scan_changed(&named)?;
+            let a = if explicit {
+                self.scanner.verify_file(&named)?
+            } else {
+                self.scanner.scan_changed(&named)?
+            };
             confined()?;
             Ok(value(&a))
         })();
-        if result.is_err() {
+        if !explicit && result.is_err() {
             self.scanner.forget(&named);
         }
         result
@@ -124,6 +128,9 @@ impl Scans for Session<'_> {
             },
         )
     }
+    fn verify(&mut self, rel: &Path) -> io::Result<FileVerdict> {
+        self.read_one(rel, true)
+    }
     fn forget(&mut self, rel: &Path) {
         self.scanner.forget(&self.named(rel));
     }
@@ -132,14 +139,14 @@ impl Scans for Session<'_> {
         // sharing/lock violations, with a finite budget, never a timer during idle.
         #[cfg(windows)]
         for ms in [2, 8, 32, 128] {
-            match self.read_change(rel) {
+            match self.read_one(rel, false) {
                 Err(e) if matches!(e.raw_os_error(), Some(32 | 33)) => {
                     std::thread::sleep(std::time::Duration::from_millis(ms))
                 }
                 r => return r,
             }
         }
-        self.read_change(rel)
+        self.read_one(rel, false)
     }
 }
 pub fn command(cmd: &str, args: &[String]) -> ExitCode {

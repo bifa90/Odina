@@ -1,0 +1,6 @@
+/* SPDX-License-Identifier: AGPL-3.0-or-later */
+/* Copyright (c) 2026 bifa90 — Odina */
+:root { color-scheme:light dark; font: 16px/1.5 system-ui,sans-serif; --bg:#fff; --text:#14181c; --warn:#8a5200; --danger:#b3261e; --accent:#0e7c6b; --on:#fff; --focus:#0b5fff; }
+@media(prefers-color-scheme:dark){:root{--bg:#24272b;--text:#f2f4f6;--warn:#e0a33a;--danger:#ff7b72;--accent:#3fc7b0;--on:#0b1416;--focus:#7baaff}}
+body{margin:0;background:var(--bg);color:var(--text)}main{padding:16px 24px;border-inline-start:4px solid var(--warn)}main.threat{border-color:var(--danger)}header{font-weight:600}h1{font-size:1.25rem;margin-block:8px}bdi{font-family:ui-monospace,monospace;overflow-wrap:anywhere}footer{display:flex;gap:8px;flex-wrap:wrap}button{font:inherit;min-height:44px;padding:4px 16px;border:1px solid currentColor;border-radius:8px;color:inherit;background:transparent}#deep{background:var(--accent);color:var(--on)}button:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+button:disabled{opacity:.65}

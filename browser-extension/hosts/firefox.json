@@ -1,0 +1,9 @@
+{
+  "name": "org.odina.context",
+  "description": "Local read-only Odina inspection",
+  "path": "REPLACED_BY_USER_INSTALLER",
+  "type": "stdio",
+  "allowed_extensions": [
+    "context-menu@odina.local"
+  ]
+}

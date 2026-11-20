@@ -497,3 +497,17 @@ recovery.case_invalid = Verificación fallida
 settings.repair_db.install = Instalación aparte
 settings.repair_db.instructions = Extrae { $package } de la misma versión de Odina junto al programa, sin cambiar las carpetas.
 settings.repair_db.releases = Paquetes publicados
+
+# Browser context menu (D48)
+browser.menu = Analizar con Odina
+browser.description = Comprueba la selección local solo cuando se lo pides.
+browser.suspect = Este archivo es sospechoso.
+browser.consequence = Odina leerá un archivo sospechoso de la selección para verificar su huella localmente. No cambiará nada.
+browser.deep = Análisis profundo
+browser.ignore = Ignorar
+browser.confirmed = Odina ha encontrado una amenaza confirmada en la selección.
+browser.limits = Esta comprobación no bloqueó la ejecución ni movió el archivo. La cuarentena aún no está disponible.
+browser.stillSuspect = El análisis no confirmó ninguna infección. El archivo no ha cambiado.
+browser.close = Cerrar
+browser.working = Verificando localmente…
+browser.quarantine = Mover a cuarentena

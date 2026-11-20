@@ -1,0 +1,41 @@
+{
+  "menu": {
+    "message": "Verificar com Odina"
+  },
+  "description": {
+    "message": "Verifica a seleção local somente quando você solicita."
+  },
+  "suspect": {
+    "message": "Este arquivo é suspeito."
+  },
+  "consequence": {
+    "message": "O Odina lerá um arquivo suspeito da seleção para verificar sua impressão digital localmente. Nada será alterado."
+  },
+  "deep": {
+    "message": "Verificação profunda"
+  },
+  "ignore": {
+    "message": "Ignorar"
+  },
+  "confirmed": {
+    "message": "O Odina encontrou uma ameaça confirmada na seleção."
+  },
+  "limits": {
+    "message": "Esta verificação não impediu a execução nem moveu o arquivo. A quarentena ainda não está disponível."
+  },
+  "stillSuspect": {
+    "message": "A verificação não confirmou infecção. O arquivo permanece inalterado."
+  },
+  "close": {
+    "message": "Fechar"
+  },
+  "working": {
+    "message": "Verificando localmente…"
+  },
+  "quarantine": {
+    "message": "Mover para quarentena"
+  },
+  "language": {
+    "message": "pt-BR"
+  }
+}

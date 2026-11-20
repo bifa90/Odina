@@ -497,3 +497,17 @@ recovery.case_invalid = पुष्टि विफल
 settings.repair_db.install = अलग स्थापना
 settings.repair_db.instructions = इसी Odina रिलीज़ का { $package } प्रोग्राम के पास निकालें। फ़ोल्डरों का क्रम न बदलें।
 settings.repair_db.releases = रिलीज़ पैकेज
+
+# Browser context menu (D48)
+browser.menu = Odina से जाँचें
+browser.description = आपके कहने पर ही स्थानीय चयन की जाँच करता है।
+browser.suspect = यह फ़ाइल संदिग्ध है।
+browser.consequence = Odina चयन में से एक संदिग्ध फ़ाइल पढ़कर उसके फ़िंगरप्रिंट की स्थानीय जाँच करेगा। कुछ भी नहीं बदलेगा।
+browser.deep = गहन जाँच
+browser.ignore = अनदेखा करें
+browser.confirmed = Odina को चयन में एक पुष्ट खतरा मिला।
+browser.limits = इस जाँच ने फ़ाइल को चलने से नहीं रोका और न ही उसे कहीं भेजा। क्वारंटीन अभी उपलब्ध नहीं है।
+browser.stillSuspect = जाँच में संक्रमण की पुष्टि नहीं हुई। फ़ाइल में कोई बदलाव नहीं हुआ।
+browser.close = बंद करें
+browser.working = स्थानीय जाँच जारी है…
+browser.quarantine = क्वारंटीन में भेजें

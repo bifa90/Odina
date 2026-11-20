@@ -9,6 +9,10 @@ use std::{
     sync::{Condvar, Mutex},
 };
 
+mod selection;
+use selection::Grants;
+pub(super) use selection::Revision;
+
 const QUEUE: usize = 4096; // distinct pending paths; repeats replace, never extend the queue
 const ROWS: usize = 65_536;
 const TOMBSTONES: usize = 1024;
@@ -30,6 +34,10 @@ pub(crate) struct State {
     pub manual: Option<Option<Channel>>,
     pub manual_busy: bool,
     pub full_busy: bool,
+    pub verify_busy: bool,
+    pub verification: Option<(PathBuf, Revision, Channel)>,
+    grants: Grants,
+
     pub completed: u64, // completed MANUAL requests, as in IPC v1
     pub last: Option<u8>,
     terminal: bool, // unrecoverable native error: explicit restart after correcting the cause
@@ -56,6 +64,7 @@ pub(crate) struct State {
 pub(crate) enum Task {
     Full(u64, Option<Option<Channel>>),
     One(u64, PathBuf, Event),
+    Verify(PathBuf, Revision, Channel),
 }
 impl State {
     fn invalidate_scope(&mut self) {
@@ -107,6 +116,9 @@ impl State {
             self.rows.clear();
             self.retired.clear();
             return Some(Task::Full(self.epoch, self.manual.take()));
+        }
+        if let Some((path, ticket, ch)) = self.verification.take() {
+            return Some(Task::Verify(path, ticket, ch));
         }
         let path = self.order.pop_front()?;
         let event = self
@@ -199,7 +211,7 @@ impl State {
     }
     pub fn json(&self) -> String {
         let backend = crate::watch::BACKEND;
-        let phase = if self.full_busy || self.manual_busy {
+        let phase = if self.full_busy || self.manual_busy || self.verify_busy {
             "scanning"
         } else if self.active_delta || !self.pending.is_empty() {
             "processing"
