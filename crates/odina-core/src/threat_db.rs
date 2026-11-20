@@ -7,7 +7,7 @@
 //! - Last-known-good fallback: a failed update never replaces or corrupts the active DB.
 //! - Monotonic version tracking so the Smart Cache invalidates when the DB version changes.
 
-use crate::hashing::sha256_bytes;
+use crate::hashing::sha256_hex;
 use std::fmt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
