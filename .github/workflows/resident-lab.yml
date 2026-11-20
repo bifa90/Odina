@@ -43,8 +43,8 @@ jobs:
           bin=target/release/odina
           if [[ "$RUNNER_OS" == Windows ]]; then bin+=.exe; fi
           python -m unittest discover -s tools/perf -p 'test_verify_resident.py'
-          python tools/perf/test-resident-gap.py --binary "$bin"
-          python tools/perf/verify-resident.py --binary "$bin" --root tests/fixtures/safe --out smoke.json --idle-seconds 3 --windows 1 --probe-changes --events-per-class 12 --expect-files 20
+          python tools/perf/test-resident-gap.py --binary "$bin" 2>&1 | tee gap.log || { echo "::error title=Native overflow::$(tail -1 gap.log)"; exit 1; }
+          python tools/perf/verify-resident.py --binary "$bin" --root tests/fixtures/safe --out smoke.json --idle-seconds 3 --windows 1 --probe-changes --events-per-class 12 --expect-files 20 2>&1 | tee observe.log || { echo "::error title=Witness::$(tail -1 observe.log)"; exit 1; }
           python - <<'PY'
           import json
           from pathlib import Path
@@ -64,3 +64,5 @@ jobs:
           path: |
             smoke.json
             native.log
+            gap.log
+            observe.log
