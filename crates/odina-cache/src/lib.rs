@@ -25,20 +25,43 @@ impl Scanner {
         })
     }
     pub fn resident(target: &Path, cache: Option<&Path>) -> io::Result<Self> {
-        let index = match cache {
+        let mut index = match cache {
             Some(dir) => Cache::open(dir, target, None)?,
             None => Cache::memory()?,
         };
+        index.track();
         Ok(Self {
             filter: PrefixFilter::from_catalog(),
             index: Some(index),
         })
     }
     pub fn scan_file(&mut self, path: &Path, work: &mut Work) -> io::Result<(Assessment, File)> {
-        engine::scan(path, &self.filter, &mut self.index, work)
+        engine::scan(path, &self.filter, &mut self.index, work, false)
     }
-    /// Seal a full inventory, not a single watcher event. A future delta API
-    /// must preserve unrelated rows and invalidate removed/renamed identities.
+    pub fn begin_pass(&mut self) {
+        if let Some(c) = &mut self.index {
+            c.begin_pass();
+        }
+    }
+    pub fn forget(&mut self, path: &Path) {
+        if let Some(c) = &mut self.index {
+            c.forget(path);
+        }
+    }
+    /// A native notice forces a fresh stream, with handle/name identity checks even on a cache miss.
+    /// No full-pass rotation or disk index write for a delta.
+    pub fn scan_changed(&mut self, path: &Path) -> io::Result<Assessment> {
+        self.forget(path);
+        engine::scan(
+            path,
+            &self.filter,
+            &mut self.index,
+            &mut Work::default(),
+            true,
+        )
+        .map(|(a, _)| a)
+    }
+    /// Seal only a full inventory.
     pub fn finish_pass(&mut self) -> io::Result<()> {
         self.index.as_mut().map_or(Ok(()), Cache::finish_pass)
     }

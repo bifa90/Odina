@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 bifa90 — Odina
-use super::{cache::Cache, stamp::stamp, FULL_DIGEST_CAP};
+use super::{
+    cache::Cache,
+    stamp::{stamp, state},
+    FULL_DIGEST_CAP,
+};
 use odina_core::assessment::{assess, Assessment};
 use odina_core::{g1_reference::PrefixFilter, FileHashes};
 use std::{
@@ -52,9 +56,15 @@ pub(super) fn scan(
     filter: &PrefixFilter,
     cache: &mut Option<Cache>,
     work: &mut Work,
+    delta: bool,
 ) -> io::Result<(Assessment, File)> {
     for _ in 0..2 {
         let mut file = open_regular(path)?; // even hits must still be openable
+        let proof = if delta {
+            Some(state(&file).ok_or_else(|| io::Error::other("no stable file identity"))?)
+        } else {
+            None
+        };
         let initial = cache.as_ref().and_then(|_| stamp(&file));
         let key = initial.and_then(|s| cache.as_ref().map(|c| c.key(path, s)));
         let mut preliminary = assess(path, FileHashes::default());
@@ -62,13 +72,16 @@ pub(super) fn scan(
         // freshly evaluated by assess(). Length exclusion, not the stored row,
         // proves V5 impossible. Candidate sizes always re-probe real bytes.
         if let (Some(s), Some(k), Some(c)) = (initial, key, cache.as_mut()) {
-            if !preliminary.score.interrupts() && filter.excludes_length(s.len) && c.silent_hint(k)
+            if !delta
+                && !preliminary.score.interrupts()
+                && filter.excludes_length(s.len)
+                && c.silent_hint(k)
             {
                 if stamp(&file) != Some(s) {
                     continue;
                 }
                 preliminary.hashes.size = s.len;
-                c.record(k, preliminary.score.verdict, None);
+                c.record(path, k, preliminary.score.verdict, None, false);
                 work.cache_hits += 1;
                 return Ok((preliminary, file));
             }
@@ -84,11 +97,19 @@ pub(super) fn scan(
             preliminary.hashes.size = bytes;
             preliminary
         };
+        if let Some(id) = proof {
+            if bytes != id.len
+                || state(&file) != Some(id)
+                || state(&open_regular(path)?) != Some(id)
+            {
+                continue;
+            }
+        }
         if let (Some(s), Some(k), Some(c)) = (initial, key, cache.as_mut()) {
             if stamp(&file) != Some(s) || bytes != s.len {
                 continue;
             }
-            c.record(k, report.score.verdict, Some(&report.hashes));
+            c.record(path, k, report.score.verdict, Some(&report.hashes), delta);
         }
         return Ok((report, file));
     }

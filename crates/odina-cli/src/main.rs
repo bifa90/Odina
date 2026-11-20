@@ -64,6 +64,7 @@ USAGE:
     # Resident prototype: instrumented build only
     odina serve <path> --service NAME [--cache-dir <private-directory>]
     odina status|scan-now|stop --service NAME
+    odina verdict <relative-path> --service NAME
     odina check <path> --service NAME --out <new-file>
     odina --version | --help
 
@@ -97,7 +98,7 @@ fn main() -> ExitCode {
         Some("selftest") => selftest(),
         Some("repair-db") => repair::command(&args[1..]),
         #[cfg(feature = "instrument")]
-        Some(cmd @ ("serve" | "status" | "scan-now" | "stop")) => {
+        Some(cmd @ ("serve" | "status" | "scan-now" | "stop" | "verdict")) => {
             resident::command(cmd, &args[1..])
         }
         // The public refusal is outside the module, so it has no check code.

@@ -26,6 +26,9 @@ type Rows = HashMap<u64, Row>;
 pub(super) struct Cache {
     dir: Option<PathBuf>,
     cwd: PathBuf,
+    // Resident-only reverse lookup for invalidation; these opaque tokens never leave memory.
+    paths: Option<HashMap<u64, u64>>,
+    disk_dirty: bool,
     previous: Rows,
     current: Rows,
 }
@@ -92,6 +95,8 @@ fn invalid(msg: &str) -> io::Error {
 impl Cache {
     pub(super) fn memory() -> io::Result<Self> {
         Ok(Self {
+            paths: None,
+            disk_dirty: false,
             dir: None,
             cwd: std::env::current_dir()?,
             previous: Rows::new(),
@@ -179,6 +184,8 @@ impl Cache {
         }
         let previous = load(&dir.join(FILE)).unwrap_or_default();
         Ok(Self {
+            paths: None,
+            disk_dirty: false,
             dir: Some(dir),
             cwd,
             previous,
@@ -186,6 +193,29 @@ impl Cache {
         })
     }
 
+    pub(super) fn track(&mut self) {
+        self.paths = Some(HashMap::new());
+    }
+    pub(super) fn begin_pass(&mut self) {
+        if let Some(paths) = &mut self.paths {
+            paths.clear();
+        }
+    }
+    fn token(path: &Path) -> u64 {
+        let mut h = DefaultHasher::new();
+        path.hash(&mut h);
+        h.finish()
+    }
+    pub(super) fn forget(&mut self, path: &Path) {
+        if let Some(key) = self
+            .paths
+            .as_mut()
+            .and_then(|p| p.remove(&Self::token(path)))
+        {
+            self.previous.remove(&key);
+            self.disk_dirty = true;
+        }
+    }
     pub(super) fn key(&self, path: &Path, stamp: Stamp) -> u64 {
         // Lossless native path (including non-UTF8 names), actual handle ID,
         // length, mtime AND change time. Opaque lookup token, not a MAC.
@@ -202,8 +232,19 @@ impl Cache {
             .get(&key)
             .is_some_and(|r| r.verdict != "alert")
     }
-    pub(super) fn record(&mut self, key: u64, verdict: Verdict, streamed: Option<&FileHashes>) {
-        if self.current.len() == LIMIT {
+    pub(super) fn record(
+        &mut self,
+        path: &Path,
+        key: u64,
+        verdict: Verdict,
+        streamed: Option<&FileHashes>,
+        delta: bool,
+    ) {
+        if if delta {
+            self.previous.len() == LIMIT
+        } else {
+            self.current.len() == LIMIT
+        } {
             return;
         }
         let verdict = match verdict {
@@ -218,22 +259,29 @@ impl Cache {
             Some(_) => "-",
             None => self.previous.get(&key).map_or("-", |r| r.sha.as_str()),
         };
-        self.current.insert(
-            key,
-            Row {
-                verdict: verdict.into(),
-                sha: sha.into(),
-            },
-        );
+        let row = Row {
+            verdict: verdict.into(),
+            sha: sha.into(),
+        };
+        if let Some(paths) = &mut self.paths {
+            paths.insert(Self::token(path), key);
+        }
+        if delta {
+            self.previous.insert(key, row);
+            self.disk_dirty = true;
+        } else {
+            self.current.insert(key, row);
+        }
     }
     pub(super) fn finish_pass(&mut self) -> io::Result<()> {
         // Rows describe one completed inventory. Do not reload or rebuild a
         // resident index between requests; never expose a row as a verdict.
         let published = match &self.dir {
-            Some(dir) if self.current != self.previous => self.publish(dir),
+            Some(dir) if self.disk_dirty || self.current != self.previous => self.publish(dir),
             _ => Ok(()),
         };
         if published.is_ok() {
+            self.disk_dirty = false;
             std::mem::swap(&mut self.previous, &mut self.current);
         }
         self.current.clear();

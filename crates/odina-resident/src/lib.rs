@@ -4,6 +4,8 @@
 //! Nothing here knows how to score a file, start itself, or open a TCP socket.
 use std::{io, path::Path};
 
+#[cfg(any(target_os = "linux", windows))]
+mod monitor;
 #[cfg(target_os = "linux")]
 #[path = "linux.rs"]
 mod native;
@@ -12,6 +14,8 @@ mod native;
 mod native;
 #[cfg(any(target_os = "linux", windows))]
 mod server;
+#[cfg(any(target_os = "linux", windows))]
+mod watch;
 #[cfg(any(target_os = "linux", windows))]
 mod wire;
 #[cfg(any(target_os = "linux", windows))]
@@ -24,10 +28,28 @@ pub enum Command<'a> {
     /// Already canonical on the client. Compared as opaque bytes, never opened by the server.
     Check(&'a Path),
     Stop,
+    /// Relative, read-only lookup. Never interpreted as a scan request.
+    Verdict(&'a Path),
 }
 pub struct Reply {
     pub code: u8,
     pub body: String,
+}
+#[derive(Clone, Copy, Debug)]
+pub struct FileVerdict {
+    pub band: &'static str,
+    pub bytes: u64,
+}
+pub struct Inventory {
+    pub code: u8,
+    pub report: String,
+    /// False if enumeration was incomplete. An unknown tree cannot become current.
+    pub enumerated: bool,
+}
+pub trait Scans: Send {
+    fn inventory(&mut self, seen: &mut dyn FnMut(&Path, FileVerdict)) -> io::Result<Inventory>;
+    fn changed(&mut self, relative: &Path) -> io::Result<FileVerdict>;
+    fn forget(&mut self, relative: &Path);
 }
 fn invalid(s: &'static str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, s)
@@ -53,11 +75,6 @@ pub fn request(name: &str, _: Command<'_>) -> io::Result<Reply> {
     ))
 }
 #[cfg(not(any(target_os = "linux", windows)))]
-pub fn serve(
-    name: &str,
-    _: &Path,
-    _: impl FnOnce(),
-    _: impl FnMut() -> io::Result<(u8, String)> + Send,
-) -> io::Result<()> {
+pub fn serve(name: &str, _: &Path, _: impl FnOnce(), _: impl Scans) -> io::Result<()> {
     request(name, Command::Status).map(|_| ())
 }

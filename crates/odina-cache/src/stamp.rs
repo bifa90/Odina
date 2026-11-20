@@ -14,10 +14,7 @@ pub(super) struct Stamp {
 
 #[cfg(target_os = "linux")]
 pub(super) fn stamp(file: &File) -> Option<Stamp> {
-    use std::{
-        mem::MaybeUninit,
-        os::unix::{fs::MetadataExt, io::AsRawFd},
-    };
+    use std::{mem::MaybeUninit, os::unix::io::AsRawFd};
     let mut fs = MaybeUninit::<libc::statfs>::uninit();
     // SAFETY: live fd and space for the platform's statfs, read only on success.
     let fs = unsafe {
@@ -40,6 +37,11 @@ pub(super) fn stamp(file: &File) -> Option<Stamp> {
     ) {
         return None;
     }
+    state(file)
+}
+#[cfg(target_os = "linux")]
+pub(super) fn state(file: &File) -> Option<Stamp> {
+    use std::os::unix::fs::MetadataExt;
     let m = file.metadata().ok()?;
     m.is_file().then(|| Stamp {
         len: m.len(),
@@ -50,6 +52,14 @@ pub(super) fn stamp(file: &File) -> Option<Stamp> {
 
 #[cfg(windows)]
 pub(super) fn stamp(file: &File) -> Option<Stamp> {
+    windows_state(file, true)
+}
+#[cfg(windows)]
+pub(super) fn state(file: &File) -> Option<Stamp> {
+    windows_state(file, false)
+}
+#[cfg(windows)]
+fn windows_state(file: &File, require_cacheable_volume: bool) -> Option<Stamp> {
     use std::{
         ffi::c_void,
         mem::{size_of, MaybeUninit},
@@ -95,17 +105,18 @@ pub(super) fn stamp(file: &File) -> Option<Stamp> {
     // SAFETY: all sizes match the two documented Win32 structures. Null
     // volume fields are optional. A local volume GUID is required (not UNC).
     let (basic, id) = unsafe {
-        if GetFinalPathNameByHandleW(h, null_mut(), 0, 1) == 0
-            || GetVolumeInformationByHandleW(
-                h,
-                null_mut(),
-                0,
-                null_mut(),
-                null_mut(),
-                null_mut(),
-                fs.as_mut_ptr(),
-                fs.len() as u32,
-            ) == 0
+        if (require_cacheable_volume
+            && (GetFinalPathNameByHandleW(h, null_mut(), 0, 1) == 0
+                || GetVolumeInformationByHandleW(
+                    h,
+                    null_mut(),
+                    0,
+                    null_mut(),
+                    null_mut(),
+                    null_mut(),
+                    fs.as_mut_ptr(),
+                    fs.len() as u32,
+                ) == 0))
             || GetFileInformationByHandleEx(
                 h,
                 0,
@@ -123,8 +134,9 @@ pub(super) fn stamp(file: &File) -> Option<Stamp> {
     let fs = &fs[..fs.iter().position(|&c| c == 0)?];
     if !m.is_file()
         || basic.attributes & 0x400 != 0
-        || !(fs.iter().copied().eq("NTFS".encode_utf16())
-            || fs.iter().copied().eq("ReFS".encode_utf16()))
+        || (require_cacheable_volume
+            && !(fs.iter().copied().eq("NTFS".encode_utf16())
+                || fs.iter().copied().eq("ReFS".encode_utf16())))
     {
         return None;
     }
@@ -141,5 +153,10 @@ pub(super) fn stamp(file: &File) -> Option<Stamp> {
 
 #[cfg(not(any(target_os = "linux", windows)))]
 pub(super) fn stamp(_: &File) -> Option<Stamp> {
+    None
+}
+
+#[cfg(not(any(target_os = "linux", windows)))]
+pub(super) fn state(_: &File) -> Option<Stamp> {
     None
 }

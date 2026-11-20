@@ -250,7 +250,11 @@ pub fn walk(dir: &Path) -> Walked {
         };
 
         let mut paths: Vec<(bool, PathBuf)> = Vec::new();
-        for entry in entries.take(MAX_ENTRIES_PER_DIR) {
+        for (index, entry) in entries.enumerate() {
+            if index == MAX_ENTRIES_PER_DIR {
+                truncated = true;
+                break;
+            }
             let Ok(entry) = entry else {
                 read_errors += 1;
                 continue;
@@ -261,6 +265,21 @@ pub fn walk(dir: &Path) -> Walked {
                 read_errors += 1;
                 continue;
             };
+            #[cfg(windows)]
+            {
+                use std::os::windows::fs::MetadataExt;
+                match entry.metadata() {
+                    Ok(m) if m.file_attributes() & 0x400 != 0 => {
+                        links_skipped += 1;
+                        continue;
+                    }
+                    Err(_) => {
+                        read_errors += 1;
+                        continue;
+                    }
+                    _ => (),
+                }
+            }
             if kind.is_symlink() {
                 links_skipped += 1;
                 continue;
@@ -370,8 +389,10 @@ pub fn command(args: &[String]) -> std::process::ExitCode {
             return ExitCode::FAILURE;
         }
     };
-    match run_pass(&mut scanner, path, idle, started, usize::MAX) {
-        Ok((code, json)) => {
+    match run_pass(&mut scanner, path, idle, started, usize::MAX, &mut |_| {}) {
+        Ok(odina_resident::Inventory {
+            code, report: json, ..
+        }) => {
             if let Err(e) = std::fs::write(&out_path, json) {
                 eprintln!("odina: cannot write {}: {e}", out_path.display());
                 return ExitCode::FAILURE;
@@ -395,7 +416,9 @@ pub(super) fn run_pass(
     idle: Meter,
     started: std::time::Instant,
     max_export: usize,
-) -> std::io::Result<(u8, String)> {
+    seen: &mut dyn FnMut(&odina_core::assessment::Assessment),
+) -> std::io::Result<odina_resident::Inventory> {
+    scanner.begin_pass();
     let mut work = Work::default();
     let mut report_bytes = 0usize;
     let mut stats = ScanStats::default();
@@ -438,6 +461,7 @@ pub(super) fn run_pass(
         }
         match scanner.scan_file(file, &mut work) {
             Ok((scanned, mut handle)) => {
+                seen(&scanned);
                 stats.files += 1;
                 stats.bytes += scanned.hashes.size;
                 match scanned.score.verdict {
@@ -511,7 +535,11 @@ pub(super) fn run_pass(
     } else {
         0
     };
-    Ok((code, json))
+    Ok(odina_resident::Inventory {
+        code,
+        report: json,
+        enumerated: !stats.truncated && stats.read_errors == 0,
+    })
 }
 
 #[cfg(test)]

@@ -4,11 +4,11 @@
 use super::check;
 use odina_cache::Scanner;
 use odina_instrument::Meter;
-use odina_resident::{request, serve, Command, MAX_REPLY};
+use odina_resident::{request, serve, Command, FileVerdict, Inventory, Scans, MAX_REPLY};
 use std::{
     fs,
     io::{self, Write},
-    path::Path,
+    path::{Path, PathBuf},
     process::ExitCode,
     time::Instant,
 };
@@ -39,6 +39,86 @@ fn data_target(p: &Path) -> io::Result<()> {
     }
     Ok(())
 }
+struct Session<'a> {
+    scanner: Scanner,
+    root: &'a Path,
+    scope: PathBuf,
+    single: bool,
+}
+fn value(a: &odina_core::assessment::Assessment) -> FileVerdict {
+    use odina_core::Verdict::*;
+    FileVerdict {
+        bytes: a.hashes.size,
+        band: match a.score.verdict {
+            Clean => "clean",
+            Monitor => "monitor",
+            Suspicious => "suspicious",
+            HighRisk => "high_risk",
+            Confirmed => "confirmed",
+        },
+    }
+}
+impl Session<'_> {
+    fn named(&self, rel: &Path) -> PathBuf {
+        if self.single {
+            self.root.to_owned()
+        } else {
+            self.root.join(rel)
+        }
+    }
+    fn check_root(&self) -> io::Result<()> {
+        data_target(self.root)?;
+        if self.root.canonicalize()? != self.scope {
+            return Err(bad("configured root changed"));
+        }
+        Ok(())
+    }
+}
+impl Scans for Session<'_> {
+    fn inventory(&mut self, seen: &mut dyn FnMut(&Path, FileVerdict)) -> io::Result<Inventory> {
+        self.check_root()?;
+        let (root, scope, single) = (self.root, &self.scope, self.single);
+        check::run_pass(
+            &mut self.scanner,
+            root,
+            Meter::now(),
+            Instant::now(),
+            MAX_REPLY,
+            &mut |a| {
+                let rel = if single {
+                    Path::new(scope.file_name().unwrap())
+                } else {
+                    a.path
+                        .strip_prefix(root)
+                        .expect("inventory inside configured root")
+                };
+                seen(rel, value(a));
+            },
+        )
+    }
+    fn forget(&mut self, rel: &Path) {
+        self.scanner.forget(&self.named(rel));
+    }
+    fn changed(&mut self, rel: &Path) -> io::Result<FileVerdict> {
+        let named = self.named(rel);
+        let expected = if self.single {
+            self.scope.clone()
+        } else {
+            self.scope.join(rel)
+        };
+        // Compare canonical identity for confinement; score the original spelling, just as CHECK does.
+        self.scanner.forget(&named);
+        if named.canonicalize()? != expected {
+            return Err(bad("changed path redirected"));
+        }
+        let result = self.scanner.scan_changed(&named);
+        if named.canonicalize()? != expected {
+            self.scanner.forget(&named);
+            return Err(bad("changed path redirected"));
+        }
+        result.map(|a| value(&a))
+    }
+}
 pub fn command(cmd: &str, args: &[String]) -> ExitCode {
     code(run(cmd, args))
 }
@@ -57,20 +137,28 @@ fn run(cmd: &str, args: &[String]) -> io::Result<u8> {
         let root = Path::new(root);
         data_target(root)?;
         let scope = root.canonicalize()?;
-        let mut scanner = Scanner::resident(root, dir)?;
+        let scanner = Scanner::resident(root, dir)?;
+        let session = Session {
+            scanner,
+            root,
+            scope: scope.clone(),
+            single: scope.is_file(),
+        };
         serve(
             name,
             &scope,
-            || println!("READY odina-resident/v1 (manual scans; no watcher)"),
-            || {
-                data_target(root)?;
-                if root.canonicalize()? != scope {
-                    return Err(bad("configured root changed"));
-                }
-                check::run_pass(&mut scanner, root, Meter::now(), Instant::now(), MAX_REPLY)
-            },
+            || println!("READY odina-resident/v2 (check status for coverage)"),
+            session,
         )?;
         return Ok(0);
+    }
+    if let ("verdict", [p, flag, name]) = (cmd, args) {
+        if flag != "--service" {
+            return Err(bad("verdict <relative-path> --service NAME"));
+        }
+        let r = request(name, Command::Verdict(Path::new(p)))?;
+        println!("{}", r.body);
+        return Ok(r.code);
     }
     let [flag, name] = args else {
         return Err(bad("expected --service NAME"));

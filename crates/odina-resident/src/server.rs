@@ -2,15 +2,15 @@
 // Copyright (c) 2026 bifa90 — Odina
 use super::{
     invalid,
+    monitor::{Shared, Task},
     native::{Listener, Peer},
-    validate_name,
+    validate_name, watch,
     wire::{self, Channel},
-    Command, Reply, MAX_REPLY,
+    Command, Reply, Scans, MAX_REPLY,
 };
 use std::{
     io::{self, Write},
     path::Path,
-    sync::{mpsc, Mutex},
     thread,
 };
 
@@ -18,6 +18,7 @@ const STATUS: u8 = 1;
 const CHECK: u8 = 2;
 const SCAN_NOW: u8 = 3;
 const STOP: u8 = 4;
+const VERDICT: u8 = 5;
 
 pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
     validate_name(name)?;
@@ -25,6 +26,12 @@ pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
         Command::Status => (STATUS, &[][..]),
         Command::ScanNow => (SCAN_NOW, &[][..]),
         Command::Stop => (STOP, &[][..]),
+        Command::Verdict(p) => (
+            VERDICT,
+            p.to_str()
+                .ok_or_else(|| invalid("lookup expects UTF-8"))?
+                .as_bytes(),
+        ),
         Command::Check(p) => (CHECK, p.as_os_str().as_encoded_bytes()),
     };
     let mut ch = Channel::new(Peer::connect(name)?);
@@ -40,165 +47,215 @@ pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
     Ok(Reply { code, body })
 }
 
-#[derive(Default)]
-struct State {
-    busy: bool,
-    completed: u64,
-    last: Option<u8>,
-}
-impl State {
-    fn json(&self) -> String {
-        let phase = if self.busy { "scanning" } else { "idle" };
-        let last = self.last.map_or_else(|| "null".into(), |c| c.to_string());
-        format!(
-            r#"{{"schema":"odina-resident/v1","phase":"{phase}","watching":false,"completed":{},"last_exit":{last}}}"#,
-            self.completed
-        )
-    }
-}
 fn reply(ch: &mut Channel, code: u8, body: impl Into<String>) {
     let _ = ch.reply(Reply {
         code,
         body: body.into(),
     });
 }
-
-/// One fixed canonical scope, one worker, no periodic wakeups or jobs lost in
-/// an unbounded queue. The service stays live if a client exits during a scan.
-pub fn serve(
-    name: &str,
-    root: &Path,
-    ready: impl FnOnce(),
-    mut scan: impl FnMut() -> io::Result<(u8, String)> + Send,
-) -> io::Result<()> {
-    validate_name(name)?;
-    let mut listener = Listener::bind(name)?;
-    let state = Mutex::new(State::default());
-    thread::scope(|threads| {
-        let (jobs, rx) = mpsc::sync_channel::<Option<Channel>>(1);
-        let shared = &state;
-        threads.spawn(move || {
-            for client in rx {
-                let (code, body) = match scan() {
-                    Ok((c, b)) if matches!(c, 0 | 2) && b.len() <= MAX_REPLY => (c, b),
-                    _ => (1, r#"{"error":"scan_or_export_failed"}"#.into()),
+fn worker(shared: &Shared, cancel: &watch::Cancel, mut scans: impl Scans) {
+    loop {
+        let mut s = shared.state.lock().unwrap();
+        let task = loop {
+            if s.stopping {
+                return;
+            }
+            if let Some(work) = s.next() {
+                break work;
+            }
+            s = shared.wake.wait(s).unwrap();
+        };
+        drop(s);
+        match task {
+            Task::One(epoch, path, e) => {
+                let v = if e.remove {
+                    scans.forget(&path);
+                    None
+                } else {
+                    scans.changed(&path).ok()
                 };
-                {
-                    let mut s = shared.lock().unwrap();
+                shared.state.lock().unwrap().publish(epoch, &path, e, v);
+            }
+            Task::Full(epoch, manual) => {
+                let mut fits = true;
+                let result = scans.inventory(&mut |path, v| {
+                    fits &= shared.state.lock().unwrap().seed(epoch, path, v);
+                });
+                let (code, body, enumerated) = match result {
+                    Ok(r) if matches!(r.code, 0 | 2) && r.report.len() <= MAX_REPLY => {
+                        (r.code, r.report, r.enumerated && fits)
+                    }
+                    _ => (1, r#"{"error":"scan_or_export_failed"}"#.into(), false),
+                };
+                let mut s = shared.state.lock().unwrap();
+                s.end_full(epoch, enumerated);
+                if manual.is_some() {
+                    s.manual_busy = false;
                     s.completed += 1;
                     s.last = Some(code);
-                    s.busy = false;
                 }
-                if let Some(mut ch) = client {
+                drop(s);
+                cancel.wake();
+                if let Some(Some(mut ch)) = manual {
                     reply(&mut ch, code, body);
                 }
             }
-        });
-        ready();
-        loop {
-            let peer = match listener.accept() {
-                Ok(s) => s,
-                Err(e)
-                    if matches!(
-                        e.kind(),
-                        io::ErrorKind::Interrupted | io::ErrorKind::PermissionDenied
-                    ) =>
-                {
-                    continue
-                }
-                Err(e) => return Err(e),
-            };
-            let mut ch = Channel::new(peer);
-            let (op, arg) = match wire::read_frame(&mut ch, wire::LIMIT) {
-                Ok(f) => f,
-                Err(_) => continue,
-            };
-            if (op == CHECK && arg != root.as_os_str().as_encoded_bytes())
-                || (op != CHECK && !arg.is_empty())
+        }
+    }
+}
+fn control(mut listener: Listener, root: &Path, shared: &Shared) -> io::Result<()> {
+    loop {
+        let peer = match listener.accept() {
+            Ok(s) => s,
+            Err(e)
+                if matches!(
+                    e.kind(),
+                    io::ErrorKind::Interrupted | io::ErrorKind::PermissionDenied
+                ) =>
             {
-                reply(&mut ch, 1, r#"{"error":"invalid_scope"}"#);
-                continue;
+                continue
             }
-            let mut s = state.lock().unwrap();
-            if op == STATUS {
-                let json = s.json();
-                drop(s);
-                reply(&mut ch, 0, json);
-                continue;
+            Err(e) => return Err(e),
+        };
+        let mut ch = Channel::new(peer);
+        let (op, arg) = match wire::read_frame(&mut ch, wire::LIMIT) {
+            Ok(f) => f,
+            Err(_) => continue,
+        };
+        let mut s = shared.state.lock().unwrap();
+        let (code, body) = match op {
+            STATUS if arg.is_empty() => (0, s.json()),
+            VERDICT => match std::str::from_utf8(&arg)
+                .ok()
+                .map(Path::new)
+                .filter(|p| watch::relative(p))
+            {
+                Some(p) => (0, s.lookup(p)),
+                None => (1, r#"{"error":"invalid_relative_key"}"#.into()),
+            },
+            CHECK if arg != root.as_os_str().as_encoded_bytes() => {
+                (1, r#"{"error":"invalid_scope"}"#.into())
             }
-            if !matches!(op, CHECK | SCAN_NOW | STOP) {
-                drop(s);
-                reply(&mut ch, 1, r#"{"error":"unknown_command"}"#);
-                continue;
+            _ if op != CHECK && !arg.is_empty() => (1, r#"{"error":"unexpected_payload"}"#.into()),
+            CHECK | SCAN_NOW | STOP if s.manual_busy || s.full_busy => {
+                (1, r#"{"error":"busy"}"#.into())
             }
-            if s.busy {
-                drop(s);
-                reply(&mut ch, 1, r#"{"error":"busy"}"#);
-                continue;
-            }
-            if op == STOP {
+            STOP => {
                 drop(s);
                 reply(&mut ch, 0, r#"{"stopping":true}"#);
-                break;
+                return Ok(());
             }
-            s.busy = true;
-            let id = s.completed + 1;
-            drop(s);
-            if op == CHECK {
-                jobs.send(Some(ch))
-            } else {
-                let result = jobs.send(None);
-                if result.is_ok() {
-                    reply(&mut ch, 0, format!(r#"{{"accepted":{id}}}"#));
+            CHECK | SCAN_NOW => {
+                s.manual_busy = true;
+                if op == CHECK {
+                    s.manual = Some(Some(ch));
+                    shared.wake.notify_one();
+                    continue;
                 }
-                result
+                s.manual = Some(None);
+                shared.wake.notify_one();
+                (0, format!(r#"{{"accepted":{}}}"#, s.completed + 1))
             }
-            .map_err(|_| io::Error::other("scan worker stopped"))?;
-        }
-        Ok(()) // drop sender, wake and join worker, release endpoint
+            _ => (1, r#"{"error":"unknown_command"}"#.into()),
+        };
+        drop(s); // never do IPC, filesystem I/O or scoring under the publication lock
+        reply(&mut ch, code, body);
+    }
+}
+pub fn serve(name: &str, root: &Path, ready: impl FnOnce(), scans: impl Scans) -> io::Result<()> {
+    validate_name(name)?;
+    let listener = Listener::bind(name)?;
+    let single = root.metadata()?.is_file();
+    let shared = Shared::default();
+    let cancel = watch::Cancel::new()?;
+    // READY is endpoint readiness only; watching:true requires subscription + reconciliation.
+    ready();
+    thread::scope(|threads| {
+        let shared = &shared;
+        threads.spawn(|| {
+            if let Err(e) = watch::run(root, single, shared, &cancel) {
+                shared.loss();
+                eprintln!("odina: watcher offline; coverage unknown: {e}");
+            }
+        });
+        let signal = &cancel;
+        threads.spawn(move || worker(shared, signal, scans));
+        let result = control(listener, root, shared);
+        shared.state.lock().unwrap().stopping = true;
+        shared.wake.notify_one();
+        cancel.wake();
+        result
     })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::time::{Duration, Instant};
+    use crate::{FileVerdict, Inventory};
+    use std::{
+        sync::mpsc,
+        time::{Duration, Instant},
+    };
+    struct BlockAfterBootstrap {
+        count: usize,
+        wait: mpsc::Receiver<()>,
+    }
+    impl Scans for BlockAfterBootstrap {
+        fn inventory(&mut self, _: &mut dyn FnMut(&Path, FileVerdict)) -> io::Result<Inventory> {
+            if self.count != 0 {
+                self.wait
+                    .recv_timeout(Duration::from_secs(10))
+                    .map_err(io::Error::other)?;
+            }
+            self.count += 1;
+            Ok(Inventory {
+                code: 2,
+                report: "{}".into(),
+                enumerated: true,
+            })
+        }
+        fn changed(&mut self, _: &Path) -> io::Result<FileVerdict> {
+            unreachable!()
+        }
+        fn forget(&mut self, _: &Path) {}
+    }
     #[test]
-    fn status_remains_live_while_a_job_runs_and_busy_never_means_clean() {
+    fn status_remains_live_during_inventory_and_busy_never_means_clean() {
         let name = format!("worker-{}", std::process::id());
         let n = name.clone();
+        let dir = std::env::temp_dir().join(&name);
+        std::fs::create_dir(&dir).unwrap();
+        let root = dir.canonicalize().unwrap();
+        let scope = root.clone();
         let (ready, started) = mpsc::channel();
         let (go, wait) = mpsc::channel();
-        let service = thread::spawn(move || {
+        let srv = thread::spawn(move || {
             serve(
                 &n,
-                Path::new("fixed"),
+                &root,
                 || ready.send(()).unwrap(),
-                move || {
-                    wait.recv_timeout(Duration::from_secs(10))
-                        .map_err(io::Error::other)?;
-                    Ok((2, "{}".into()))
-                },
+                BlockAfterBootstrap { count: 0, wait },
             )
         });
         started.recv_timeout(Duration::from_secs(10)).unwrap();
         let ask = |c| request(&name, c).unwrap();
+        let until = Instant::now() + Duration::from_secs(10);
+        while !ask(Command::Status).body.contains(r#""watching":true"#) {
+            assert!(Instant::now() < until);
+            thread::yield_now();
+        }
         assert_eq!(ask(Command::ScanNow).body, r#"{"accepted":1}"#);
         assert!(ask(Command::Status).body.contains(r#""phase":"scanning""#));
-        for op in [
-            Command::ScanNow,
-            Command::Stop,
-            Command::Check(Path::new("fixed")),
-        ] {
+        for op in [Command::ScanNow, Command::Stop, Command::Check(&scope)] {
             assert_eq!(ask(op).code, 1);
         }
         go.send(()).unwrap();
-        let deadline = Instant::now() + Duration::from_secs(5);
         while !ask(Command::Status).body.contains(r#""last_exit":2"#) {
-            assert!(Instant::now() < deadline);
+            assert!(Instant::now() < until);
             thread::yield_now();
         }
         assert_eq!(ask(Command::Stop).code, 0);
-        service.join().unwrap().unwrap();
+        srv.join().unwrap().unwrap();
+        std::fs::remove_dir(dir).unwrap();
     }
 }
