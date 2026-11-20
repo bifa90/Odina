@@ -198,6 +198,7 @@ impl State {
         self.settle();
     }
     pub fn json(&self) -> String {
+        let backend = crate::watch::BACKEND;
         let phase = if self.full_busy || self.manual_busy {
             "scanning"
         } else if self.active_delta || !self.pending.is_empty() {
@@ -222,7 +223,7 @@ impl State {
         };
         let last = self.last.map_or_else(|| "null".into(), |c| c.to_string());
         format!(
-            r#"{{"schema":"odina-resident/v2","phase":"{phase}","watching":{},"completed":{},"last_exit":{last},"subscribed":{},"coverage":"{}","monitor":"{stream}","epoch":{},"full_scans":{},"delta_scans":{},"pending":{},"events":{},"loss_incidents":{},"queue_overflows":{},"delta_errors":{},"consecutive_same_path_events":{}}}"#,
+            r#"{{"schema":"odina-resident/v2","backend":"{backend}","phase":"{phase}","watching":{},"completed":{},"last_exit":{last},"subscribed":{},"coverage":"{}","monitor":"{stream}","epoch":{},"full_scans":{},"delta_scans":{},"pending":{},"events":{},"loss_incidents":{},"queue_overflows":{},"delta_errors":{},"consecutive_same_path_events":{}}}"#,
             self.covered,
             self.completed,
             self.armed,

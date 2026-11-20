@@ -240,11 +240,12 @@ impl Cache {
         streamed: Option<&FileHashes>,
         delta: bool,
     ) {
-        if if delta {
-            self.previous.len() == LIMIT
+        let count = if delta {
+            self.previous.len()
         } else {
-            self.current.len() == LIMIT
-        } {
+            self.current.len()
+        };
+        if count >= LIMIT {
             return;
         }
         let verdict = match verdict {
@@ -319,6 +320,26 @@ impl Cache {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn delta_keeps_unrelated_hints_and_removal_drops_the_changed_identity() {
+        let mut c = Cache::memory().unwrap();
+        c.track();
+        let (a, b) = (Path::new("a"), Path::new("b"));
+        c.begin_pass();
+        c.record(a, 1, Verdict::Clean, None, false);
+        c.record(b, 2, Verdict::Clean, None, false);
+        c.finish_pass().unwrap();
+        assert_eq!(c.previous.len(), 2);
+        c.forget(a);
+        c.record(a, 3, Verdict::Confirmed, None, true);
+        assert!(!c.previous.contains_key(&1));
+        assert!(c.previous.contains_key(&3));
+        assert!(c.silent_hint(2));
+        c.forget(a);
+        assert_eq!(c.previous.len(), 1);
+        assert!(c.silent_hint(2));
+        assert!(c.current.is_empty());
+    }
     #[test]
     fn unknown_version_partial_duplicate_or_oversized_field_is_a_cold_miss() {
         for bad in [

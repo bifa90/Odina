@@ -6,7 +6,7 @@ use std::{
     time::{Duration, Instant},
 };
 
-pub const LIMIT: usize = 64 * 1024; // canonical scope bytes; other requests have no body
+pub const LIMIT: usize = 64 * 1024; // canonical scope or relative verdict key; control requests have no body
 pub const SHORT: Duration = Duration::from_secs(3);
 pub const SCAN: Duration = Duration::from_secs(3600);
 pub struct Channel {

@@ -143,7 +143,7 @@ impl Stream {
                         | libc::IN_UNMOUNT)
                     != 0
                 {
-                    if dir.as_os_str().is_empty() {
+                    if dir.as_os_str().is_empty() || e.mask & libc::IN_UNMOUNT != 0 {
                         return Err(io::Error::other("watched root detached"));
                     }
                     return Ok(End::Gap);
@@ -179,10 +179,16 @@ impl Stream {
     }
 }
 pub(crate) fn run(root: &Path, single: bool, shared: &Shared, cancel: &Cancel) -> io::Result<()> {
+    use std::os::unix::fs::MetadataExt;
     let scope = Scope::new(root, single)?;
+    let identity = || fs::symlink_metadata(scope.base).map(|m| (m.dev(), m.ino()));
+    let original = identity()?;
     loop {
         let mut stream = Stream::open()?;
         stream.add(&scope, Path::new(""), None)?;
+        if identity()? != original {
+            return Err(io::Error::other("subscription root was replaced"));
+        }
         shared.arm();
         match stream.listen(&scope, shared, cancel)? {
             End::Stop => return Ok(()),

@@ -217,7 +217,7 @@ def gates(result):
     peak = result["process_high_water_after_workload_bytes"]
     total = "fail" if "fail" in (eg, ig) or (peak is not None and peak >= 50_000_000) else (
         "pass" if eg == ig == "pass" and peak is not None else "inconclusive")
-    if not result["corpus_matches_expected"]:
+    if not result["corpus_matches_expected"] or not result["clean_shutdown"]:
         total = "inconclusive"
     return {"idle_three_windows": ig, "strict_response": eg, "workload": total}
 
@@ -285,9 +285,10 @@ def measure(args, psutil):
                                                          before["full_scans"] == after["full_scans"] and
                                                          before["loss_incidents"] == after["loss_incidents"]))
                 result["process_high_water_after_workload_bytes"] = high_water(child.pid, proc.memory_info())
-                calls(binary, "stop", "--service", name)
-                if child.wait(timeout=10) != 0:
-                    raise ValueError("unclean service shutdown")
+                rc, _ = calls(binary, "stop", "--service", name, allowed=(0, 1))
+                result["clean_shutdown"] = rc == 0 and child.wait(timeout=10) == 0
+                # If STOP declined because a reconciliation is still running, retain the
+                # measurements as inconclusive and clean up only our own child below.
             finally:
                 if child.poll() is None:
                     child.kill()  # only a child we created, never an existing instance

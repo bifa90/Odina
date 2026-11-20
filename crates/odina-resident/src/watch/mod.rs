@@ -14,6 +14,11 @@ mod windows;
 #[cfg(windows)]
 pub(crate) use windows::{now_ns, run, Cancel};
 
+#[cfg(windows)]
+pub(crate) const BACKEND: &str = "ReadDirectoryChangesW";
+#[cfg(target_os = "linux")]
+pub(crate) const BACKEND: &str = "inotify";
+
 pub(crate) fn relative(path: &Path) -> bool {
     !path.as_os_str().is_empty() && path.components().all(|p| matches!(p, Component::Normal(_)))
 }
@@ -51,6 +56,14 @@ fn ordinary_dir(m: &fs::Metadata) -> bool {
     }
     m.is_dir()
 }
+// A nested entry that vanished between readdir/stat/add_watch is normal churn;
+// its parent is already subscribed. Never swallow permission or root errors.
+fn still_there<T>(result: io::Result<T>, nested: bool) -> io::Result<Option<T>> {
+    match result {
+        Err(e) if nested && e.kind() == io::ErrorKind::NotFound => Ok(None),
+        r => r.map(Some),
+    }
+}
 // Install before enumeration. For a newly inserted subtree, feed existing regular files
 // to the same per-file queue, closing the interval before the child watches were armed.
 fn tree(
@@ -62,25 +75,42 @@ fn tree(
     let mut stack = vec![start.to_owned()];
     while let Some(rel) = stack.pop() {
         let dir = scope.base.join(&rel);
-        let m = match fs::symlink_metadata(&dir) {
-            Err(e) if !rel.as_os_str().is_empty() && e.kind() == io::ErrorKind::NotFound => {
-                continue
-            }
-            r => r?,
+        let nested = !rel.as_os_str().is_empty();
+        let Some(m) = still_there(fs::symlink_metadata(&dir), nested)? else {
+            continue;
         };
-        if !ordinary_dir(&m) || dir.canonicalize()? != dir {
-            return Err(invalid("watch directory changed or redirected"));
+        if !ordinary_dir(&m) {
+            if nested {
+                continue;
+            }
+            return Err(invalid("watch root changed type"));
         }
-        if !install(&rel)? || scope.only.is_some() {
+        let Some(canonical) = still_there(dir.canonicalize(), nested)? else {
+            continue;
+        };
+        if canonical != dir {
+            return Err(invalid("watch directory redirected"));
+        }
+        if still_there(install(&rel), nested)? != Some(true) || scope.only.is_some() {
             continue;
         }
-        for entry in fs::read_dir(dir)? {
-            let entry = entry?;
-            let kind = entry.file_type()?;
+        let Some(entries) = still_there(fs::read_dir(dir), nested)? else {
+            continue;
+        };
+        for entry in entries {
+            let Some(entry) = still_there(entry, true)? else {
+                continue;
+            };
+            let Some(kind) = still_there(entry.file_type(), true)? else {
+                continue;
+            };
             let child = rel.join(entry.file_name());
             if kind.is_dir() {
                 #[cfg(windows)]
-                if !ordinary_dir(&entry.metadata()?) {
+                if !still_there(entry.metadata(), true)?
+                    .as_ref()
+                    .is_some_and(ordinary_dir)
+                {
                     continue;
                 }
                 stack.push(child);

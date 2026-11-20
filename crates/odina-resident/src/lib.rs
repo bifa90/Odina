@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: AGPL-3.0-or-later
 // Copyright (c) 2026 bifa90 — Odina
-//! Local per-user control plane. The operator selects the scope at startup.
+//! Native filesystem watcher and local per-user control plane. The operator selects the scope at startup.
 //! Nothing here knows how to score a file, start itself, or open a TCP socket.
 use std::{io, path::Path};
 

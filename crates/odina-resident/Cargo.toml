@@ -2,7 +2,7 @@
 # Copyright (c) 2026 bifa90 — Odina
 [package]
 name = "odina-resident"
-description = "Blocking per-user resident control plane. Local IPC only."
+description = "Native filesystem watches and a blocking per-user resident control plane. Local IPC only."
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

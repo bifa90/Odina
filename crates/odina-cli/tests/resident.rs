@@ -204,6 +204,20 @@ fn resident_ipc_preserves_g1_reports_and_exit_reuses_index_and_stops() {
     fs::write(&replacement, common::offline_vector()).unwrap();
     fs::rename(replacement, root.join("nested/child.txt")).unwrap();
     wait_for(|| verdict("nested/child.txt"), r#""verdict":"confirmed""#);
+    #[cfg(windows)]
+    {
+        use std::{io::Write, os::windows::fs::OpenOptionsExt};
+        let mut writer = fs::OpenOptions::new()
+            .write(true)
+            .create_new(true)
+            .share_mode(0)
+            .open(root.join("exclusive.txt"))
+            .unwrap();
+        writer.write_all(&[b'Z'; 65]).unwrap();
+        thread::sleep(Duration::from_millis(25));
+        drop(writer);
+        wait_for(|| verdict("exclusive.txt"), r#""verdict":"clean""#);
+    }
     assert_eq!(verdict(&untouched), before);
     let status = run(&mut control("status"), 0);
     assert_eq!(number(&status, "full_scans"), full);
@@ -212,6 +226,12 @@ fn resident_ipc_preserves_g1_reports_and_exit_reuses_index_and_stops() {
         Command::new(BIN).args(["verdict", "../outside", "--service", &name]),
         1,
     );
+    #[cfg(target_os = "linux")]
+    {
+        fs::rename(&root, dir.join("detached")).unwrap();
+        wait_for(|| run(&mut control("status"), 0), r#""monitor":"offline""#);
+        assert!(verdict(&untouched).contains(r#""state":"unknown""#));
+    }
     run(&mut control("stop"), 0);
     assert!(guard.0.wait().unwrap().success());
     run(&mut control("status"), 1);

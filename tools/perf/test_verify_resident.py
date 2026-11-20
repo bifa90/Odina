@@ -30,7 +30,7 @@ class Gates(unittest.TestCase):
         w = dict(idle_cpu_this_window='pass', memory_this_workload='pass')
         g = dict(attempted=1000, at_or_above_10_ms=0, missed_by_deadline=0)
         r = dict(idle_windows=[w] * 3, events=dict(create=g, modify=g, delete=g), isolated_event_window=True,
-                 process_high_water_after_workload_bytes=49_999_999, corpus_matches_expected=True)
+                 process_high_water_after_workload_bytes=49_999_999, corpus_matches_expected=True, clean_shutdown=True)
         self.assertEqual(lab.gates(r)['workload'], 'pass')
         self.assertEqual(lab.gates({**r, 'idle_windows': [w]})['workload'], 'inconclusive')
         self.assertEqual(lab.gates({**r, 'isolated_event_window': False})['strict_response'], 'fail')

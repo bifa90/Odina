@@ -59,6 +59,33 @@ fn value(a: &odina_core::assessment::Assessment) -> FileVerdict {
     }
 }
 impl Session<'_> {
+    fn read_change(&mut self, rel: &Path) -> io::Result<FileVerdict> {
+        let named = self.named(rel);
+        let expected = if self.single {
+            self.scope.clone()
+        } else {
+            self.scope.join(rel)
+        };
+        let confined = || -> io::Result<()> {
+            if named.canonicalize()? == expected {
+                Ok(())
+            } else {
+                Err(bad("changed path redirected"))
+            }
+        };
+        // Canonical name for confinement, original spelling for all scoring. Forget on
+        // failure as well: a newly recorded private hint isn't a successful publication.
+        let result = (|| {
+            confined()?;
+            let a = self.scanner.scan_changed(&named)?;
+            confined()?;
+            Ok(value(&a))
+        })();
+        if result.is_err() {
+            self.scanner.forget(&named);
+        }
+        result
+    }
     fn named(&self, rel: &Path) -> PathBuf {
         if self.single {
             self.root.to_owned()
@@ -68,7 +95,8 @@ impl Session<'_> {
     }
     fn check_root(&self) -> io::Result<()> {
         data_target(self.root)?;
-        if self.root.canonicalize()? != self.scope {
+        if self.root.canonicalize()? != self.scope || self.root.metadata()?.is_file() != self.single
+        {
             return Err(bad("configured root changed"));
         }
         Ok(())
@@ -100,23 +128,18 @@ impl Scans for Session<'_> {
         self.scanner.forget(&self.named(rel));
     }
     fn changed(&mut self, rel: &Path) -> io::Result<FileVerdict> {
-        let named = self.named(rel);
-        let expected = if self.single {
-            self.scope.clone()
-        } else {
-            self.scope.join(rel)
-        };
-        // Compare canonical identity for confinement; score the original spelling, just as CHECK does.
-        self.scanner.forget(&named);
-        if named.canonicalize()? != expected {
-            return Err(bad("changed path redirected"));
+        // RDCW can notify before a writer releases an exclusive handle. Retry only
+        // sharing/lock violations, with a finite budget, never a timer during idle.
+        #[cfg(windows)]
+        for ms in [2, 8, 32, 128] {
+            match self.read_change(rel) {
+                Err(e) if matches!(e.raw_os_error(), Some(32 | 33)) => {
+                    std::thread::sleep(std::time::Duration::from_millis(ms))
+                }
+                r => return r,
+            }
         }
-        let result = self.scanner.scan_changed(&named);
-        if named.canonicalize()? != expected {
-            self.scanner.forget(&named);
-            return Err(bad("changed path redirected"));
-        }
-        result.map(|a| value(&a))
+        self.read_change(rel)
     }
 }
 pub fn command(cmd: &str, args: &[String]) -> ExitCode {
