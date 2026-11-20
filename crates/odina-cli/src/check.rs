@@ -22,6 +22,9 @@
 use odina_cache::FULL_DIGEST_CAP;
 #[cfg(feature = "instrument")]
 use odina_cache::{Scanner, Work};
+// One walk, one implementation. The check build and the public build must not
+// disagree about which files a folder contains.
+pub use odina_scan::{walk, Walked, MAX_DIRS};
 #[cfg(feature = "instrument")]
 use odina_instrument::{Meter, PerfReport, ScanStats};
 use std::fs::File;
@@ -184,137 +187,6 @@ pub fn civil_from_days(z: i64) -> (i64, u32, u32) {
     (if m <= 2 { y + 1 } else { y }, m, d)
 }
 
-/// What a folder walk found, and what it refused to follow.
-pub struct Walked {
-    /// Every regular file, in a stable order.
-    pub files: Vec<PathBuf>,
-    /// Junctions, symlinks and reparse points met and not entered. A folder
-    /// whose real content lives elsewhere is not a folder we measured.
-    pub links_skipped: u64,
-    /// Folders the walk could not read, split by whether anyone could have.
-    ///
-    /// The public build writes this and prints nothing: the number exists for
-    /// the instrumented report and for the tests. Saying so here is narrower
-    /// than a crate-wide `allow`, which would hide the next field nobody reads.
-    #[cfg_attr(not(feature = "instrument"), allow(dead_code))]
-    pub read_errors: u64,
-    /// True if the walk stopped early because it hit a limit.
-    pub truncated: bool,
-}
-
-/// How many directories one walk may visit. A Downloads folder is far below
-/// this; the number exists only so that a pathological tree cannot run for
-/// hours while the user watches nothing happen.
-pub const MAX_DIRS: u64 = 200_000;
-
-/// How many entries one directory may yield before the walk gives up on it.
-/// Windows shortcut files are a normal part of a Downloads folder, and
-/// resolving them is not this tool's job.
-const MAX_ENTRIES_PER_DIR: usize = 500_000;
-
-/// Every file under `dir`, in a stable order. Two runs on the same folder must
-/// produce the same sequence, or the numbers cannot be compared.
-///
-/// Three things this deliberately does *not* do, each of which would turn a
-/// scan into a hang:
-///
-/// 1. **It never enters a link.** `Path::is_dir` follows junctions and
-///    symlinks, and one junction pointing at an ancestor is an infinite walk.
-///    The entry type from `read_dir` is used instead, which reports the link
-///    rather than its target.
-/// 2. **It never opens a non-regular file.** A named pipe in a downloads
-///    folder blocks on open, forever, and looks exactly like a slow scan.
-/// 3. **It bounds itself.** `MAX_DIRS` stops a tree that is legal but absurd,
-///    and says so rather than returning a number that looks complete.
-pub fn walk(dir: &Path) -> Walked {
-    let mut files = Vec::new();
-    let mut links_skipped = 0u64;
-    let mut read_errors = 0u64;
-    let mut visited = 0u64;
-    let mut truncated = false;
-
-    let mut stack = vec![dir.to_path_buf()];
-    while let Some(current) = stack.pop() {
-        if visited >= MAX_DIRS {
-            truncated = true;
-            break;
-        }
-        visited += 1;
-
-        let entries = match std::fs::read_dir(&current) {
-            Ok(rd) => rd,
-            Err(_) => {
-                read_errors += 1;
-                continue;
-            }
-        };
-
-        let mut paths: Vec<(bool, PathBuf)> = Vec::new();
-        for (index, entry) in entries.enumerate() {
-            if index == MAX_ENTRIES_PER_DIR {
-                truncated = true;
-                break;
-            }
-            let Ok(entry) = entry else {
-                read_errors += 1;
-                continue;
-            };
-            // `DirEntry::file_type` does not follow a link; that is the whole
-            // point of using it here.
-            let Ok(kind) = entry.file_type() else {
-                read_errors += 1;
-                continue;
-            };
-            #[cfg(windows)]
-            {
-                use std::os::windows::fs::MetadataExt;
-                match entry.metadata() {
-                    Ok(m) if m.file_attributes() & 0x400 != 0 => {
-                        links_skipped += 1;
-                        continue;
-                    }
-                    Err(_) => {
-                        read_errors += 1;
-                        continue;
-                    }
-                    _ => (),
-                }
-            }
-            if kind.is_symlink() {
-                links_skipped += 1;
-                continue;
-            }
-            if kind.is_dir() {
-                paths.push((true, entry.path()));
-            } else if kind.is_file() {
-                paths.push((false, entry.path()));
-            } else {
-                // A pipe, a socket, a device: opening it can block forever.
-                links_skipped += 1;
-            }
-        }
-        // Sorted by path, and the `is_dir` flag rides along so the loop below
-        // does not have to ask the filesystem a second time — asking again is
-        // what followed the link in the first place.
-        paths.sort_by(|a, b| a.1.cmp(&b.1));
-        for (is_dir, path) in paths {
-            if is_dir {
-                stack.push(path);
-            } else {
-                files.push(path);
-            }
-        }
-    }
-
-    files.sort();
-    Walked {
-        files,
-        links_skipped,
-        read_errors,
-        truncated,
-    }
-}
-
 /// The command. Only reachable when the module is compiled, which is the
 /// check build and this crate's tests.
 #[cfg(feature = "instrument")]
@@ -424,16 +296,15 @@ pub(super) fn run_pass(
     let mut stats = ScanStats::default();
     let mut exported: Vec<String> = Vec::new();
 
+    // Same helper the public loop uses; the single-file case is `Walked::one`.
     let walked = if path.is_dir() {
         walk(path)
     } else {
-        Walked {
-            files: vec![path.to_path_buf()],
-            links_skipped: 0,
-            read_errors: 0,
-            truncated: false,
-        }
+        Walked::one(path)
     };
+    // Read before the file list is moved out: "the answer is the whole answer"
+    // has one definition, in odina-scan, and both builds ask the same question.
+    let complete = walked.is_complete();
     let files = walked.files;
     stats.links_skipped = walked.links_skipped;
     stats.read_errors = walked.read_errors;
@@ -530,16 +401,33 @@ pub(super) fn run_pass(
         "التقارير المصدَّرة: {} (فقط ما يستدعي تنبيهًا)",
         exported.len()
     );
-    let code = if stats.confirmed > 0 || stats.high_risk > 0 {
-        2
-    } else {
-        0
-    };
     Ok(odina_resident::Inventory {
-        code,
+        // Same two functions the public loop calls, on the same counts. A second
+        // copy of "what is interrupting" or of "is this the whole answer" is how
+        // the lab build and the public build start answering the same folder
+        // differently; `the_public_and_measured_verdicts_are_the_same_per_file`
+        // in `resident.rs` is the test that keeps the counts honest.
+        code: totals_of(stats).exit_code(),
         report: json,
-        enumerated: !stats.truncated && stats.read_errors == 0,
+        enumerated: complete,
     })
+}
+
+/// odina-instrument's counters as odina-scan's totals, spelled out field by
+/// field: a positional constructor could be reordered silently, and this is the
+/// conversion that decides an exit code in the build users are measured on.
+#[cfg(feature = "instrument")]
+fn totals_of(stats: ScanStats) -> odina_scan::Totals {
+    odina_scan::Totals {
+        files: stats.files,
+        unreadable: stats.unreadable,
+        bytes: stats.bytes,
+        clean: stats.clean,
+        monitor: stats.monitor,
+        suspicious: stats.suspicious,
+        high_risk: stats.high_risk,
+        confirmed: stats.confirmed,
+    }
 }
 
 #[cfg(test)]
