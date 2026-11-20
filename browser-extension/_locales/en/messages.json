@@ -1,0 +1,41 @@
+{
+  "menu": {
+    "message": "Scan with Odina"
+  },
+  "description": {
+    "message": "Checks your local selection only when you ask."
+  },
+  "suspect": {
+    "message": "This file is suspicious."
+  },
+  "consequence": {
+    "message": "Odina will read one suspicious file in the selection to verify its fingerprint locally. Nothing will be changed."
+  },
+  "deep": {
+    "message": "Deep scan"
+  },
+  "ignore": {
+    "message": "Ignore"
+  },
+  "confirmed": {
+    "message": "Odina found a confirmed threat in the selection."
+  },
+  "limits": {
+    "message": "This check did not block execution or move the file. A quarantine store is not available yet."
+  },
+  "stillSuspect": {
+    "message": "The scan did not confirm an infection. The file is unchanged."
+  },
+  "close": {
+    "message": "Close"
+  },
+  "working": {
+    "message": "Verifying locally…"
+  },
+  "quarantine": {
+    "message": "Move to quarantine"
+  },
+  "language": {
+    "message": "en"
+  }
+}

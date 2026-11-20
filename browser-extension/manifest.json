@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Odina",
+  "version": "0.1.0",
+  "description": "__MSG_description__",
+  "default_locale": "ar",
+  "permissions": [
+    "contextMenus",
+    "nativeMessaging"
+  ],
+  "content_security_policy": {
+    "extension_pages": "default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoL41o43LAByEmcAmcPUi6bPCPMYbhRE450ItP7fNN05y2GRq9bRGmBukv0t7RkMy1cP6JQEyW0freaKvZ5hTa609H3bzifWnpP4fcwiTRT52LsC/GZKa8ZxbCwu6hZkc4a6IdQwo5IwzAg00D/L5yrDTbQaahe3e2RpZdt5FMWDc2WAzWW/58xClMRl04FyPR5bEhZDspCOZWea6jShNJza+QWUQnfN/FPzN1Wh4LCdtklqZzqeX3JtBfs9LaU7m48Cv6VpVp2wr+rasbsXeUjmayLkvz82SuEGWpwUbM2BWwFWou2fCdSkuEhmtoZBlXGSfnDxJwBBlQjg4TBSpLQIDAQAB"
+}

@@ -3,7 +3,7 @@
 > **الملف:** `docs/perf/baseline/2026-11-18-windows-i7-8550u.json`
 > **بصمته:** `0684568f2bccda6ce5968c12fcd25bd5c262faa88e2cf7e7daf0e59fb0c0a3cc`
 > **التاريخ:** 2026-11-18 · **النسخة:** 0.1.0 · **الجهاز:** i7-8550U · 8 خيوط · ويندوز x86_64
-> **المرجع:** `docs/review-instrumented.md` · `docs/odina-agent-prompt-v17.md` §34.2
+> **المرجع:** `docs/review-instrumented.md` · `docs/odina-agent-prompt-v18.md` §34.2
 > **قياسان لاحقان على Linux:** [تحليل HDD وSSD وخطة B9](../b9-hdd-ssd.md). تختلف مجموعتا الملفات؛ ليستا إعادة لقياس ويندوز أدناه.
 > **الجولة الثانية (أربعة سيناريوهات):** [تقرير الفحص والفهرسة والمنع](../b9-architecture.md) · [نسخة للطباعة في أربع صفحات](../b9-architecture.pdf). الأزمنة وميزانيات CPU تخص جولة كل تقرير.
 >

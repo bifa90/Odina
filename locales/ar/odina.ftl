@@ -536,3 +536,17 @@ recovery.case_invalid = فشل التحقق
 settings.repair_db.install = التثبيت المنفصل
 settings.repair_db.instructions = فكّ { $package } من إصدار Odina المطابق بجوار البرنامج، مع الحفاظ على المجلدات.
 settings.repair_db.releases = حزم الإصدارات
+
+## Browser context menu (D48)
+browser.menu = فحص بـ Odina
+browser.description = يستعلم عن التحديد المحلي عند طلبك فقط.
+browser.suspect = هذا الملف مشبوه.
+browser.consequence = سيقرأ Odina ملفًا مشتبهًا واحدًا من التحديد للتحقق من بصمته محليًا. لن يغيّر شيئًا.
+browser.deep = فحص عميق
+browser.ignore = تجاهل
+browser.confirmed = رصد Odina تهديدًا مؤكدًا في التحديد.
+browser.limits = لم يمنع هذا الفحص التشغيل ولم ينقل الملف. يتطلب النقل صندوق عزل غير متاح بعد.
+browser.stillSuspect = انتهى الفحص ولم تتأكد الإصابة. لم يتغيّر الملف.
+browser.close = إغلاق
+browser.working = جارٍ التحقق محليًا…
+browser.quarantine = انقله إلى العزل

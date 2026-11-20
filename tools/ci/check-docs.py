@@ -3,7 +3,7 @@
 # Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
 """Docs gate — internal references must resolve.
 
-The plan has grown across seventeen prompt revisions and six specs. The
+The plan has grown across successive prompt revisions and multiple specs. The
 failure mode is not a broken build, it is a reader following a reference
 into a file that was renamed three revisions ago. This gate follows every
 in-repo path mentioned in backticks and every relative markdown link.

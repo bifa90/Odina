@@ -3,7 +3,7 @@
 //! Hardware facts for the instrumentation layer — and the exact limits of
 //! what may be recorded.
 //!
-//! `docs/odina-agent-prompt-v17.md` §35.3 says a performance number without
+//! `docs/odina-agent-prompt-v18.md` §35.3 says a performance number without
 //! the hardware it was measured on means nothing, so the CPU name and core
 //! count must travel with every measurement. §34.3 says the same layer must
 //! never measure anything about the user.

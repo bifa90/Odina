@@ -528,3 +528,17 @@ recovery.case_invalid = Verification failure
 settings.repair_db.install = Separate installation
 settings.repair_db.instructions = Extract { $package } from the matching Odina release beside the program. Keep the folder structure.
 settings.repair_db.releases = Release packages
+
+## Browser context menu (D48)
+browser.menu = Scan with Odina
+browser.description = Checks your local selection only when you ask.
+browser.suspect = This file is suspicious.
+browser.consequence = Odina will read one suspicious file in the selection to verify its fingerprint locally. Nothing will be changed.
+browser.deep = Deep scan
+browser.ignore = Ignore
+browser.confirmed = Odina found a confirmed threat in the selection.
+browser.limits = This check did not block execution or move the file. A quarantine store is not available yet.
+browser.stillSuspect = The scan did not confirm an infection. The file is unchanged.
+browser.close = Close
+browser.working = Verifying locally…
+browser.quarantine = Move to quarantine

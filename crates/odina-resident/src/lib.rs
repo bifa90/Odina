@@ -21,6 +21,9 @@ mod wire;
 #[cfg(any(target_os = "linux", windows))]
 pub use server::{request, serve};
 
+mod selection;
+pub use selection::local_selection;
+
 pub const MAX_REPLY: usize = 8 * 1024 * 1024;
 pub enum Command<'a> {
     Status,
@@ -30,6 +33,10 @@ pub enum Command<'a> {
     Stop,
     /// Relative, read-only lookup. Never interpreted as a scan request.
     Verdict(&'a Path),
+    /// Read-only summary of an absolute selection under the operator's fixed scope.
+    Inspect(&'a Path),
+    /// Explicitly verify the *previously selected* suspect, never a folder inventory.
+    Verify(&'a Path, u64),
 }
 pub struct Reply {
     pub code: u8,
@@ -50,6 +57,7 @@ pub trait Scans: Send {
     fn inventory(&mut self, seen: &mut dyn FnMut(&Path, FileVerdict)) -> io::Result<Inventory>;
     fn changed(&mut self, relative: &Path) -> io::Result<FileVerdict>;
     fn forget(&mut self, relative: &Path);
+    fn verify(&mut self, relative: &Path) -> io::Result<FileVerdict>;
 }
 fn invalid(s: &'static str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, s)

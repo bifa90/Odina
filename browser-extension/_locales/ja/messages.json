@@ -1,0 +1,41 @@
+{
+  "menu": {
+    "message": "Odina でスキャン"
+  },
+  "description": {
+    "message": "選択したローカル項目を、操作時にのみ確認します。"
+  },
+  "suspect": {
+    "message": "不審なファイルです。"
+  },
+  "consequence": {
+    "message": "選択範囲にある不審なファイルを 1 件読み取り、指紋を端末内で照合します。ファイルは変更しません。"
+  },
+  "deep": {
+    "message": "詳細スキャン"
+  },
+  "ignore": {
+    "message": "無視"
+  },
+  "confirmed": {
+    "message": "選択範囲で脅威が確認されました。"
+  },
+  "limits": {
+    "message": "この確認は実行を阻止しておらず、ファイルも移動していません。隔離機能はまだ利用できません。"
+  },
+  "stillSuspect": {
+    "message": "感染は確認されませんでした。ファイルは変更されていません。"
+  },
+  "close": {
+    "message": "閉じる"
+  },
+  "working": {
+    "message": "端末内で確認しています…"
+  },
+  "quarantine": {
+    "message": "隔離する"
+  },
+  "language": {
+    "message": "ja"
+  }
+}

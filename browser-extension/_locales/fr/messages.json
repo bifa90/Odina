@@ -1,0 +1,41 @@
+{
+  "menu": {
+    "message": "Analyser avec Odina"
+  },
+  "description": {
+    "message": "Vérifie la sélection locale uniquement à votre demande."
+  },
+  "suspect": {
+    "message": "Ce fichier est suspect."
+  },
+  "consequence": {
+    "message": "Odina lira un fichier suspect de la sélection pour vérifier son empreinte localement. Rien ne sera modifié."
+  },
+  "deep": {
+    "message": "Analyse approfondie"
+  },
+  "ignore": {
+    "message": "Ignorer"
+  },
+  "confirmed": {
+    "message": "Odina a détecté une menace confirmée dans la sélection."
+  },
+  "limits": {
+    "message": "Cette vérification n’a ni bloqué l’exécution ni déplacé le fichier. La quarantaine n’est pas encore disponible."
+  },
+  "stillSuspect": {
+    "message": "L’analyse n’a pas confirmé d’infection. Le fichier est inchangé."
+  },
+  "close": {
+    "message": "Fermer"
+  },
+  "working": {
+    "message": "Vérification locale en cours…"
+  },
+  "quarantine": {
+    "message": "Mettre en quarantaine"
+  },
+  "language": {
+    "message": "fr"
+  }
+}

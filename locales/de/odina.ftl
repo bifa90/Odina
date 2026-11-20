@@ -497,3 +497,17 @@ recovery.case_invalid = Prüfung scheitert
 settings.repair_db.install = Separat installieren
 settings.repair_db.instructions = Entpacken Sie { $package } aus der passenden Odina-Version neben dem Programm. Behalten Sie die Ordnerstruktur bei.
 settings.repair_db.releases = Veröffentlichte Pakete
+
+## Browser context menu (D48)
+browser.menu = Mit Odina prüfen
+browser.description = Prüft Ihre lokale Auswahl nur auf Anfrage.
+browser.suspect = Diese Datei ist verdächtig.
+browser.consequence = Odina liest eine verdächtige Datei aus der Auswahl und prüft ihren Fingerabdruck lokal. Nichts wird geändert.
+browser.deep = Genau prüfen
+browser.ignore = Ignorieren
+browser.confirmed = Odina hat eine bestätigte Bedrohung in der Auswahl gefunden.
+browser.limits = Diese Prüfung hat weder die Ausführung verhindert noch die Datei verschoben. Es steht noch keine Quarantäne zur Verfügung.
+browser.stillSuspect = Die Prüfung hat keine Infektion bestätigt. Die Datei ist unverändert.
+browser.close = Schließen
+browser.working = Lokale Prüfung läuft…
+browser.quarantine = In Quarantäne verschieben

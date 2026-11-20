@@ -497,3 +497,17 @@ recovery.case_invalid = Сбой проверки
 settings.repair_db.install = Отдельная установка
 settings.repair_db.instructions = Распакуйте { $package } из соответствующего выпуска Odina рядом с программой, сохранив структуру папок.
 settings.repair_db.releases = Пакеты выпусков
+
+## Browser context menu (D48)
+browser.menu = Проверить в Odina
+browser.description = Проверяет выбранный локальный объект только по вашему запросу.
+browser.suspect = Этот файл подозрителен.
+browser.consequence = Odina прочитает один подозрительный файл из выбранных и проверит его отпечаток локально. Файлы не изменятся.
+browser.deep = Глубокая проверка
+browser.ignore = Пропустить
+browser.confirmed = В выбранных объектах обнаружена подтверждённая угроза.
+browser.limits = Эта проверка не блокировала запуск и не перемещала файл. Карантин пока недоступен.
+browser.stillSuspect = Заражение не подтверждено. Файл не изменён.
+browser.close = Закрыть
+browser.working = Идёт локальная проверка…
+browser.quarantine = В карантин

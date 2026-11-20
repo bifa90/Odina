@@ -497,3 +497,17 @@ recovery.case_invalid = 验证失败
 settings.repair_db.install = 单独安装
 settings.repair_db.instructions = 从对应的 Odina 版本取得 { $package }，解压到程序所在目录，并保留文件夹结构。
 settings.repair_db.releases = 发行包
+
+## Browser context menu (D48)
+browser.menu = 使用 Odina 扫描
+browser.description = 仅在你主动操作时检查选中的本地项目。
+browser.suspect = 此文件可疑。
+browser.consequence = Odina 将读取所选项目中的一个可疑文件，在本地核对其指纹，不会更改任何文件。
+browser.deep = 深度扫描
+browser.ignore = 忽略
+browser.confirmed = Odina 在所选项目中发现了已确认的威胁。
+browser.limits = 本次检查未阻止运行，也未移动文件。隔离区尚不可用。
+browser.stillSuspect = 本次扫描未能确认感染，文件未被更改。
+browser.close = 关闭
+browser.working = 正在本地核对…
+browser.quarantine = 移至隔离区

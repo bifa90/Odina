@@ -1,0 +1,41 @@
+{
+  "menu": {
+    "message": "使用 Odina 扫描"
+  },
+  "description": {
+    "message": "仅在你主动操作时检查选中的本地项目。"
+  },
+  "suspect": {
+    "message": "此文件可疑。"
+  },
+  "consequence": {
+    "message": "Odina 将读取所选项目中的一个可疑文件，在本地核对其指纹，不会更改任何文件。"
+  },
+  "deep": {
+    "message": "深度扫描"
+  },
+  "ignore": {
+    "message": "忽略"
+  },
+  "confirmed": {
+    "message": "Odina 在所选项目中发现了已确认的威胁。"
+  },
+  "limits": {
+    "message": "本次检查未阻止运行，也未移动文件。隔离区尚不可用。"
+  },
+  "stillSuspect": {
+    "message": "本次扫描未能确认感染，文件未被更改。"
+  },
+  "close": {
+    "message": "关闭"
+  },
+  "working": {
+    "message": "正在本地核对…"
+  },
+  "quarantine": {
+    "message": "移至隔离区"
+  },
+  "language": {
+    "message": "zh-Hans"
+  }
+}

@@ -19,9 +19,13 @@ const CHECK: u8 = 2;
 const SCAN_NOW: u8 = 3;
 const STOP: u8 = 4;
 const VERDICT: u8 = 5;
+const INSPECT: u8 = 6;
+const VERIFY: u8 = 7;
+pub(super) const UNKNOWN: &str = r#"{"result":"unknown"}"#;
 
 pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
     validate_name(name)?;
+    let mut encoded = Vec::new();
     let (op, scope) = match cmd {
         Command::Status => (STATUS, &[][..]),
         Command::ScanNow => (SCAN_NOW, &[][..]),
@@ -32,12 +36,36 @@ pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
                 .ok_or_else(|| invalid("lookup expects UTF-8"))?
                 .as_bytes(),
         ),
+        Command::Inspect(p) => (
+            INSPECT,
+            p.to_str()
+                .ok_or_else(|| invalid("selection requires UTF-8"))?
+                .as_bytes(),
+        ),
+        Command::Verify(p, t) => {
+            encoded.extend(t.to_be_bytes());
+            encoded.extend(
+                p.to_str()
+                    .ok_or_else(|| invalid("selection requires UTF-8"))?
+                    .as_bytes(),
+            );
+            (VERIFY, encoded.as_slice())
+        }
         Command::Check(p) => (CHECK, p.as_os_str().as_encoded_bytes()),
     };
     let mut ch = Channel::new(Peer::connect(name)?);
     wire::write_frame(&mut ch, op, scope, wire::LIMIT)?;
-    ch.timeout(if op == CHECK { wire::SCAN } else { wire::SHORT });
-    let (code, body) = wire::read_frame(&mut ch, MAX_REPLY)?;
+    ch.timeout(if matches!(op, CHECK | VERIFY) {
+        wire::SCAN
+    } else {
+        wire::SHORT
+    });
+    let reply_limit = if matches!(op, INSPECT | VERIFY) {
+        128
+    } else {
+        MAX_REPLY
+    };
+    let (code, body) = wire::read_frame(&mut ch, reply_limit)?;
     if !matches!(code, 0..=2) {
         return Err(invalid("invalid reply code"));
     }
@@ -67,6 +95,30 @@ fn worker(shared: &Shared, cancel: &watch::Cancel, mut scans: impl Scans) {
         };
         drop(s);
         match task {
+            Task::Verify(key, revision, mut ch) => {
+                let current = || shared.state.lock().unwrap().still_suspect(&key, revision);
+                let verdict = if current() {
+                    scans.verify(&key).ok()
+                } else {
+                    None
+                };
+                let mut s = shared.state.lock().unwrap();
+                let band = if s.still_suspect(&key, revision) {
+                    verdict.map(|v| v.band)
+                } else {
+                    None
+                };
+                s.verify_busy = false;
+                drop(s);
+                // A verified-but-still-suspicious result has no new consent receipt.
+                let label = match band {
+                    Some("confirmed") => "threat",
+                    Some("suspicious" | "high_risk") => "suspicious",
+                    Some("clean") => "clean",
+                    _ => "unknown",
+                };
+                reply(&mut ch, 0, format!(r#"{{"result":"{label}"}}"#));
+            }
             Task::One(epoch, path, e) => {
                 let v = if e.remove {
                     scans.forget(&path);
@@ -103,7 +155,7 @@ fn worker(shared: &Shared, cancel: &watch::Cancel, mut scans: impl Scans) {
         }
     }
 }
-fn control(mut listener: Listener, root: &Path, shared: &Shared) -> io::Result<()> {
+fn control(mut listener: Listener, root: &Path, single: bool, shared: &Shared) -> io::Result<()> {
     loop {
         let peer = match listener.accept() {
             Ok(s) => s,
@@ -133,11 +185,30 @@ fn control(mut listener: Listener, root: &Path, shared: &Shared) -> io::Result<(
                 Some(p) => (0, s.lookup(p)),
                 None => (1, r#"{"error":"invalid_relative_key"}"#.into()),
             },
+            INSPECT => {
+                let key = crate::selection::scope_key(root, single, &arg);
+                (0, key.map_or_else(|| UNKNOWN.into(), |key| s.inspect(&key)))
+            }
+            VERIFY => {
+                if !s.manual_busy && !s.full_busy && !s.verify_busy && arg.len() > 8 {
+                    let (ticket, path) = arg.split_at(8);
+                    let job = crate::selection::scope_key(root, single, path).and_then(|key| {
+                        s.consume(&key, u64::from_be_bytes(ticket.try_into().unwrap()))
+                    });
+                    if let Some((key, revision)) = job {
+                        s.verify_busy = true;
+                        s.verification = Some((key, revision, ch));
+                        shared.wake.notify_one();
+                        continue;
+                    }
+                }
+                (0, UNKNOWN.into())
+            }
             CHECK if arg != root.as_os_str().as_encoded_bytes() => {
                 (1, r#"{"error":"invalid_scope"}"#.into())
             }
             _ if op != CHECK && !arg.is_empty() => (1, r#"{"error":"unexpected_payload"}"#.into()),
-            CHECK | SCAN_NOW | STOP if s.manual_busy || s.full_busy => {
+            CHECK | SCAN_NOW | STOP if s.manual_busy || s.full_busy || s.verify_busy => {
                 (1, r#"{"error":"busy"}"#.into())
             }
             STOP => {
@@ -180,7 +251,7 @@ pub fn serve(name: &str, root: &Path, ready: impl FnOnce(), scans: impl Scans) -
         });
         let signal = &cancel;
         threads.spawn(move || worker(shared, signal, scans));
-        let result = control(listener, root, shared);
+        let result = control(listener, root, single, shared);
         shared.state.lock().unwrap().stopping = true;
         shared.wake.notify_one();
         cancel.wake();
@@ -218,6 +289,9 @@ mod tests {
             unreachable!()
         }
         fn forget(&mut self, _: &Path) {}
+        fn verify(&mut self, _: &Path) -> io::Result<FileVerdict> {
+            unreachable!()
+        }
     }
     #[test]
     fn status_remains_live_during_inventory_and_busy_never_means_clean() {

@@ -1,0 +1,41 @@
+{
+  "menu": {
+    "message": "Mit Odina prüfen"
+  },
+  "description": {
+    "message": "Prüft Ihre lokale Auswahl nur auf Anfrage."
+  },
+  "suspect": {
+    "message": "Diese Datei ist verdächtig."
+  },
+  "consequence": {
+    "message": "Odina liest eine verdächtige Datei aus der Auswahl und prüft ihren Fingerabdruck lokal. Nichts wird geändert."
+  },
+  "deep": {
+    "message": "Genau prüfen"
+  },
+  "ignore": {
+    "message": "Ignorieren"
+  },
+  "confirmed": {
+    "message": "Odina hat eine bestätigte Bedrohung in der Auswahl gefunden."
+  },
+  "limits": {
+    "message": "Diese Prüfung hat weder die Ausführung verhindert noch die Datei verschoben. Es steht noch keine Quarantäne zur Verfügung."
+  },
+  "stillSuspect": {
+    "message": "Die Prüfung hat keine Infektion bestätigt. Die Datei ist unverändert."
+  },
+  "close": {
+    "message": "Schließen"
+  },
+  "working": {
+    "message": "Lokale Prüfung läuft…"
+  },
+  "quarantine": {
+    "message": "In Quarantäne verschieben"
+  },
+  "language": {
+    "message": "de"
+  }
+}

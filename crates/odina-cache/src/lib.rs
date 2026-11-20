@@ -5,6 +5,7 @@ mod cache;
 mod engine;
 mod stamp;
 use cache::Cache;
+use engine::ReadMode;
 pub use engine::Work;
 use odina_core::{assessment::Assessment, g1_reference::PrefixFilter};
 use std::{fs::File, io, path::Path};
@@ -36,7 +37,13 @@ impl Scanner {
         })
     }
     pub fn scan_file(&mut self, path: &Path, work: &mut Work) -> io::Result<(Assessment, File)> {
-        engine::scan(path, &self.filter, &mut self.index, work, false)
+        engine::scan(
+            path,
+            &self.filter,
+            &mut self.index,
+            work,
+            ReadMode::Inventory,
+        )
     }
     pub fn begin_pass(&mut self) {
         if let Some(c) = &mut self.index {
@@ -57,7 +64,19 @@ impl Scanner {
             &self.filter,
             &mut self.index,
             &mut Work::default(),
-            true,
+            ReadMode::Delta,
+        )
+        .map(|(a, _)| a)
+    }
+    /// Opt-in read of one stable regular file. Force Bloom + full SHA; do not read
+    /// cached hints, update inventory, export a hash or run the file.
+    pub fn verify_file(&self, path: &Path) -> io::Result<Assessment> {
+        engine::scan(
+            path,
+            &self.filter,
+            &mut None,
+            &mut Work::default(),
+            ReadMode::Explicit,
         )
         .map(|(a, _)| a)
     }

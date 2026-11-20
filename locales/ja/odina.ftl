@@ -497,3 +497,17 @@ recovery.case_invalid = 検証失敗
 settings.repair_db.install = 個別に導入
 settings.repair_db.instructions = 同じバージョンの Odina の { $package } を、フォルダー構成を保ってプログラムと同じ場所に展開します。
 settings.repair_db.releases = リリース一覧
+
+## Browser context menu (D48)
+browser.menu = Odina でスキャン
+browser.description = 選択したローカル項目を、操作時にのみ確認します。
+browser.suspect = 不審なファイルです。
+browser.consequence = 選択範囲にある不審なファイルを 1 件読み取り、指紋を端末内で照合します。ファイルは変更しません。
+browser.deep = 詳細スキャン
+browser.ignore = 無視
+browser.confirmed = 選択範囲で脅威が確認されました。
+browser.limits = この確認は実行を阻止しておらず、ファイルも移動していません。隔離機能はまだ利用できません。
+browser.stillSuspect = 感染は確認されませんでした。ファイルは変更されていません。
+browser.close = 閉じる
+browser.working = 端末内で確認しています…
+browser.quarantine = 隔離する
