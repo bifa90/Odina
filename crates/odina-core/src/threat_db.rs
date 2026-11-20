@@ -204,7 +204,7 @@ mod tests {
             version,
             source: SOURCE.to_string(),
             license: LICENSE.to_string(),
-            digest_sha256: sha256_bytes(payload),
+            digest_sha256: parse_hex_32(&sha256_hex(payload)).unwrap(),
             signature_verified: true,
         }
     }
