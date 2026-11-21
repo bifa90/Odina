@@ -158,7 +158,7 @@ fn inventory_once(
 ) -> io::Result<Inventory> {
     session.scanner.begin_pass();
     let (totals, walked) = odina_scan::pass(&mut session.scanner, session.root, &mut |a| {
-        seen(&relative(session.root, session.single, a), value(a));
+        seen(relative(session.root, session.single, a), value(a));
     })?;
     // Sealing can fail (a read-only index directory, a full disk). That costs the
     // next run its warm start; it does not falsify this one, which is why it is a
