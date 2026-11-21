@@ -26,14 +26,24 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - name: format and push
+      - name: format, test and push
         run: |
           cargo fmt --all
-          if git diff --quiet; then
-            echo "already formatted"
+          set +e
+          cargo test --workspace --locked > /tmp/test.log 2>&1
+          echo "TEST_EXIT=$?" >> /tmp/test.log
+          set -e
+          {
+            echo '```'
+            grep -E "^(test .* FAILED|failures:|---- .* stdout ----|TEST_EXIT=|error(\[|:)|running [0-9]+ test|test result:)" /tmp/test.log | head -200
+            echo '```'
+          } > test-report.md
+          git add -A
+          if git diff --cached --quiet; then
+            echo "nothing to push"
             exit 0
           fi
           git config user.name "odina-fmt-probe"
           git config user.email "fmt-probe@users.noreply.github.com"
-          git commit -am "style: apply CI rustfmt to the new modules (probe commit)"
+          git commit -m "chore: probe output (format + failing test names)"
           git push origin HEAD:arena/392cabeb-odina
