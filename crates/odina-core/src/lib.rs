@@ -21,6 +21,7 @@ pub mod policy;
 pub mod proactive;
 pub mod remediation;
 pub mod repair_db;
+pub mod sandbox_exec;
 pub mod scoring;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};
