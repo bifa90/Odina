@@ -6,7 +6,7 @@ pub const MAX_SCAN_MEMORY_MB: u64 = 512;
 pub const MAX_WORKERS: u8 = 4;
 
 pub fn within_resource_caps(memory_mb: u64, workers: u8) -> bool {
-    memory_mb <= MAX_SCAN_MEMORY_MB && workers >= 1 && workers <= MAX_WORKERS
+    memory_mb <= MAX_SCAN_MEMORY_MB && (1..=MAX_WORKERS).contains(&workers)
 }
 
 #[cfg(test)]
