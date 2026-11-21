@@ -17,6 +17,7 @@ pub mod assessment;
 pub mod g1_reference;
 pub mod hashing;
 pub mod heuristics;
+pub mod incident;
 pub mod policy;
 pub mod proactive;
 pub mod quarantine;
