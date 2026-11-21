@@ -214,6 +214,8 @@ impl State {
         let backend = crate::watch::BACKEND;
         let phase = if self.full_busy || self.manual_busy || self.verify_busy {
             "scanning"
+        } else if self.suspended {
+            "suspended"
         } else if self.active_delta || !self.pending.is_empty() {
             "processing"
         } else if self.covered {

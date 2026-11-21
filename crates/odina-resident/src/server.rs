@@ -342,6 +342,7 @@ mod tests {
             thread::yield_now();
         }
         assert_eq!(ask(Command::Suspend).body, r#"{"suspended":true}"#);
+        assert!(ask(Command::Status).body.contains(r#""phase":"suspended""#));
         assert_eq!(ask(Command::ScanNow).body, r#"{"error":"suspended"}"#);
         assert_eq!(ask(Command::Resume).body, r#"{"suspended":false}"#);
         assert_eq!(ask(Command::Stop).code, 0);
