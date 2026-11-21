@@ -26,6 +26,8 @@ use odina_cache::{Scanner, Work};
 // disagree about which files a folder contains.
 pub use odina_scan::walk;
 #[cfg(feature = "instrument")]
+use odina_scan::Walked;
+#[cfg(feature = "instrument")]
 use odina_instrument::{Meter, PerfReport, ScanStats};
 use std::fs::File;
 use std::path::{Path, PathBuf};
