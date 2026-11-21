@@ -23,9 +23,11 @@ pub mod packaging;
 pub mod policy;
 pub mod proactive;
 pub mod quarantine;
+pub mod release_gate;
 pub mod remediation;
 pub mod repair_db;
 pub mod scoring;
+pub mod telemetry;
 pub mod ui_state;
 pub mod update;
 
