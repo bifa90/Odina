@@ -148,7 +148,9 @@ pub struct TierStats {
 
 impl TierStats {
     pub fn is_complete_for(self, tier: Tier) -> bool {
-        tier.required_fields().iter().all(|f| self.fields.contains(*f))
+        tier.required_fields()
+            .iter()
+            .all(|f| self.fields.contains(*f))
     }
 }
 
@@ -257,7 +259,10 @@ impl CatalogStore {
                 }
             }
         };
-        if self.active.is_some_and(|c| candidate.generation <= c.generation) {
+        if self
+            .active
+            .is_some_and(|c| candidate.generation <= c.generation)
+        {
             return InstallOutcome::KeptPrevious {
                 active_generation: self.active.map(|c| c.generation),
                 reason: DbReject::NotNewer,
@@ -315,7 +320,10 @@ mod tests {
     fn a_language_column_cannot_be_encoded_at_all() {
         let known = Field::ALL.iter().fold(0u16, |acc, f| acc | f.bit());
         assert_eq!(FieldSet::from_bits(known), Ok(FieldSet::of(&Field::ALL)));
-        assert_eq!(FieldSet::from_bits(known | (1 << 15)), Err(DbReject::UnknownField));
+        assert_eq!(
+            FieldSet::from_bits(known | (1 << 15)),
+            Err(DbReject::UnknownField)
+        );
         assert_eq!(FieldSet::from_bits(0), Ok(FieldSet::of(&[])));
     }
 

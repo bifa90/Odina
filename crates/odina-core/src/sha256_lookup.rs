@@ -32,8 +32,7 @@ pub fn build_free_sha256_lookup_url(
 mod tests {
     use super::*;
 
-    const EICAR_SHA256: &str =
-        "275A021BBFB6489E54D471899F7DB9D1663FC695EC2FE2A2C4538AABF651FD0F";
+    const EICAR_SHA256: &str = "275A021BBFB6489E54D471899F7DB9D1663FC695EC2FE2A2C4538AABF651FD0F";
 
     #[test]
     fn requires_explicit_user_request_and_valid_sha256() {

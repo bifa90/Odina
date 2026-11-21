@@ -1,0 +1,39 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# TEMPORARY probe, deleted before merge. It exists because the sandbox that
+# edits this branch has no Rust toolchain: the only authoritative answer to
+# "what does CI's rustfmt want" is CI's rustfmt. It formats the tree and pushes
+# the result back to the same branch instead of only failing.
+
+name: fmt-probe
+
+on:
+  push:
+    branches: [arena/392cabeb-odina]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: arena/392cabeb-odina
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: format and push
+        run: |
+          cargo fmt --all
+          if git diff --quiet; then
+            echo "already formatted"
+            exit 0
+          fi
+          git config user.name "odina-fmt-probe"
+          git config user.email "fmt-probe@users.noreply.github.com"
+          git commit -am "style: apply CI rustfmt to the new modules (probe commit)"
+          git push origin HEAD:arena/392cabeb-odina
