@@ -268,6 +268,8 @@ fn run(cmd: &str, args: &[String]) -> io::Result<u8> {
         "status" => Command::Status,
         "scan-now" => Command::ScanNow,
         "stop" => Command::Stop,
+        "suspend" => Command::Suspend,
+        "resume" => Command::Resume,
         _ => return Err(bad("unknown command")),
     };
     let r = request(name, op)?;
