@@ -56,6 +56,7 @@ pub mod removable_media;
 pub mod repair_db;
 pub mod resource_cap;
 pub mod retention;
+pub mod sandbox_exec;
 pub mod scheduler;
 pub mod scoring;
 pub mod script_inspect;
