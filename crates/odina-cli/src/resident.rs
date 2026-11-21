@@ -9,6 +9,8 @@ use odina_cache::Scanner;
 #[cfg(feature = "instrument")]
 use odina_instrument::Meter;
 use odina_resident::{request, serve, Command, FileVerdict, Inventory, Scans};
+#[cfg(feature = "instrument")]
+use std::io::Write;
 use std::{
     fs,
     io::{self},

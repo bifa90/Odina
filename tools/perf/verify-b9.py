@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# SPDX-License-Identifier: AGPL-3.0-or-later
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 bifa90 — Odina developer tools (see LICENSE-TOOLS)
 """Before/after B9: deferred PE vs the prefix Bloom + private index (empty and filled).
 Run outside the scan folders: python3 verify-b9.py [--quick] [--cache-state cold|warm|both] DIR [DIR ...]
