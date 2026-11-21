@@ -89,6 +89,31 @@ mod resident {
         }
     }
 
+    /// `status` answers `busy` while the first inventory is still draining.
+    /// That is a state the product reports on purpose — it is never `clean` —
+    /// so the test waits for an answer instead of treating the state as a
+    /// failure. The assertions below still run on the settled answer.
+    fn status_now(name: &str) -> String {
+        let by = Instant::now() + Duration::from_secs(20);
+        loop {
+            let out = Command::new(BIN)
+                .args(["status", "--service", name])
+                .output()
+                .unwrap();
+            let text = format!(
+                "{}{}",
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+            if !text.contains(r#""error":"busy""#) {
+                assert_eq!(out.status.code(), Some(0), "{text}");
+                return text;
+            }
+            assert!(Instant::now() < by, "status stayed busy: {text}");
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+
     fn wait_for(mut query: impl FnMut() -> String, expected: &str) -> String {
         let by = Instant::now() + Duration::from_secs(20);
         loop {
@@ -154,12 +179,12 @@ mod resident {
         // `last_exit` record, and the exit code comes from `Totals::exit_code`
         // in odina-scan — the same function the public CLI would call.
         assert!(
-            run(&mut control("status"), 0).contains(r#""last_exit":null"#),
+            status_now(&name).contains(r#""last_exit":null"#),
             "nothing has been scanned yet, so nothing may claim an exit code"
         );
         let accepted = run(&mut control("scan-now"), 0);
         assert!(accepted.contains("accepted"), "got: {accepted}");
-        let status = wait_for(|| run(&mut control("status"), 0), r#""completed":1"#);
+        let status = wait_for(|| status_now(&name), r#""completed":1"#);
         assert!(
             status.contains(r#""last_exit":2"#),
             "the found vector must raise the code to 2: {status}"
