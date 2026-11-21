@@ -33,6 +33,7 @@ pub enum Command<'a> {
     Stop,
     Suspend,
     Resume,
+    Drain,
     /// Relative, read-only lookup. Never interpreted as a scan request.
     Verdict(&'a Path),
     /// Read-only summary of an absolute selection under the operator's fixed scope.

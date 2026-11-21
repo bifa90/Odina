@@ -19,6 +19,7 @@ pub mod hashing;
 pub mod heuristics;
 pub mod policy;
 pub mod proactive;
+pub mod quarantine;
 pub mod remediation;
 pub mod repair_db;
 pub mod scoring;

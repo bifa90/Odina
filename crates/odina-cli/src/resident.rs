@@ -9,6 +9,8 @@ use odina_cache::Scanner;
 #[cfg(feature = "instrument")]
 use odina_instrument::Meter;
 use odina_resident::{request, serve, Command, FileVerdict, Inventory, Scans};
+#[cfg(feature = "instrument")]
+use std::io::Write;
 use std::{
     fs,
     io::{self},
@@ -270,6 +272,7 @@ fn run(cmd: &str, args: &[String]) -> io::Result<u8> {
         "stop" => Command::Stop,
         "suspend" => Command::Suspend,
         "resume" => Command::Resume,
+        "drain" => Command::Drain,
         _ => return Err(bad("unknown command")),
     };
     let r = request(name, op)?;

@@ -23,6 +23,7 @@ const INSPECT: u8 = 6;
 const VERIFY: u8 = 7;
 const SUSPEND: u8 = 8;
 const RESUME: u8 = 9;
+const DRAIN: u8 = 10;
 pub(super) const UNKNOWN: &str = r#"{"result":"unknown"}"#;
 
 pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
@@ -34,6 +35,7 @@ pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
         Command::Stop => (STOP, &[][..]),
         Command::Suspend => (SUSPEND, &[][..]),
         Command::Resume => (RESUME, &[][..]),
+        Command::Drain => (DRAIN, &[][..]),
         Command::Verdict(p) => (
             VERDICT,
             p.to_str()
@@ -188,6 +190,10 @@ fn control(mut listener: Listener, root: &Path, single: bool, shared: &Shared) -
             RESUME if arg.is_empty() => {
                 s.suspended = false;
                 (0, r#"{"suspended":false}"#.into())
+            }
+            DRAIN if arg.is_empty() => {
+                let drained = s.pending_len();
+                (0, format!(r#"{{"drained":{drained}}}"#))
             }
             VERDICT => match std::str::from_utf8(&arg)
                 .ok()

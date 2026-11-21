@@ -68,6 +68,9 @@ pub(crate) enum Task {
     Verify(PathBuf, Revision, Channel),
 }
 impl State {
+    pub(super) fn pending_len(&self) -> usize {
+        self.pending.len()
+    }
     fn invalidate_scope(&mut self) {
         self.loss_incidents += 1;
         self.epoch += 1;
