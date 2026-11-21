@@ -35,7 +35,8 @@ jobs:
           set -e
           {
             echo '```'
-            grep -E "^(test .* FAILED|failures:|---- .* stdout ----|TEST_EXIT=|error(\[|:)|running [0-9]+ test|test result:)" /tmp/test.log | head -200
+            grep -E "^(test .* FAILED|TEST_EXIT=|error(\[|:)|running [0-9]+ test|test result:)" /tmp/test.log | head -60
+            awk '/^---- /{f=1;c=0} f&&c<40{print;c++}' /tmp/test.log | head -120
             echo '```'
           } > test-report.md
           git add -A
