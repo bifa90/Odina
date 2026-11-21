@@ -13,6 +13,7 @@
 //! spawn threads. Callers supply bytes or normalized activities; it returns
 //! file verdicts or policy decisions, never OS side effects.
 
+pub mod artifact_verify;
 pub mod assessment;
 pub mod audit;
 pub mod explorer;
@@ -22,6 +23,7 @@ pub mod heuristics;
 pub mod incident;
 pub mod packaging;
 pub mod policy;
+pub mod privilege;
 pub mod proactive;
 pub mod quarantine;
 pub mod recovery;
@@ -31,6 +33,7 @@ pub mod repair_db;
 pub mod scheduler;
 pub mod scoring;
 pub mod telemetry;
+pub mod threat_db;
 pub mod ui_state;
 pub mod update;
 
