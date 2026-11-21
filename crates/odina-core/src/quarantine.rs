@@ -32,10 +32,15 @@ pub enum QuarantineError {
 impl fmt::Display for QuarantineError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Self::StoreFull { capacity } => write!(f, "quarantine store full (capacity={capacity})"),
+            Self::StoreFull { capacity } => {
+                write!(f, "quarantine store full (capacity={capacity})")
+            }
             Self::NotFound(id) => write!(f, "quarantine entry {id} not found"),
             Self::IdentityMismatch { expected, actual } => {
-                write!(f, "quarantine identity mismatch (expected={expected}, actual={actual})")
+                write!(
+                    f,
+                    "quarantine identity mismatch (expected={expected}, actual={actual})"
+                )
             }
             Self::PathConflict(path) => write!(f, "restore path already exists: {path}"),
             Self::KnownBadRestoreBlocked(id) => {
@@ -109,10 +114,7 @@ impl QuarantineStore {
         target_exists: bool,
         allow_known_bad: bool,
     ) -> Result<QuarantineEntry, QuarantineError> {
-        let entry = self
-            .entries
-            .get(&id)
-            .ok_or(QuarantineError::NotFound(id))?;
+        let entry = self.entries.get(&id).ok_or(QuarantineError::NotFound(id))?;
         if entry.known_bad && !allow_known_bad {
             return Err(QuarantineError::KnownBadRestoreBlocked(id));
         }

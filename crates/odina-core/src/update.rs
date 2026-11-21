@@ -16,9 +16,17 @@ pub struct UpdatePackage {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum UpdateStatus {
-    Updated { version: u64 },
-    RolledBack { active_version: u64, reason: &'static str },
-    CheckFailed { active_version: u64, reason: &'static str },
+    Updated {
+        version: u64,
+    },
+    RolledBack {
+        active_version: u64,
+        reason: &'static str,
+    },
+    CheckFailed {
+        active_version: u64,
+        reason: &'static str,
+    },
 }
 
 #[derive(Debug, Clone)]
@@ -93,7 +101,10 @@ mod tests {
             sha256_hex: "b".repeat(64),
             signature_valid: true,
         };
-        assert_eq!(mgr.apply_update(good), UpdateStatus::Updated { version: 11 });
+        assert_eq!(
+            mgr.apply_update(good),
+            UpdateStatus::Updated { version: 11 }
+        );
         assert_eq!(mgr.active_version(), 11);
     }
 

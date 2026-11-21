@@ -2,7 +2,11 @@
 // Copyright (c) 2026 bifa90 — Odina
 //! K28 Offline Installer & Integrity Contract.
 
-pub fn verify_offline_bundle(signature_ok: bool, manifest_hash_ok: bool, network_required: bool) -> bool {
+pub fn verify_offline_bundle(
+    signature_ok: bool,
+    manifest_hash_ok: bool,
+    network_required: bool,
+) -> bool {
     signature_ok && manifest_hash_ok && !network_required
 }
 

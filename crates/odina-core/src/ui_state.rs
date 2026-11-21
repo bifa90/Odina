@@ -89,6 +89,9 @@ mod tests {
         );
         let mut alert_state = UiState::new(ServiceHealth::Active, "ar");
         alert_state.active_alerts = 2;
-        assert_eq!(alert_state.tray_and_toast_summary(), "status.attention_needed");
+        assert_eq!(
+            alert_state.tray_and_toast_summary(),
+            "status.attention_needed"
+        );
     }
 }

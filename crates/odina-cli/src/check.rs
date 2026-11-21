@@ -24,11 +24,11 @@ use odina_cache::FULL_DIGEST_CAP;
 use odina_cache::{Scanner, Work};
 // One walk, one implementation. The check build and the public build must not
 // disagree about which files a folder contains.
+#[cfg(feature = "instrument")]
+use odina_instrument::{Meter, PerfReport, ScanStats};
 pub use odina_scan::walk;
 #[cfg(feature = "instrument")]
 use odina_scan::Walked;
-#[cfg(feature = "instrument")]
-use odina_instrument::{Meter, PerfReport, ScanStats};
 use std::fs::File;
 use std::path::{Path, PathBuf};
 

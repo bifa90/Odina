@@ -53,7 +53,10 @@ mod tests {
             temp_fs_redirected: true,
             timeout_ms: 3000,
         };
-        assert_eq!(evaluate_sandbox_run(unsafe_cfg, 0, 0, false), SandboxVerdict::AnalysisFailed);
+        assert_eq!(
+            evaluate_sandbox_run(unsafe_cfg, 0, 0, false),
+            SandboxVerdict::AnalysisFailed
+        );
 
         let safe_cfg = SandboxConfig {
             network_disabled: true,
