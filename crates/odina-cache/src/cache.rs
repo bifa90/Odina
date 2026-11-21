@@ -26,6 +26,7 @@ type Rows = HashMap<u64, Row>;
 pub(super) struct Cache {
     dir: Option<PathBuf>,
     cwd: PathBuf,
+    db_version: u64,
     // Resident-only reverse lookup for invalidation; these opaque tokens never leave memory.
     paths: Option<HashMap<u64, u64>>,
     disk_dirty: bool,
@@ -33,16 +34,16 @@ pub(super) struct Cache {
     current: Rows,
 }
 
-fn header() -> String {
+fn header(db_version: u64) -> String {
     format!(
-        "odina-index/v1\t{}\t{}\t{FULL_DIGEST_CAP}\tname-path-v5/1",
+        "odina-index/v1\t{}\t{}\t{FULL_DIGEST_CAP}\tname-path-v5/1\tdb={db_version}",
         env!("CARGO_PKG_VERSION"),
         g1_reference::VERSION
     )
 }
-fn parse(text: &str) -> Option<Rows> {
+fn parse(text: &str, db_version: u64) -> Option<Rows> {
     let mut lines = text.lines();
-    if lines.next()? != header() {
+    if lines.next()? != header(db_version) {
         return None;
     }
     let mut rows = Rows::new();
@@ -86,7 +87,7 @@ fn load(path: &Path) -> Option<Rows> {
     if text.len() as u64 > MAX_BYTES {
         return None;
     }
-    parse(&text)
+    parse(&text, 0)
 }
 fn invalid(msg: &str) -> io::Error {
     io::Error::new(io::ErrorKind::InvalidInput, msg)
@@ -95,6 +96,7 @@ fn invalid(msg: &str) -> io::Error {
 impl Cache {
     pub(super) fn memory() -> io::Result<Self> {
         Ok(Self {
+            db_version: 0,
             paths: None,
             disk_dirty: false,
             dir: None,
@@ -102,6 +104,17 @@ impl Cache {
             previous: Rows::new(),
             current: Rows::new(),
         })
+    }
+    pub(super) fn set_db_version(&mut self, db_version: u64) {
+        if self.db_version != db_version {
+            self.db_version = db_version;
+            self.previous.clear();
+            self.current.clear();
+            if let Some(paths) = &mut self.paths {
+                paths.clear();
+            }
+            self.disk_dirty = true;
+        }
     }
     pub(super) fn open(dir: &Path, target: &Path, out: Option<&Path>) -> io::Result<Self> {
         // Resolve existing parents before creating anything; never put even an
@@ -184,6 +197,7 @@ impl Cache {
         }
         let previous = load(&dir.join(FILE)).unwrap_or_default();
         Ok(Self {
+            db_version: 0,
             paths: None,
             disk_dirty: false,
             dir: Some(dir),
@@ -300,7 +314,7 @@ impl Cache {
         let file = options.open(&tmp)?;
         let publish = || -> io::Result<()> {
             let mut out = BufWriter::new(file);
-            writeln!(out, "{}", header())?;
+            writeln!(out, "{}", header(self.db_version))?;
             for (key, row) in &self.current {
                 writeln!(out, "{key:016x}\t{}\t{}", row.verdict, row.sha)?;
             }
@@ -344,11 +358,28 @@ mod tests {
     fn unknown_version_partial_duplicate_or_oversized_field_is_a_cold_miss() {
         for bad in [
             "old\n0\tclean\t-".into(),
-            format!("{}\n0\tclean", header()),
-            format!("{}\n0\talert\tzzz", header()),
-            format!("{}\n0\tclean\t-\n0\tclean\t-", header()),
+            format!("{}\n0\tclean", header(0)),
+            format!("{}\n0\talert\tzzz", header(0)),
+            format!("{}\n0\tclean\t-\n0\tclean\t-", header(0)),
         ] {
-            assert!(parse(&bad).is_none());
+            assert!(parse(&bad, 0).is_none());
         }
+    }
+
+    #[test]
+    fn db_version_change_invalidates_warm_cache_to_cold_miss() {
+        let mut cache = Cache::memory().unwrap();
+        cache.previous.insert(
+            42,
+            Row {
+                verdict: "clean".to_string(),
+                sha: "-".to_string(),
+            },
+        );
+        assert!(cache.previous.contains_key(&42));
+        cache.set_db_version(2);
+        assert!(cache.previous.is_empty());
+        assert!(parse(&format!("{}\n42\tclean\t-", header(1)), 2).is_none());
+        assert!(parse(&format!("{}\n42\tclean\t-", header(2)), 2).is_some());
     }
 }

@@ -50,6 +50,11 @@ impl Scanner {
             c.begin_pass();
         }
     }
+    pub fn set_db_version(&mut self, db_version: u64) {
+        if let Some(c) = &mut self.index {
+            c.set_db_version(db_version);
+        }
+    }
     pub fn forget(&mut self, path: &Path) {
         if let Some(c) = &mut self.index {
             c.forget(path);
