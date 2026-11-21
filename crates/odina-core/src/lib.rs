@@ -60,6 +60,7 @@ pub mod sandbox_exec;
 pub mod scheduler;
 pub mod scoring;
 pub mod script_inspect;
+pub mod sha256_lookup;
 pub mod telemetry;
 pub mod threat_db;
 pub mod ui_state;
