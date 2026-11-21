@@ -14,6 +14,7 @@
 //! file verdicts or policy decisions, never OS side effects.
 
 pub mod assessment;
+pub mod audit;
 pub mod explorer;
 pub mod g1_reference;
 pub mod hashing;
@@ -23,9 +24,11 @@ pub mod packaging;
 pub mod policy;
 pub mod proactive;
 pub mod quarantine;
+pub mod recovery;
 pub mod release_gate;
 pub mod remediation;
 pub mod repair_db;
+pub mod scheduler;
 pub mod scoring;
 pub mod telemetry;
 pub mod ui_state;
