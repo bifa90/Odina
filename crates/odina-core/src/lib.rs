@@ -14,6 +14,7 @@
 //! file verdicts or policy decisions, never OS side effects.
 
 pub mod assessment;
+pub mod explorer;
 pub mod g1_reference;
 pub mod hashing;
 pub mod heuristics;
