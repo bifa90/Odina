@@ -639,6 +639,11 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
     <div class="app">
       <div class="shield">
   <div class="sub" style="margin-bottom:6px;padding:4px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);font-size:12px">v19 · K1–K44 · لا يُدّعى «محمي» عند التوقف أو الانقطاع</div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:8px;font-size:12px;font-weight:600">
+    <span style="color:var(--danger)">مؤكد: 1</span>
+    <span style="color:var(--warn)">مشتبه/متوسط: 2</span>
+    <span style="color:var(--ok)">تم التنظيف: 14</span>
+  </div>
         <svg width="76" height="76" viewBox="0 0 1024 1024" aria-hidden="true">
           <path d="M512 176 C622 214 788 320 788 500 L788 688 C788 794 664 852 512 852 C360 852 236 794 236 688 L236 500 C236 320 402 214 512 176 Z"
                 fill="none" stroke="var(--ok)" stroke-width="104" stroke-linejoin="round" stroke-linecap="round"/>
@@ -961,7 +966,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
                   data-copy="C:\Users\Ahmed\Downloads\setup-key.exe"><svg class="i"><use href="#i-copy"/></svg></button>
         </div>
         <div class="row">
-          <button class="btn ghost" data-goto="quarantine" data-k="alert.pua.quarantine">انقله جانبًا</button>
+          <button class="btn ghost" data-goto="quarantine" data-k="alert.pua.quarantine">عزل</button>
           <button class="btn primary" data-k="alert.pua.allowed">اسمح به</button>
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
@@ -1040,7 +1045,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="qmain">
           <div class="qname">sample.dat</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\sample.dat</div>
-          <div class="qmeta"><span id="q-demo-reason" data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span id="q-demo-reason" data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":90}'>يُحفظ 90 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -1053,7 +1058,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="qmain">
           <div class="qname">malware-only.bin</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\malware-only.bin</div>
-          <div class="qmeta"><span data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":90}'>يُحفظ 90 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -1066,7 +1071,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="qmain">
           <div class="qname">setup-key.exe</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</div>
-          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":90}'>يُحفظ 90 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
