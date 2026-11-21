@@ -114,6 +114,30 @@ mod resident {
         }
     }
 
+    /// `scan-now` and `stop` refuse to interleave with a running pass and
+    /// answer `busy` (exit 1). That refusal is the contract — it is never a
+    /// silent queue — so the test retries instead of treating it as an error.
+    fn control_ok(name: &str, op: &str) -> String {
+        let by = Instant::now() + Duration::from_secs(20);
+        loop {
+            let out = Command::new(BIN)
+                .args([op, "--service", name])
+                .output()
+                .unwrap();
+            let text = format!(
+                "{}{}",
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+            if !text.contains(r#""error":"busy""#) {
+                assert_eq!(out.status.code(), Some(0), "{text}");
+                return String::from_utf8(out.stdout).unwrap();
+            }
+            assert!(Instant::now() < by, "{op} stayed busy: {text}");
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+
     fn wait_for(mut query: impl FnMut() -> String, expected: &str) -> String {
         let by = Instant::now() + Duration::from_secs(20);
         loop {
@@ -162,11 +186,6 @@ mod resident {
             "the service never announced itself"
         );
 
-        let control = |op: &str| {
-            let mut c = Command::new(BIN);
-            c.args([op, "--service", &name]);
-            c
-        };
         let verdict = |rel: &str| {
             run(
                 Command::new(BIN).args(["verdict", rel, "--service", &name]),
@@ -182,7 +201,7 @@ mod resident {
             status_now(&name).contains(r#""last_exit":null"#),
             "nothing has been scanned yet, so nothing may claim an exit code"
         );
-        let accepted = run(&mut control("scan-now"), 0);
+        let accepted = control_ok(&name, "scan-now");
         assert!(accepted.contains("accepted"), "got: {accepted}");
         let status = wait_for(|| status_now(&name), r#""completed":1"#);
         assert!(
@@ -205,7 +224,7 @@ mod resident {
             "an ordinary file must reach a verdict, not stay unknown: {clean}"
         );
 
-        run(&mut control("stop"), 0);
+        control_ok(&name, "stop");
         assert!(guard.0.wait().unwrap().success(), "the service must exit 0");
 
         // The index the public path seals is the same file format the lab path
