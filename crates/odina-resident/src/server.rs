@@ -223,6 +223,7 @@ fn control(mut listener: Listener, root: &Path, single: bool, shared: &Shared) -
             CHECK | SCAN_NOW | STOP if s.manual_busy || s.full_busy || s.verify_busy => {
                 (1, r#"{"error":"busy"}"#.into())
             }
+            CHECK | SCAN_NOW if s.suspended => (1, r#"{"error":"suspended"}"#.into()),
             STOP => {
                 drop(s);
                 reply(&mut ch, 0, r#"{"stopping":true}"#);
@@ -341,6 +342,7 @@ mod tests {
             thread::yield_now();
         }
         assert_eq!(ask(Command::Suspend).body, r#"{"suspended":true}"#);
+        assert_eq!(ask(Command::ScanNow).body, r#"{"error":"suspended"}"#);
         assert_eq!(ask(Command::Resume).body, r#"{"suspended":false}"#);
         assert_eq!(ask(Command::Stop).code, 0);
         srv.join().unwrap().unwrap();
