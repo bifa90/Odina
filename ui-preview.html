@@ -933,21 +933,17 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="row">
           <button class="btn primary" data-goto="remediation" data-list-tip="recovery.tip" data-k="alert.confirmed.cta">متابعة المعالجة</button>
         </div>
-        <details style="margin-top:6px">
-          <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات إضافية</summary>
-          <p style="margin-top:6px"><a class="policy-link" href="#screen-log">سجل أنشطة المكافح</a></p>
-        </details>
       </div>
+      <details style="margin:4px 0 10px">
+        <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات إضافية</summary>
+        <p style="margin-top:6px"><a class="policy-link" href="#screen-log">سجل أنشطة المكافح</a></p>
+      </details>
 
       <!-- مشتبه بشدة: قرار فوري، زرّان -->
       <div class="alert high">
         <div class="t"><svg class="i"><use href="#i-alert"/></svg><span><span class="badge conf" data-k="badge.high">مشتبه بشدة</span>&nbsp;
           <span data-k="alert.suspicious.title">برنامج يحاول الوصول إلى ملفاتك</span></span></div>
         <p class="b" data-k="alert.suspicious.body" data-k-args='{"file":"PhotoTool.exe"}'>PhotoTool.exe يعدّل ملفات في المستندات — أوقفناه مؤقتًا.</p>
-        <details style="margin-bottom:8px">
-          <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات متقدمة</summary>
-          <p style="margin-top:6px"><a class="policy-link" href="#behavior-check">فحص السلوك (بيئة معزولة)</a></p>
-        </details>
         <div class="row">
           <button class="btn ghost" data-k="button.allow">السماح</button>
           <button class="btn primary" data-k="button.block">المنع</button>
@@ -955,6 +951,10 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
       </div>
+      <details style="margin:4px 0 10px">
+        <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات متقدمة</summary>
+        <p style="margin-top:6px"><a class="policy-link" href="#behavior-check">فحص السلوك (بيئة معزولة)</a></p>
+      </details>
 
       <!-- خطر متوسط -->
       <div class="alert medium">
