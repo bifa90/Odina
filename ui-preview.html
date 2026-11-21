@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="icon" type="image/svg+xml" href="assets/logo/svg/odina-icon-light.svg">
-<title>Odina — معاينة الواجهة (v1)</title>
+<title>Odina — معاينة الواجهة (v19 · K1–K44)</title>
 <style data-vendor-fonts>
 /* ══════════════════════════════════════════════════════════════════
    Odina — UI Preview
@@ -315,7 +315,7 @@ body.real .sec + .sec{margin-top:26px}
 .qmain{flex:1;min-width:0}
 .qname{font-weight:600;font-size:14px}
 .qpath{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:11.5px;color:var(--text3);
-  direction:ltr;unicode-bidi:isolate;text-align:left;word-break:break-all;margin:2px 0 4px}
+  direction:ltr;unicode-bidi:isolate;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:2px 0 4px}
 .qmeta{font-size:12px;color:var(--text2)}
 .qacts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .btn.sm{min-height:34px;padding:6px 12px;font-size:13px;flex:0 0 auto}
@@ -326,7 +326,7 @@ body.real .sec + .sec{margin-top:26px}
   background:var(--surface2);padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
 .pathrow .plabel{font-size:11px;font-weight:600;color:var(--text3);white-space:nowrap;padding-top:2px}
 .pathrow .pval{font-family:ui-monospace,'Cascadia Mono',Consolas,monospace;font-size:12.5px;
-  color:var(--text);direction:ltr;unicode-bidi:isolate;text-align:left;word-break:break-all;
+  color:var(--text);direction:ltr;unicode-bidi:isolate;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   flex:1;line-height:1.5}
 .pathrow .pcopy{background:none;border:0;cursor:pointer;color:var(--text3);font-size:14px;
   padding:0 2px;line-height:1}
@@ -638,6 +638,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
 
     <div class="app">
       <div class="shield">
+  <div class="sub" style="margin-bottom:6px;padding:4px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--border);font-size:12px">v19 · K1–K44 · لا يُدّعى «محمي» عند التوقف أو الانقطاع</div>
         <svg width="76" height="76" viewBox="0 0 1024 1024" aria-hidden="true">
           <path d="M512 176 C622 214 788 320 788 500 L788 688 C788 794 664 852 512 852 C360 852 236 794 236 688 L236 500 C236 320 402 214 512 176 Z"
                 fill="none" stroke="var(--ok)" stroke-width="104" stroke-linejoin="round" stroke-linecap="round"/>
@@ -654,7 +655,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <span class="ico"><svg class="i"><use href="#i-db"/></svg></span>
           <span class="nm" data-k="wall.signatures.title">قاعدة بيانات الملفات</span>
           <span class="st on" data-k="wall.signatures.on">فعّال</span>
-          <span class="pill"></span>
+          <span class="pill" role="switch" aria-checked="true"></span>
         </div>
         <div class="wall">
           <span class="ico"><svg class="i"><use href="#i-pulse"/></svg></span>
@@ -666,7 +667,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <span class="ico"><svg class="i"><use href="#i-shield-check"/></svg></span>
           <span class="nm" data-k="wall.proactive.title">الحماية الاستباقية</span>
           <span class="st on" data-k="wall.proactive.on">فعّال</span>
-          <span class="pill"></span>
+          <span class="pill" role="switch" aria-checked="true"></span>
         </div>
       </div>
 
@@ -747,18 +748,17 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <div class="lvrow"><span data-k="lvl.app">التطبيق</span><b data-k="lvl1.app">يعمل · يفحص · يمنع · لا يسأل</b></div>
         </div>
         <div class="chips">
-          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":10}'>١٠ دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>٣٠ دقيقة</span>
+          <span class="chip" data-k="lvl.d10" data-tmpl="lvl.d10" data-k-args='{"n":10}'>10 دقائق</span><span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>30 دقيقة</span>
           <span class="chip" data-k="lvl.d60">ساعة</span><span class="chip" data-k="lvl.dreboot">حتى إعادة التشغيل</span>
         </div>
       </div>
 
       <div class="lvcard danger">
         <div class="lvhead"><svg class="i"><use href="#i-stop"/></svg><b data-k="lvl2.name">إيقاف الحماية</b></div>
-        <div class="lvbody" data-k="lvl2.body">لا فحص، لا منع، لا تنبيه. الخدمة تبقى مشغّلة لكن خاملة. جهازك غير محمي تمامًا.</div>
+        <div class="lvbody" data-k="lvl2.body">الخدمة تبقى مشغّلة لكن خاملة. جهازك غير محمي تمامًا.</div>
         <div class="warnbox">
           <div class="wtitle"><svg class="i sm"><use href="#i-alert"/></svg><span data-k="disable.warning_title">خطر شديد</span></div>
-          <div data-k="lvl2.warn">نتوقف عن الحماية، لا عن الإخبار.</div>
-          <div class="resp" data-k="lvl2.resp">القرار قرارك، والمسؤولية عليك أثناء هذه المدة.</div>
+          <div data-k="lvl2.warn">نتوقف عن الحماية تماما، المسؤولية عليك أثناء هذه المدة.</div>
         </div>
         <div class="chips">
           <span class="chip" data-k="lvl.d30" data-tmpl="lvl.d30" data-k-args='{"n":30}'>٣٠ دقيقة</span><span class="chip" data-k="lvl.d60">ساعة</span>
@@ -918,6 +918,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
     </div>
     <h2 data-k="sec.alerts">2 · التنبيهات</h2>
     <p class="hint" data-k="sec.alerts.hint">نص أقل · لا زر حذف إطلاقًا · شرح عند الطلب</p>
+    <p class="hint" style="margin-top:-6px">محور المحتوى: مصاب (عزل + معالجة) · فيروس مستقل (فحص السجل + صندوق العزل)</p>
 
     <div class="alerts">
       <!-- تأكيد الإصابة يمنع التشغيل ولا يقرر مصير الملف. -->
@@ -934,6 +935,10 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <button class="btn primary" data-goto="remediation" data-list-tip="recovery.tip" data-k="alert.confirmed.cta">متابعة المعالجة</button>
         </div>
       </div>
+      <details style="margin:4px 0 10px">
+        <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات إضافية</summary>
+        <p style="margin-top:6px"><a class="policy-link" href="#screen-log">سجل أنشطة المكافح</a></p>
+      </details>
 
       <!-- مشتبه بشدة: قرار فوري، زرّان -->
       <div class="alert high">
@@ -947,6 +952,10 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
       </div>
+      <details style="margin:4px 0 10px">
+        <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات متقدمة</summary>
+        <p style="margin-top:6px"><a class="policy-link" href="#behavior-check">فحص السلوك (بيئة معزولة)</a></p>
+      </details>
 
       <!-- خطر متوسط -->
       <div class="alert medium">
@@ -960,7 +969,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
                   data-copy="C:\Users\Ahmed\Downloads\setup-key.exe"><svg class="i"><use href="#i-copy"/></svg></button>
         </div>
         <div class="row">
-          <button class="btn ghost" data-goto="quarantine" data-k="alert.pua.quarantine">انقله جانبًا</button>
+          <button class="btn ghost" data-goto="quarantine" data-k="alert.pua.quarantine">عزل</button>
           <button class="btn primary" data-k="alert.pua.allowed">اسمح به</button>
           <span class="why" data-k="action.why">لماذا؟</span>
         </div>
@@ -971,6 +980,10 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="t"><svg class="i"><use href="#i-info"/></svg><span><span class="badge low" data-k="badge.low">مشتبه</span>&nbsp;
           <span data-k="alert.unsure.title">هذا البرنامج غير مألوف</span></span></div>
         <p class="b" data-k="alert.unsure.body" data-k-args='{"file":"newapp.exe"}'>newapp.exe جديد هنا ويتصرف بغرابة.</p>
+        <details style="margin-bottom:8px">
+          <summary style="cursor:pointer;font-size:12px;color:var(--text2)">▾ خيارات متقدمة</summary>
+          <p style="margin-top:6px"><a class="policy-link" href="#behavior-check">فحص السلوك (بيئة معزولة)</a></p>
+        </details>
         <div class="row">
           <button class="btn ghost" data-k="button.allow">السماح</button>
           <button class="btn primary" data-k="button.block">المنع</button>
@@ -1039,7 +1052,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="qmain">
           <div class="qname">sample.dat</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\sample.dat</div>
-          <div class="qmeta"><span id="q-demo-reason" data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span id="q-demo-reason" data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":90}'>يُحفظ 90 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -1052,7 +1065,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="qmain">
           <div class="qname">malware-only.bin</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\malware-only.bin</div>
-          <div class="qmeta"><span data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason1">برمجية خبيثة مستقلة بلا ملف يمكن إنقاذه</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":90}'>يُحفظ 90 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -1065,7 +1078,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="qmain">
           <div class="qname">setup-key.exe</div>
           <div class="qpath" dir="ltr">C:\Users\Ahmed\Downloads\setup-key.exe</div>
-          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":30}'>يُحفظ 30 يومًا</span></div>
+          <div class="qmeta"><span data-k="q.reason2">أداة كسر حماية</span> · <span data-k="quarantine.retention" data-tmpl="quarantine.retention" data-k-args='{"days":90}'>يُحفظ 90 يومًا</span></div>
         </div>
         <div class="qacts">
           <button class="btn ghost sm" data-k="quarantine.keep">احتفظ به</button>
@@ -1102,6 +1115,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
     </div>
     <h2><svg class="i"><use href="#i-pause"/></svg><span data-k="proactive.title">الحماية الاستباقية</span></h2>
     <p class="surface-intro" data-k="proactive.sub">السماح بنشاط هنا لا يلغي فحص الملفات أو قواعد جدار الحماية.</p>
+    <p class="hint" style="margin-bottom:10px">الحالة (مسموح/ممنوع) · التوصية (موصى به بشدة/موصى به) · (السماح/المنع)</p>
     <div class="remediation-box">
       <p class="demo-notice" data-k="proactive.demo.note">هذه محاكاة لخطوات آلية. لا تُفحص ملفاتك ولا تتغيّر إعدادات ويندوز.</p>
       <p id="remediation-status" role="status" data-k="proactive.demo.ready">عند فحص إصابة مؤكدة، تُمنع الأنشطة التسعة حتى ينجح الإصلاح.</p>
@@ -1245,16 +1259,6 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
 
     <div class="sechead"><svg class="i"><use href="#i-key"/></svg><span data-k="settings.behavior">السلوك</span></div>
     <div class="setrows">
-      <div class="setrow">
-        <details class="txt list-tip">
-          <summary class="t" data-k="settings.startup">يبدأ مع ويندوز</summary>
-          <span role="tooltip" data-k="settings.startup.body">يعمل في الخلفية منذ الإقلاع. يمكنك إيقافه.</span>
-        </details>
-        <div class="act seg" role="group" aria-label="startup">
-          <button aria-pressed="true" data-k="button.on">مفعّل</button>
-          <button aria-pressed="false" data-k="button.off">متوقف</button>
-        </div>
-      </div>
     </div>
 
     <div class="sechead"><svg class="i"><use href="#i-db"/></svg><span data-k="settings.about">عن البرنامج</span></div>
@@ -1903,5 +1907,11 @@ try { initialLang = localStorage.getItem('odina.lang') || 'ar'; } catch (e) {}
 applyLang(initialLang);
 </script>
 <script src="proactive-preview.js"></script>
+<script>
+document.querySelectorAll('.pval').forEach(el=>{
+  const t=el.textContent.trim();
+  if(t.length>42){el.title=t;el.textContent=t.slice(0,18)+'…'+t.slice(-20);}
+});
+</script>
 </body>
 </html>
