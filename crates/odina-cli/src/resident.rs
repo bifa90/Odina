@@ -11,14 +11,14 @@ use odina_instrument::Meter;
 use odina_resident::{request, serve, Command, FileVerdict, Inventory, Scans};
 #[cfg(feature = "instrument")]
 use std::io::Write;
+#[cfg(feature = "instrument")]
+use std::time::Instant;
 use std::{
     fs,
     io::{self},
     path::{Path, PathBuf},
     process::ExitCode,
 };
-#[cfg(feature = "instrument")]
-use std::time::Instant;
 
 fn code(r: io::Result<u8>) -> ExitCode {
     match r {
@@ -158,7 +158,7 @@ fn inventory_once(
 ) -> io::Result<Inventory> {
     session.scanner.begin_pass();
     let (totals, walked) = odina_scan::pass(&mut session.scanner, session.root, &mut |a| {
-        seen(&relative(session.root, session.single, a), value(a));
+        seen(relative(session.root, session.single, a), value(a));
     })?;
     // Sealing can fail (a read-only index directory, a full disk). That costs the
     // next run its warm start; it does not falsify this one, which is why it is a
@@ -360,11 +360,10 @@ mod tests {
         // What the public pass saw, kept by path so each file can be compared
         // against its own second reading below.
         let mut by_path: Vec<(PathBuf, odina_core::Verdict, odina_core::FileHashes)> = Vec::new();
-        let (totals, complete) =
-            odina_scan::pass(&mut public, &dir, &mut |a| {
-                by_path.push((a.path.clone(), a.score.verdict, a.hashes.clone()));
-            })
-            .expect("public pass");
+        let (totals, complete) = odina_scan::pass(&mut public, &dir, &mut |a| {
+            by_path.push((a.path.clone(), a.score.verdict, a.hashes.clone()));
+        })
+        .expect("public pass");
         assert_eq!(totals.files, 3);
         assert_eq!(totals.unreadable, 0);
         assert!(complete.is_complete());
@@ -391,7 +390,10 @@ mod tests {
             }
             bytes += one.hashes.size;
         }
-        assert_eq!(totals.bytes, bytes, "the two paths must read the same bytes");
+        assert_eq!(
+            totals.bytes, bytes,
+            "the two paths must read the same bytes"
+        );
 
         let _ = fs::remove_dir_all(&dir);
     }

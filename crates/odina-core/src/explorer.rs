@@ -50,11 +50,8 @@ mod tests {
 
     #[test]
     fn arabic_filename_in_scope_is_accepted_when_service_runs() {
-        let res = validate_explorer_selection(
-            "C:\\Users\\user\\ملف_تجريبي.exe",
-            "C:\\Users\\user",
-            true,
-        );
+        let res =
+            validate_explorer_selection("C:\\Users\\user\\ملف_تجريبي.exe", "C:\\Users\\user", true);
         assert_eq!(
             res,
             Ok(ExplorerAction {

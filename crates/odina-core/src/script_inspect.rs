@@ -25,8 +25,17 @@ mod tests {
 
     #[test]
     fn timeout_never_silently_allows_without_monitor_fallback() {
-        assert_eq!(evaluate_script_inspection(true, false), ScriptVerdict::MonitorTimeoutFallback);
-        assert_eq!(evaluate_script_inspection(false, true), ScriptVerdict::Block);
-        assert_eq!(evaluate_script_inspection(false, false), ScriptVerdict::Allow);
+        assert_eq!(
+            evaluate_script_inspection(true, false),
+            ScriptVerdict::MonitorTimeoutFallback
+        );
+        assert_eq!(
+            evaluate_script_inspection(false, true),
+            ScriptVerdict::Block
+        );
+        assert_eq!(
+            evaluate_script_inspection(false, false),
+            ScriptVerdict::Allow
+        );
     }
 }

@@ -11,7 +11,11 @@ pub enum ArchiveVerdict {
     AbortedBombOrDepth(&'static str),
 }
 
-pub fn check_archive_limits(depth: u8, compressed_bytes: u64, uncompressed_bytes: u64) -> ArchiveVerdict {
+pub fn check_archive_limits(
+    depth: u8,
+    compressed_bytes: u64,
+    uncompressed_bytes: u64,
+) -> ArchiveVerdict {
     if depth > MAX_ARCHIVE_DEPTH {
         return ArchiveVerdict::AbortedBombOrDepth("max_depth_exceeded");
     }
@@ -38,6 +42,9 @@ mod tests {
             check_archive_limits(2, 10, 50_000),
             ArchiveVerdict::AbortedBombOrDepth("expansion_ratio_exceeded")
         );
-        assert_eq!(check_archive_limits(2, 1000, 5000), ArchiveVerdict::SafeToInspect);
+        assert_eq!(
+            check_archive_limits(2, 1000, 5000),
+            ArchiveVerdict::SafeToInspect
+        );
     }
 }

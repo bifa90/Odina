@@ -34,7 +34,10 @@ mod tests {
 
     #[test]
     fn standard_user_cannot_perform_admin_actions() {
-        assert!(is_authorized(Role::StandardUser, PrivilegedAction::RunUserScan));
+        assert!(is_authorized(
+            Role::StandardUser,
+            PrivilegedAction::RunUserScan
+        ));
         assert!(!is_authorized(
             Role::StandardUser,
             PrivilegedAction::DisableRealtimeProtection

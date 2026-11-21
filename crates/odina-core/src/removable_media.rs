@@ -25,8 +25,17 @@ mod tests {
 
     #[test]
     fn blocks_unscanned_autorun_and_requires_scan() {
-        assert_eq!(evaluate_removable_mount(true, false), MediaAction::BlockAutorun);
-        assert_eq!(evaluate_removable_mount(false, false), MediaAction::ScanBeforeAutorun);
-        assert_eq!(evaluate_removable_mount(false, true), MediaAction::AllowMounted);
+        assert_eq!(
+            evaluate_removable_mount(true, false),
+            MediaAction::BlockAutorun
+        );
+        assert_eq!(
+            evaluate_removable_mount(false, false),
+            MediaAction::ScanBeforeAutorun
+        );
+        assert_eq!(
+            evaluate_removable_mount(false, true),
+            MediaAction::AllowMounted
+        );
     }
 }

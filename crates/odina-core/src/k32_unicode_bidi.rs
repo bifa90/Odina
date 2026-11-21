@@ -3,7 +3,8 @@
 //! K32 Unicode Bidi Override Guard Contract.
 
 pub fn has_bidi_override(name: &str) -> bool {
-    name.chars().any(|c| matches!(c, '\u{202A}'..='\u{202E}' | '\u{2066}'..='\u{2069}'))
+    name.chars()
+        .any(|c| matches!(c, '\u{202A}'..='\u{202E}' | '\u{2066}'..='\u{2069}'))
 }
 
 #[cfg(test)]
