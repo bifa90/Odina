@@ -1911,5 +1911,11 @@ try { initialLang = localStorage.getItem('odina.lang') || 'ar'; } catch (e) {}
 applyLang(initialLang);
 </script>
 <script src="proactive-preview.js"></script>
+<script>
+document.querySelectorAll('.pval').forEach(el=>{
+  const t=el.textContent.trim();
+  if(t.length>42){el.title=t;el.textContent=t.slice(0,18)+'…'+t.slice(-20);}
+});
+</script>
 </body>
 </html>
