@@ -46,6 +46,7 @@ pub(crate) struct State {
     baseline: bool, // complete inventory in this epoch
     fenced: bool,   // kernel stream drained through the end-of-inventory wake
     covered: bool,  // also replayed changes from the inventory window
+    pub(super) suspended: bool,
     epoch: u64,
     seq: u64,
     full_scans: u64,

@@ -21,6 +21,8 @@ const STOP: u8 = 4;
 const VERDICT: u8 = 5;
 const INSPECT: u8 = 6;
 const VERIFY: u8 = 7;
+const SUSPEND: u8 = 8;
+const RESUME: u8 = 9;
 pub(super) const UNKNOWN: &str = r#"{"result":"unknown"}"#;
 
 pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
@@ -30,6 +32,8 @@ pub fn request(name: &str, cmd: Command<'_>) -> io::Result<Reply> {
         Command::Status => (STATUS, &[][..]),
         Command::ScanNow => (SCAN_NOW, &[][..]),
         Command::Stop => (STOP, &[][..]),
+        Command::Suspend => (SUSPEND, &[][..]),
+        Command::Resume => (RESUME, &[][..]),
         Command::Verdict(p) => (
             VERDICT,
             p.to_str()
@@ -177,6 +181,14 @@ fn control(mut listener: Listener, root: &Path, single: bool, shared: &Shared) -
         let mut s = shared.state.lock().unwrap();
         let (code, body) = match op {
             STATUS if arg.is_empty() => (0, s.json()),
+            SUSPEND if arg.is_empty() => {
+                s.suspended = true;
+                (0, r#"{"suspended":true}"#.into())
+            }
+            RESUME if arg.is_empty() => {
+                s.suspended = false;
+                (0, r#"{"suspended":false}"#.into())
+            }
             VERDICT => match std::str::from_utf8(&arg)
                 .ok()
                 .map(Path::new)
@@ -328,6 +340,8 @@ mod tests {
             assert!(Instant::now() < until);
             thread::yield_now();
         }
+        assert_eq!(ask(Command::Suspend).body, r#"{"suspended":true}"#);
+        assert_eq!(ask(Command::Resume).body, r#"{"suspended":false}"#);
         assert_eq!(ask(Command::Stop).code, 0);
         srv.join().unwrap().unwrap();
         std::fs::remove_dir(dir).unwrap();
