@@ -345,6 +345,7 @@ mod tests {
         assert!(ask(Command::Status).body.contains(r#""phase":"suspended""#));
         assert_eq!(ask(Command::ScanNow).body, r#"{"error":"suspended"}"#);
         assert_eq!(ask(Command::Resume).body, r#"{"suspended":false}"#);
+        assert!(!ask(Command::Status).body.contains(r#""phase":"suspended""#));
         assert_eq!(ask(Command::Stop).code, 0);
         srv.join().unwrap().unwrap();
         std::fs::remove_dir(dir).unwrap();
