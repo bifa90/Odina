@@ -13,6 +13,7 @@
 //! spawn threads. Callers supply bytes or normalized activities; it returns
 //! file verdicts or policy decisions, never OS side effects.
 
+pub mod archive_guard;
 pub mod artifact_verify;
 pub mod assessment;
 pub mod audit;
@@ -21,14 +22,17 @@ pub mod g1_reference;
 pub mod hashing;
 pub mod heuristics;
 pub mod incident;
+pub mod network_scope;
 pub mod packaging;
 pub mod policy;
 pub mod privilege;
 pub mod proactive;
+pub mod publisher_trust;
 pub mod quarantine;
 pub mod recovery;
 pub mod release_gate;
 pub mod remediation;
+pub mod removable_media;
 pub mod repair_db;
 pub mod scheduler;
 pub mod scoring;
@@ -36,6 +40,7 @@ pub mod telemetry;
 pub mod threat_db;
 pub mod ui_state;
 pub mod update;
+pub mod watchdog;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};
 pub use heuristics::{guess_path_flags, name_shape, path_score, NameShape, PathFlags};
