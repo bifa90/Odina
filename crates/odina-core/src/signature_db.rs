@@ -315,10 +315,7 @@ mod tests {
     fn a_language_column_cannot_be_encoded_at_all() {
         let known = Field::ALL.iter().fold(0u16, |acc, f| acc | f.bit());
         assert_eq!(FieldSet::from_bits(known), Ok(FieldSet::of(&Field::ALL)));
-        assert_eq!(
-            FieldSet::from_bits(known | (1 << 15)),
-            Err(DbReject::UnknownField)
-        );
+        assert_eq!(FieldSet::from_bits(known | (1 << 15)), Err(DbReject::UnknownField));
         assert_eq!(FieldSet::from_bits(0), Ok(FieldSet::of(&[])));
     }
 
@@ -402,7 +399,7 @@ mod tests {
             InstallOutcome::Activated(Catalog {
                 generation: 2,
                 coverage: Coverage::Full,
-                records: 15
+                records: 15,
             })
         );
         for broken in [
