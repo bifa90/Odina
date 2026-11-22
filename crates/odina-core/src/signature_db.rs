@@ -363,7 +363,9 @@ pub fn age_status(age_days: u32, acknowledged_at_age: Option<u32>) -> AgeStatus 
     if age_days < WARN_DAYS {
         return AgeStatus::Current;
     }
-    let acked = acknowledged_at_age.is_some_and(|at| at >= WARN_DAYS && at < STRICT_DAYS);
+    // An acknowledgement only counts inside the warning window: pressing
+    // "I know" before the warning exists is not an acknowledgement.
+    let acked = acknowledged_at_age.is_some_and(|at| (WARN_DAYS..STRICT_DAYS).contains(&at));
     let deadline = if acked {
         STRICT_DAYS + ACK_EXTENSION_DAYS
     } else {
