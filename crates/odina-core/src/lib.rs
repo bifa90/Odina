@@ -50,6 +50,7 @@ pub mod proactive;
 pub mod publisher_trust;
 pub mod quarantine;
 pub mod recovery;
+pub mod release_age;
 pub mod release_gate;
 pub mod remediation;
 pub mod removable_media;

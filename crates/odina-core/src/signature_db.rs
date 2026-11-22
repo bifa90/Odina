@@ -16,9 +16,9 @@
 //! 3. **"Protected" is a conclusion, not a default** (D104, §10.4). It appears
 //!    only when protection is running, a catalogue is active, its Bloom index
 //!    matches its generation, and its age is current. A seed is never coverage.
-//! 4. **Age has one policy** (D106): a warning at 30 days, one user
-//!    acknowledgement bought 30 more days with the warning still visible, and
-//!    strict mode at 60 days without one.
+//! 4. **Age is not a gate** (D113): the 30/60/90 ladder was cancelled — no
+//!    strict mode, no acknowledgement button, no behaviour change with age.
+//!    How old the build is gets *said* (`release_age`), not enforced.
 //! 5. **Admission decides, then the database is simple** (D109): a hash enters
 //!    with full verdict power or it does not enter. There is no trust grade
 //!    inside the catalogue.
@@ -39,12 +39,6 @@ pub const SCHEMA_VERSION: u16 = 1;
 pub const KEY_MAIN: u8 = 1;
 /// The standby key, pinned before it is used so rotation needs no new trust.
 pub const KEY_NEXT: u8 = 2;
-/// Days of age at which the catalogue shows a warning (D106).
-pub const WARN_DAYS: u32 = 30;
-/// Days of age at which scanning turns strict without an acknowledgement.
-pub const STRICT_DAYS: u32 = 60;
-/// One acknowledgement buys this many more days of warning — never silence.
-pub const ACK_EXTENSION_DAYS: u32 = 30;
 /// The first batch from a new source gets human eyes, capped so the review is
 /// real rather than a rubber stamp (D109).
 pub const MAX_FIRST_BATCH_REVIEW: usize = 200;
@@ -343,44 +337,6 @@ impl CatalogStore {
     }
 }
 
-/// The single age policy (D106). One acknowledgement extends the warning
-/// window; it never hides the warning and never becomes permanent.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum AgeStatus {
-    /// Within the warning window.
-    Current,
-    /// Old enough to warn, still below the strict deadline.
-    Warn,
-    /// Past the deadline but inside an acknowledged extension.
-    Extended,
-    /// Past every window: strict mode, still a working catalogue.
-    Strict,
-}
-
-/// `acknowledged_days_ago` is the age of the catalogue when the user pressed
-/// "I know" — an acknowledgement before the warning existed does not count.
-pub fn age_status(age_days: u32, acknowledged_at_age: Option<u32>) -> AgeStatus {
-    if age_days < WARN_DAYS {
-        return AgeStatus::Current;
-    }
-    // An acknowledgement only counts inside the warning window: pressing
-    // "I know" before the warning exists is not an acknowledgement.
-    let acked = acknowledged_at_age.is_some_and(|at| (WARN_DAYS..STRICT_DAYS).contains(&at));
-    let deadline = if acked {
-        STRICT_DAYS + ACK_EXTENSION_DAYS
-    } else {
-        STRICT_DAYS
-    };
-    if age_days < deadline {
-        return if acked {
-            AgeStatus::Extended
-        } else {
-            AgeStatus::Warn
-        };
-    }
-    AgeStatus::Strict
-}
-
 /// The four states the UI may show (§10.4). "Protected" is reached only by
 /// argument, never inferred from the service simply running.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -391,11 +347,7 @@ pub enum ProtectionState {
     Stopped,
 }
 
-pub fn protection_state(
-    protection_enabled: bool,
-    catalog: Option<&Catalog>,
-    age: AgeStatus,
-) -> ProtectionState {
+pub fn protection_state(protection_enabled: bool, catalog: Option<&Catalog>) -> ProtectionState {
     if !protection_enabled {
         return ProtectionState::Stopped;
     }
@@ -403,10 +355,9 @@ pub fn protection_state(
         return ProtectionState::NeedsAttention;
     };
     // A seed is not coverage (D104): matching a seed row may warn, never bless.
-    if catalog.kind == CatalogKind::Seed
-        || catalog.coverage == Coverage::ExactOnly
-        || age != AgeStatus::Current
-    {
+    // An old build is *not* a reason to demote this state (D113): age is shown
+    // as a badge from `release_age`, and the catalogue keeps working as it is.
+    if catalog.kind == CatalogKind::Seed || catalog.coverage == Coverage::ExactOnly {
         return ProtectionState::WorkingWithAlert;
     }
     ProtectionState::Protected
@@ -810,50 +761,20 @@ mod tests {
     }
 
     #[test]
-    fn age_policy_warns_extends_and_then_is_strict() {
-        assert_eq!(age_status(0, None), AgeStatus::Current);
-        assert_eq!(age_status(WARN_DAYS - 1, None), AgeStatus::Current);
-        assert_eq!(age_status(WARN_DAYS, None), AgeStatus::Warn);
-        assert_eq!(age_status(STRICT_DAYS - 1, None), AgeStatus::Warn);
-        assert_eq!(age_status(STRICT_DAYS, None), AgeStatus::Strict);
-        // One acknowledgement, made inside the warning window, buys one window.
-        assert_eq!(
-            age_status(STRICT_DAYS, Some(WARN_DAYS)),
-            AgeStatus::Extended
-        );
-        assert_eq!(
-            age_status(STRICT_DAYS + ACK_EXTENSION_DAYS - 1, Some(WARN_DAYS)),
-            AgeStatus::Extended
-        );
-        assert_eq!(
-            age_status(STRICT_DAYS + ACK_EXTENSION_DAYS, Some(WARN_DAYS)),
-            AgeStatus::Strict
-        );
-        // An acknowledgement before the warning existed is not one.
-        assert_eq!(age_status(STRICT_DAYS, Some(1)), AgeStatus::Strict);
-    }
-
-    #[test]
     fn protected_is_a_conclusion_not_a_default() {
         let current = manifest(5).open().unwrap();
         assert_eq!(
-            protection_state(true, Some(&current), AgeStatus::Current),
+            protection_state(true, Some(&current)),
             ProtectionState::Protected
         );
         assert_eq!(
-            protection_state(true, None, AgeStatus::Current),
+            protection_state(true, None),
             ProtectionState::NeedsAttention
         );
         assert_eq!(
-            protection_state(false, Some(&current), AgeStatus::Current),
+            protection_state(false, Some(&current)),
             ProtectionState::Stopped
         );
-        for age in [AgeStatus::Warn, AgeStatus::Extended, AgeStatus::Strict] {
-            assert_eq!(
-                protection_state(true, Some(&current), age),
-                ProtectionState::WorkingWithAlert
-            );
-        }
         let exact_only = CatalogManifest {
             bloom_generation: None,
             ..manifest(5)
@@ -861,7 +782,7 @@ mod tests {
         .open()
         .unwrap();
         assert_eq!(
-            protection_state(true, Some(&exact_only), AgeStatus::Current),
+            protection_state(true, Some(&exact_only)),
             ProtectionState::WorkingWithAlert
         );
         // A seed is never coverage, whatever its generation says.
@@ -874,7 +795,7 @@ mod tests {
         assert_eq!(seed.kind, CatalogKind::Seed);
         assert_eq!(seed.records, 15);
         assert_eq!(
-            protection_state(true, Some(&seed), AgeStatus::Current),
+            protection_state(true, Some(&seed)),
             ProtectionState::WorkingWithAlert
         );
     }
