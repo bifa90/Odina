@@ -70,8 +70,8 @@ impl ReleaseMonth {
     /// be earlier than the build is not a reason to show a negative age: it
     /// returns `None` and the caller shows the month alone.
     pub fn months_until(self, now: Self) -> Option<u32> {
-        let months = (now.year as i64 * 12 + now.month as i64)
-            - (self.year as i64 * 12 + self.month as i64);
+        let months =
+            (now.year as i64 * 12 + now.month as i64) - (self.year as i64 * 12 + self.month as i64);
         u32::try_from(months).ok()
     }
 }
@@ -120,8 +120,23 @@ mod tests {
 
     #[test]
     fn a_month_stamp_is_four_digits_two_digits_and_nothing_else() {
-        assert_eq!(m("2026-04"), ReleaseMonth { year: 2026, month: 4 });
-        for bad in ["", "2026", "2026-4", "26-04", "2026-13", "2026-00", "2026-04-01", "1999-12"] {
+        assert_eq!(
+            m("2026-04"),
+            ReleaseMonth {
+                year: 2026,
+                month: 4
+            }
+        );
+        for bad in [
+            "",
+            "2026",
+            "2026-4",
+            "26-04",
+            "2026-13",
+            "2026-00",
+            "2026-04-01",
+            "1999-12",
+        ] {
             assert!(ReleaseMonth::parse(bad).is_err(), "{bad}");
         }
         assert_eq!(ReleaseMonth::parse("2026-4x"), Err(MonthReject::Shape));
@@ -158,10 +173,18 @@ mod tests {
         // carry one, and both answers must be safe.
         match age_from_build(m("2027-01")) {
             Some((released, age)) => {
-                assert_eq!(released, ReleaseMonth::parse(RELEASE_MONTH.unwrap()).unwrap());
-                assert_eq!(age, release_age(released.months_until(m("2027-01")).unwrap()));
+                assert_eq!(
+                    released,
+                    ReleaseMonth::parse(RELEASE_MONTH.unwrap()).unwrap()
+                );
+                assert_eq!(
+                    age,
+                    release_age(released.months_until(m("2027-01")).unwrap())
+                );
             }
-            None => assert!(RELEASE_MONTH.is_none() || ReleaseMonth::parse(RELEASE_MONTH.unwrap()).is_err()),
+            None => assert!(
+                RELEASE_MONTH.is_none() || ReleaseMonth::parse(RELEASE_MONTH.unwrap()).is_err()
+            ),
         }
     }
 }
