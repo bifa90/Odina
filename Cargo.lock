@@ -123,18 +123,18 @@ name = "odina-report"
 version = "0.1.0"
 
 [[package]]
-name = "odina-scan"
-version = "0.1.0"
-dependencies = [
- "odina-core",
-]
-
-[[package]]
 name = "odina-resident"
 version = "0.1.0"
 dependencies = [
  "libc",
  "windows-sys",
+]
+
+[[package]]
+name = "odina-scan"
+version = "0.1.0"
+dependencies = [
+ "odina-core",
 ]
 
 [[package]]

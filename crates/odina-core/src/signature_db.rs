@@ -183,7 +183,9 @@ pub struct TierStats {
 
 impl TierStats {
     pub fn is_complete_for(self, tier: Tier) -> bool {
-        tier.required_fields().iter().all(|f| self.fields.contains(*f))
+        tier.required_fields()
+            .iter()
+            .all(|f| self.fields.contains(*f))
     }
 }
 
@@ -560,10 +562,7 @@ impl<'a> SeedCatalog<'a> {
             if columns[4].is_empty() {
                 return Err(SeedReject::Source);
             }
-            if rows
-                .iter()
-                .any(|r| r.sha256.eq_ignore_ascii_case(sha256))
-            {
+            if rows.iter().any(|r| r.sha256.eq_ignore_ascii_case(sha256)) {
                 return Err(SeedReject::Duplicate);
             }
             rows.push(SeedRow {
@@ -584,7 +583,9 @@ impl<'a> SeedCatalog<'a> {
     }
 
     pub fn contains(&self, sha256: &str) -> bool {
-        self.rows.iter().any(|r| r.sha256.eq_ignore_ascii_case(sha256))
+        self.rows
+            .iter()
+            .any(|r| r.sha256.eq_ignore_ascii_case(sha256))
     }
 }
 
@@ -810,7 +811,10 @@ mod tests {
         assert_eq!(age_status(STRICT_DAYS - 1, None), AgeStatus::Warn);
         assert_eq!(age_status(STRICT_DAYS, None), AgeStatus::Strict);
         // One acknowledgement, made inside the warning window, buys one window.
-        assert_eq!(age_status(STRICT_DAYS, Some(WARN_DAYS)), AgeStatus::Extended);
+        assert_eq!(
+            age_status(STRICT_DAYS, Some(WARN_DAYS)),
+            AgeStatus::Extended
+        );
         assert_eq!(
             age_status(STRICT_DAYS + ACK_EXTENSION_DAYS - 1, Some(WARN_DAYS)),
             AgeStatus::Extended
@@ -983,7 +987,10 @@ mod tests {
                 "licence {bad}"
             );
         }
-        assert_eq!(SeedCatalog::parse("wrong-header\n"), Err(SeedReject::Header));
+        assert_eq!(
+            SeedCatalog::parse("wrong-header\n"),
+            Err(SeedReject::Header)
+        );
         assert_eq!(SeedCatalog::parse(header), Err(SeedReject::Empty));
         assert_eq!(
             SeedCatalog::parse(&format!("{header}{good}\t68\tfam\n")),
