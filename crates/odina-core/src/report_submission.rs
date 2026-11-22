@@ -30,6 +30,9 @@ pub const MAX_TOKEN: usize = 64;
 
 /// D109 stays as it was: a single user is not two origins.
 pub const USER_REPORT_IS_INDEPENDENT_ORIGIN: bool = false;
+/// And that is not a wish: the build fails if anyone flips it without reading
+/// D109 and D119 first.
+const _: () = assert!(!USER_REPORT_IS_INDEPENDENT_ORIGIN);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Report {
@@ -426,6 +429,5 @@ mod tests {
         };
         assert_eq!(session.offer(&eleventh), Submit::DailyCapReached);
         assert_eq!(session.sent_today(), DAILY_CAP);
-        assert!(!USER_REPORT_IS_INDEPENDENT_ORIGIN);
     }
 }

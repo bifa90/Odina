@@ -153,7 +153,7 @@ impl ReleaseSheet {
         if rows.is_empty() {
             return Err(SheetReject::Empty);
         }
-        rows.sort_by(|a, b| b.version.cmp(&a.version));
+        rows.sort_by_key(|row| std::cmp::Reverse(row.version));
         Ok(Self { rows })
     }
 
