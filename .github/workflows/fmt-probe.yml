@@ -30,23 +30,24 @@ jobs:
         run: |
           cargo fmt --all
           set +e
-          cargo clippy --workspace --all-targets -- -D warnings > /tmp/clippy.log 2>&1
+          cargo clippy --workspace --all-targets -- -D warnings > clippy.log 2>&1
           CLIPPY_EXIT=$?
-          cargo test --workspace > /tmp/test.log 2>&1
+          cargo test --workspace > test.log 2>&1
           TEST_EXIT=$?
           set -e
           {
             echo '# probe output'
             echo
-            echo "clippy exit: $CLIPPY_EXIT"
+            echo "clippy exit: $CLIPPY_EXIT, bytes: $(wc -c < clippy.log)"
             echo '```'
-            grep -E "^(error|warning|help)|^\s+--> |^[a-z0-9_]+\.rs:[0-9]+" /tmp/clippy.log | head -160
+            head -c 8000 clippy.log
             echo '```'
             echo "test exit: $TEST_EXIT"
             echo '```'
-            grep -E "^(test .* FAILED|failures:|---- .* stdout ----|error(\[|:)|running [0-9]+ test|test result:)" /tmp/test.log | head -160
+            grep -E "FAILED|test result:|^error" test.log | head -40
             echo '```'
           } > probe-report.md
+          rm -f clippy.log test.log
           cat probe-report.md
           git add -A
           if git diff --cached --quiet; then
