@@ -533,12 +533,16 @@ impl<'a> SeedCatalog<'a> {
         let mut rows: Vec<SeedRow<'a>> = Vec::new();
         let mut seen_header = false;
         for raw in text.lines() {
-            let line = raw.trim();
-            if line.is_empty() || line.starts_with('#') {
+            // Only the line terminator is stripped: a trailing tab here is a
+            // real empty column, and trimming it would turn "no source" into
+            // "wrong column count" — a different, less honest rejection.
+            let line = raw.trim_end_matches('\r');
+            let bare = line.trim();
+            if bare.is_empty() || bare.starts_with('#') {
                 continue;
             }
             if !seen_header {
-                if line != "odina-seed/v1\t1" {
+                if bare != "odina-seed/v1\t1" {
                     return Err(SeedReject::Header);
                 }
                 seen_header = true;
@@ -1007,6 +1011,13 @@ mod tests {
         assert_eq!(
             SeedCatalog::parse(&format!("{header}{good}\t68\tfam\tcc0-1.0\t\n")),
             Err(SeedReject::Source)
+        );
+        assert_eq!(
+            SeedCatalog::parse(&format!(
+                "{header}{good}\t68\tfam\tcc0-1.0\tsrc\n{}\t68\tfam\tcc0-1.0\tsrc\n",
+                good.to_uppercase()
+            )),
+            Err(SeedReject::Duplicate)
         );
     }
 }
