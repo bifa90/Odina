@@ -1,0 +1,21 @@
+# SPDX-License-Identifier: CC0-1.0
+# Odina seed catalogue — D104. This file is a starting point, not coverage:
+# the UI never calls the machine "protected" because this file matched.
+#
+# Format: odina-seed/v1, tab separated, one admitted hash per row.
+#   sha256 <TAB> size <TAB> family <TAB> licence <TAB> source
+# Rules enforced by SeedCatalog::parse (crates/odina-core/src/signature_db.rs):
+#   * a row carries a licence we can actually grant — only cc0-1.0 is accepted;
+#   * a hash enters only through the D109 admission gates (two independent
+#     origins, or a sample verified locally, and a clean-corpus check);
+#   * no duplicates, no empty family, no invented hash. A guess here becomes a
+#     false positive on someone's machine, so a row is added only when the
+#     digest was computed from a file we handled or from a published source.
+# Size cap is enforced at packaging time (SEED_MAX_BYTES in signature_db.rs and
+# tools/package-windows.py); when the seed would exceed it, rows move to the
+# full catalogue instead of growing the installer.
+odina-seed/v1	1
+# EICAR anti-malware test file: the canonical, deliberately harmless sample
+# every scanner is expected to detect. Including it proves the pipeline end to
+# end without shipping a real threat. 68 bytes, verbatim from eicar.org.
+275A021BBFB6489E54D471899F7DB9D1663FC695EC2FE2A2C4538AABF651FD0F	68	eicar-test-file	cc0-1.0	eicar.org public test standard
