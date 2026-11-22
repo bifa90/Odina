@@ -145,7 +145,10 @@ impl Report {
             ("name_pattern".to_string(), self.name_pattern.clone()),
             ("path_pattern".to_string(), self.path_pattern.clone()),
             ("attributes".to_string(), self.attributes.to_string()),
-            ("behavior_score".to_string(), self.behavior_score.to_string()),
+            (
+                "behavior_score".to_string(),
+                self.behavior_score.to_string(),
+            ),
             ("behaviors".to_string(), self.behaviors.join(";")),
             ("family".to_string(), self.family.clone()),
             ("app_version".to_string(), self.app_version.clone()),
@@ -275,7 +278,9 @@ mod tests {
         };
         assert_eq!(without_lang.to_form_fields().len(), 15);
         assert_eq!(without_lang.validate(), Ok(()));
-        assert!(fields.iter().any(|(k, v)| k == "behaviors" && v == "writes_autorun;drops_temp"));
+        assert!(fields
+            .iter()
+            .any(|(k, v)| k == "behaviors" && v == "writes_autorun;drops_temp"));
     }
 
     #[test]
@@ -315,8 +320,13 @@ mod tests {
         assert!(!keys.contains(&"file_name"));
         assert!(!keys.contains(&"path"));
         assert!(!keys.contains(&"username"));
-        assert!(!keys.iter().any(|k| k.contains("hwid") || k.contains("country")));
-        assert_eq!(report().fingerprint(), format!("{DIGEST}|68|eicar-test-file"));
+        assert!(!keys
+            .iter()
+            .any(|k| k.contains("hwid") || k.contains("country")));
+        assert_eq!(
+            report().fingerprint(),
+            format!("{DIGEST}|68|eicar-test-file")
+        );
     }
 
     #[test]

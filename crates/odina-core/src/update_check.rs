@@ -108,7 +108,8 @@ fn is_digest(text: &str) -> bool {
 
 impl ReleaseSheet {
     pub fn parse(csv: &str) -> Result<Self, SheetReject> {
-        const HEADER: &str = "version,release_month,installer_url,installer_sha256,db_generation,db_bytes,db_sha256";
+        const HEADER: &str =
+            "version,release_month,installer_url,installer_sha256,db_generation,db_bytes,db_sha256";
         let mut lines = csv.lines().filter(|line| !line.trim().is_empty());
         let header = lines.next().ok_or(SheetReject::Empty)?;
         let header = header.trim_start_matches('\u{feff}').trim();
@@ -133,8 +134,12 @@ impl ReleaseSheet {
             if !is_digest(columns[3]) || !is_digest(columns[6]) {
                 return Err(SheetReject::Digest);
             }
-            let generation = columns[4].parse::<u64>().map_err(|_| SheetReject::Generation)?;
-            let bytes = columns[5].parse::<u64>().map_err(|_| SheetReject::Generation)?;
+            let generation = columns[4]
+                .parse::<u64>()
+                .map_err(|_| SheetReject::Generation)?;
+            let bytes = columns[5]
+                .parse::<u64>()
+                .map_err(|_| SheetReject::Generation)?;
             rows.push(ReleaseRow {
                 version,
                 month,
@@ -171,7 +176,10 @@ pub enum UpdateDecision {
     /// Present the installed version as current; say nothing.
     UpToDate,
     /// A newer version exists. The message names it and its month.
-    Available { version: Version, month: ReleaseMonth },
+    Available {
+        version: Version,
+        month: ReleaseMonth,
+    },
     /// The sheet was read but said nothing usable. Silence, not a warning:
     /// a broken sheet is our failure, not the user's problem.
     Unreadable,
@@ -205,9 +213,9 @@ pub fn installed_version() -> Option<Version> {
 pub fn should_check(last: Option<ReleaseMonth>, now: ReleaseMonth) -> bool {
     match last {
         None => true,
-        Some(last) => last.months_until(now).is_some_and(|months| {
-            months >= CHECK_INTERVAL_MONTHS
-        }),
+        Some(last) => last
+            .months_until(now)
+            .is_some_and(|months| months >= CHECK_INTERVAL_MONTHS),
     }
 }
 
@@ -227,7 +235,8 @@ mod tests {
     use super::*;
     use crate::release_age::ReleaseMonth;
 
-    const HEADER: &str = "version,release_month,installer_url,installer_sha256,db_generation,db_bytes,db_sha256";
+    const HEADER: &str =
+        "version,release_month,installer_url,installer_sha256,db_generation,db_bytes,db_sha256";
     const DIGEST: &str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
 
     fn row(version: &str, month: &str) -> String {
@@ -254,9 +263,20 @@ mod tests {
     fn a_version_is_three_numbers_and_the_build_suffix_is_ignored() {
         assert_eq!(
             Version::parse("0.2.1"),
-            Some(Version { major: 0, minor: 2, patch: 1 })
+            Some(Version {
+                major: 0,
+                minor: 2,
+                patch: 1
+            })
         );
-        assert_eq!(Version::parse("1.0.0-check.2"), Some(Version { major: 1, minor: 0, patch: 0 }));
+        assert_eq!(
+            Version::parse("1.0.0-check.2"),
+            Some(Version {
+                major: 1,
+                minor: 0,
+                patch: 0
+            })
+        );
         assert_eq!(Version::parse("1.0"), None);
         assert_eq!(Version::parse("1.0.0.0"), None);
         assert_eq!(Version::parse("v1.0.0"), None);
@@ -267,13 +287,19 @@ mod tests {
     fn the_sheet_needs_its_exact_header_and_seven_verified_columns() {
         assert_eq!(sheet(&[&row("0.2.0", "2026-12")]).unwrap().len(), 1);
         assert_eq!(ReleaseSheet::parse(""), Err(SheetReject::Empty));
-        assert_eq!(ReleaseSheet::parse("version,month\n"), Err(SheetReject::Header));
+        assert_eq!(
+            ReleaseSheet::parse("version,month\n"),
+            Err(SheetReject::Header)
+        );
         // A row that cannot be verified is refused as a whole sheet.
         for bad in [
             row("0.2", "2026-12"),
             row("0.2.0", "2026-13"),
             row("0.2.0", "2026-12").replace(DOWNLOAD_PREFIX, "http://example.com/"),
-            row("0.2.0", "2026-12").replace("https://github.com/bifa90/Odina/releases/download/", "https://evil.example/"),
+            row("0.2.0", "2026-12").replace(
+                "https://github.com/bifa90/Odina/releases/download/",
+                "https://evil.example/",
+            ),
             row("0.2.0", "2026-12").replace(DIGEST, "nothex"),
             row("0.2.0", "2026-12").replace(",7,94371840,", ",x,94371840,"),
         ] {
@@ -281,18 +307,37 @@ mod tests {
         }
         // Quoted fields are tolerated because a published sheet may quote them.
         let quoted = format!("\"{}\"", DIGEST);
-        let csv = format!("{HEADER}\n0.2.0,2026-12,{}Odina.zip,{quoted},7,1,{quoted}\n", DOWNLOAD_PREFIX);
+        let csv = format!(
+            "{HEADER}\n0.2.0,2026-12,{}Odina.zip,{quoted},7,1,{quoted}\n",
+            DOWNLOAD_PREFIX
+        );
         assert!(ReleaseSheet::parse(&csv).is_ok());
     }
 
     #[test]
     fn the_newest_row_wins_and_an_unreadable_sheet_is_not_up_to_date() {
-        let parsed = sheet(&[&row("0.1.0", "2026-11"), &row("0.3.0", "2027-01"), &row("0.2.0", "2026-12")]).unwrap();
-        assert_eq!(parsed.latest().unwrap().version, Version { major: 0, minor: 3, patch: 0 });
+        let parsed = sheet(&[
+            &row("0.1.0", "2026-11"),
+            &row("0.3.0", "2027-01"),
+            &row("0.2.0", "2026-12"),
+        ])
+        .unwrap();
+        assert_eq!(
+            parsed.latest().unwrap().version,
+            Version {
+                major: 0,
+                minor: 3,
+                patch: 0
+            }
+        );
         assert_eq!(
             decide(Version::parse("0.1.0").unwrap(), Ok(&parsed)),
             UpdateDecision::Available {
-                version: Version { major: 0, minor: 3, patch: 0 },
+                version: Version {
+                    major: 0,
+                    minor: 3,
+                    patch: 0
+                },
                 month: m("2027-01")
             }
         );
