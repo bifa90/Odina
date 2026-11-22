@@ -379,7 +379,11 @@ mod tests {
         assert_eq!(t.exit_code(), 0);
         t.files = 10;
         t.unreadable = 3;
-        assert_eq!(t.exit_code(), 0, "unreadable files are coverage, not a verdict");
+        assert_eq!(
+            t.exit_code(),
+            0,
+            "unreadable files are coverage, not a verdict"
+        );
         t.high_risk = 1;
         assert_eq!(t.exit_code(), 2);
         assert_eq!(t.interrupting(), 1);
