@@ -55,6 +55,7 @@ pub mod release_gate;
 pub mod remediation;
 pub mod removable_media;
 pub mod repair_db;
+pub mod report_submission;
 pub mod resource_cap;
 pub mod retention;
 pub mod sandbox_exec;
@@ -67,6 +68,7 @@ pub mod telemetry;
 pub mod threat_db;
 pub mod ui_state;
 pub mod update;
+pub mod update_check;
 pub mod watchdog;
 
 pub use hashing::{FileHashes, HEAD_BYTES, TAIL_BYTES};
