@@ -44,6 +44,7 @@ pub mod k44_eicar_vector;
 pub mod link_guard;
 pub mod network_scope;
 pub mod packaging;
+pub mod path_privacy;
 pub mod policy;
 pub mod privilege;
 pub mod proactive;

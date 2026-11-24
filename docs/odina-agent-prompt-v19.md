@@ -784,6 +784,12 @@ ui_lang
 **لا يُرسَل أبدًا:** محتوى الملف · المسار الكامل · اسم المستخدم · HWID · لغة النظام ·
 المنطقة · البلد · المنطقة الزمنية · أي بيانات شخصية.
 
+**يُرسَل بدلًا من المسار — الموقع المطبَّع (D121):** رموز بيئة ويندوز بدل جذور المجلدات
+(`%USERPROFILE%` · `%TEMP%` · `%APPDATA%` · `%LOCALAPPDATA%` · `%SYSTEMROOT%` · `%PROGRAMFILES%` ·
+`%PROGRAMDATA%` · `%SYSTEMDRIVE%`)، و`*` بدل اسم الملف مع إبقاء امتداده:
+`%USERPROFILE%\Downloads\*.exe`. والغاية معرفة مكان التحصّن لا هوية صاحبه: مشاركة UNC أو بريد
+إلكتروني أو SID ويندوز = **رفض البلاغ**، لا تنظيفه.
+
 **Google Sheets — خمس صفحات:** `Submissions` · `Confirmed_Threats` · `Families` ·
 `Trusted_Allowlist` · `Release_Manifest`.
 

@@ -18,6 +18,7 @@
 //! A user report is still **not** an independent origin for admission (D109):
 //! it needs a second origin, otherwise any single person could convict a file.
 
+use crate::path_privacy;
 use std::collections::HashSet;
 
 /// §11.1: at most this many reports per day from one installation.
@@ -45,7 +46,9 @@ pub struct Report {
     /// A *pattern* (e.g. `????????.exe`), never the real name: a file name can
     /// carry a person's name, a project name or a client name.
     pub name_pattern: String,
-    /// A *pattern* (e.g. `%USERPROFILE%\\Downloads\\*.exe`), never a real path.
+    /// A **normalised** location (D121), e.g. `%USERPROFILE%\\Downloads\\*.exe`:
+    /// environment tokens instead of the account name, `*` instead of the file
+    /// name. Built by `set_path_from`, checked by `validate`.
     pub path_pattern: String,
     pub attributes: u32,
     pub behavior_score: u8,
@@ -70,6 +73,9 @@ pub enum ReportReject {
     LongToken,
     /// A field carries what looks like a real path, so the report is refused.
     PathLeak,
+    /// `path_pattern` is not in normal form: no `%TOKEN%` first, or the last
+    /// piece is the real file name instead of `*`.
+    UnnormalizedPath,
     /// A behaviour token carries a separator that would corrupt the payload.
     Separator,
 }
@@ -116,10 +122,15 @@ impl Report {
                 return Err(ReportReject::Separator);
             }
         }
-        for value in [&self.name_pattern, &self.path_pattern, &self.family] {
-            if looks_like_path(value) {
+        // The name is a pattern with no separators, the family is an identifier,
+        // and the path must already be in the normal form of D121.
+        for value in [&self.name_pattern, &self.family] {
+            if looks_like_path(value) || value.contains('\\') || value.contains('/') {
                 return Err(ReportReject::PathLeak);
             }
+        }
+        if !path_privacy::is_normalized(&self.path_pattern) {
+            return Err(ReportReject::UnnormalizedPath);
         }
         // The cap is on bytes, not on the number of fields: sixteen fields with
         // a megabyte in one of them is still a megabyte.
@@ -162,6 +173,14 @@ impl Report {
             fields.push(("ui_lang".to_string(), lang.clone()));
         }
         fields
+    }
+
+    /// Normalise a real path into the field that may leave the machine. This is
+    /// the only supported way to fill `path_pattern`; a raw path assigned by
+    /// hand fails `validate`.
+    pub fn set_path_from(&mut self, raw_path: &str) -> Result<(), path_privacy::PathReject> {
+        self.path_pattern = path_privacy::normalize(raw_path)?;
+        Ok(())
     }
 
     /// What the sheet keys repetition on: same file, same verdict, same size.
@@ -287,32 +306,51 @@ mod tests {
     }
 
     #[test]
-    fn a_real_path_is_refused_rather_than_cleaned() {
-        for leak in [
-            "C:\\Users\\ali\\Downloads\\a.exe".to_string(),
-            "\\\\server\\share\\a.exe".to_string(),
-            "/home/ali/a.exe".to_string(),
-            "C:\\a.exe".to_string(),
+    fn a_real_path_never_leaves_and_the_location_still_does() {
+        // A raw path fails validation: there is exactly one way to build a
+        // sendable location, and it is `set_path_from`.
+        let mut raw = report();
+        raw.path_pattern = "C:\\Users\\ali\\Downloads\\invoice.exe".to_string();
+        assert_eq!(raw.validate(), Err(ReportReject::UnnormalizedPath));
+
+        let mut with_path = report();
+        with_path
+            .set_path_from("C:\\Users\\ali\\Downloads\\invoice.exe")
+            .unwrap();
+        assert_eq!(
+            with_path.path_pattern,
+            format!("{HOME}\\Downloads\\*.exe", HOME = crate::path_privacy::HOME)
+        );
+        assert_eq!(with_path.validate(), Ok(()));
+        let value = with_path
+            .to_form_fields()
+            .into_iter()
+            .find(|(key, _)| key == "path_pattern")
+            .map(|(_, value)| value)
+            .unwrap();
+        assert!(!value.to_ascii_lowercase().contains("ali"));
+        assert!(!value.contains("invoice"));
+
+        // A share, an e-mail or a SID is refused outright, never "cleaned".
+        for refused in [
+            "\\\\fileserver\\share\\a.exe",
+            "C:\\Users\\ali@example.com\\a.exe",
+            "C:\\Temp\\S-1-5-21-1-2-3-4\\a.exe",
         ] {
-            let bad = Report {
-                path_pattern: leak,
-                ..report()
-            };
-            assert_eq!(bad.validate(), Err(ReportReject::PathLeak));
+            let mut candidate = report();
+            assert!(candidate.set_path_from(refused).is_err(), "{refused}");
         }
-        // The pattern form is what is expected and what passes.
-        for good in ["%USERPROFILE%\\Downloads\\*.exe", "*.scr", "%TEMP%\\*"] {
-            let ok = Report {
-                path_pattern: good.to_string(),
-                ..report()
-            };
-            assert_eq!(ok.validate(), Ok(()));
-        }
+        // A file name carrying separators, or a family that is a path, is refused.
         let named = Report {
-            family: "C:\\evil.exe".to_string(),
+            name_pattern: "a\\/b.exe".to_string(),
             ..report()
         };
         assert_eq!(named.validate(), Err(ReportReject::PathLeak));
+        let path_family = Report {
+            family: "a/b.exe".to_string(),
+            ..report()
+        };
+        assert_eq!(path_family.validate(), Err(ReportReject::PathLeak));
     }
 
     #[test]
