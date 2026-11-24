@@ -36,7 +36,7 @@ jobs:
             echo '```'
             echo "test exit: $TEST_EXIT"
             echo '```'
-            grep -E "FAILED|test result: FAILED|^error|panicked|assertion" test.log | head -30
+            grep -E "FAILED|test result: FAILED|^error|panicked|assertion|left|right" test.log | head -40
             echo '```'
           } > probe-report.md
           rm -f clippy.log test.log

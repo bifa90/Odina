@@ -104,9 +104,6 @@ pub fn normalize(raw: &str) -> Result<String, PathReject> {
     if path.split(['\\', '/']).any(has_email) {
         return Err(PathReject::Email);
     }
-    if path.split(['\\', '/']).any(has_sid) {
-        return Err(PathReject::Sid);
-    }
 
     let unified = path.replace('/', "\\");
     let mut segments: Vec<&str> = unified.split('\\').filter(|s| !s.is_empty()).collect();
@@ -133,10 +130,11 @@ pub fn normalize(raw: &str) -> Result<String, PathReject> {
         }
     }
 
+    // Nothing is pushed here: the first surviving segment decides the token,
+    // and `head` is only the fallback when it is a plain directory.
+    let fallback = if head.is_empty() { None } else { Some(head) };
     let mut kept: Vec<String> = Vec::new();
-    if !head.is_empty() {
-        kept.push(head.to_string());
-    }
+    let mut recycle = false;
 
     let mut index = 0;
     // Home first: everything under `\Users\<name>` becomes `%USERPROFILE%`, and
@@ -175,20 +173,23 @@ pub fn normalize(raw: &str) -> Result<String, PathReject> {
             kept.push(rest[0].to_string());
             index = 1;
         } else if rest[0].eq_ignore_ascii_case("$recycle.bin") {
+            kept.push(SYSTEMDRIVE.to_string());
             kept.push("$Recycle.Bin".to_string());
             index = 1;
+            recycle = true;
         } else {
-            kept.push(SYSTEMDRIVE.to_string());
+            kept.push(fallback.unwrap_or(SYSTEMDRIVE).to_string());
         }
     }
 
-    // A SID directly after $Recycle.Bin is dropped, not masked: it identifies
-    // the account that deleted the file.
+    // A SID directly under $Recycle.Bin belongs to the account that deleted the
+    // file, so it is dropped there. Anywhere else a SID is the user, not a
+    // location, and the report is refused.
     let mut survivors: Vec<String> = rest[index..]
         .iter()
         .map(|segment| segment.to_string())
         .collect();
-    while survivors.first().is_some_and(|s| has_sid(s)) {
+    if recycle && survivors.first().is_some_and(|s| has_sid(s)) {
         survivors.remove(0);
     }
     for segment in &survivors {
@@ -353,7 +354,7 @@ mod tests {
         assert!(!is_normalized(&format!("{HOME}\\Downloads\\a.exe")));
         assert!(!is_normalized(&format!("{HOME}\\ali@example.com\\*")));
         assert!(!is_normalized(&format!("{HOME}\\S-1-5-21-1-2-3-4\\*")));
-        assert!(!is_normalized(&format!("{HOME}")));
+        assert!(!is_normalized(HOME));
         assert!(!is_normalized("*.exe"));
         assert!(!is_normalized(""));
     }
