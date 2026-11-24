@@ -68,10 +68,9 @@ fn mask_leaf(leaf: &str) -> Option<String> {
     if leaf.is_empty() {
         return None;
     }
-    let extension = leaf
-        .rsplit_once('.')
-        .map(|(_, ext)| ext)
-        .filter(|ext| (2..=5).contains(&ext.len()) && ext.bytes().all(|b| b.is_ascii_alphanumeric()));
+    let extension = leaf.rsplit_once('.').map(|(_, ext)| ext).filter(|ext| {
+        (2..=5).contains(&ext.len()) && ext.bytes().all(|b| b.is_ascii_alphanumeric())
+    });
     Some(match extension {
         Some(ext) => format!("*.{}", ext.to_ascii_lowercase()),
         None => "*".to_string(),
@@ -152,7 +151,11 @@ pub fn normalize(raw: &str) -> Result<String, PathReject> {
             // "%TEMP%\*.exe" is a more useful sentence than the full tail.
             let tail: Vec<&str> = rest[index..].to_vec();
             let lower: Vec<String> = tail.iter().map(|s| s.to_ascii_lowercase()).collect();
-            if lower.len() >= 3 && lower[0] == "appdata" && lower[1] == "local" && lower[2] == "temp" {
+            if lower.len() >= 3
+                && lower[0] == "appdata"
+                && lower[1] == "local"
+                && lower[2] == "temp"
+            {
                 kept = vec![TEMP.to_string()];
                 index += 3;
             } else if lower.len() >= 2 && lower[0] == "appdata" && lower[1] == "local" {
@@ -314,21 +317,30 @@ mod tests {
             .unwrap()
             .ends_with("\\*"));
         // A folder with nothing under it still reports its own location.
-        assert_eq!(normalize(r"C:\Users\ali\Downloads"), Ok(format!("{HOME}\\*")));
+        assert_eq!(
+            normalize(r"C:\Users\ali\Downloads"),
+            Ok(format!("{HOME}\\*"))
+        );
     }
 
     #[test]
     fn values_that_cannot_be_proven_anonymous_are_refused_not_cleaned() {
         assert_eq!(normalize(""), Err(PathReject::Empty));
         assert_eq!(normalize(r"\\fileserver\share\a.exe"), Err(PathReject::Unc));
-        assert_eq!(normalize(r"C:\Users\ali@example.com\a.exe"), Err(PathReject::Email));
+        assert_eq!(
+            normalize(r"C:\Users\ali@example.com\a.exe"),
+            Err(PathReject::Email)
+        );
         assert_eq!(
             normalize(r"C:\Temp\S-1-5-21-111-222-333-1001\a.exe"),
             Err(PathReject::Sid)
         );
         assert_eq!(normalize("Downloads\\a.exe"), Err(PathReject::NotAbsolute));
         assert_eq!(normalize("C:"), Err(PathReject::NotAbsolute));
-        assert_eq!(normalize(&format!("C:\\{}", "a".repeat(MAX_PATH))), Err(PathReject::TooLong));
+        assert_eq!(
+            normalize(&format!("C:\\{}", "a".repeat(MAX_PATH))),
+            Err(PathReject::TooLong)
+        );
     }
 
     #[test]
