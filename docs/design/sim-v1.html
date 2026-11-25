@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<!-- SPDX-License-Identifier: AGPL-3.0-or-later -->
+<!-- Copyright (c) 2026 bifa90 — Odina -->
+<!--
+  محاكاة مرئية لواجهة عدينة داخل ويندوز — ملف واحد، بلا شبكة، بلا خطوط خارجية.
+  الغاية: حسم الشكل قبل كتابة أي واجهة حقيقية. المرجع:
+    docs/spec/design-system-v1.md   (الرموز والألوان والأحجام)
+    docs/design/screens-v1.md       (الشاشات ونصوصها)
+    docs/spec/navigation-map-v1.md  (الوجهات الخمس)
+    docs/decisions.md D113 · D117 · D119 · D121 (شهر الإصدار، ورقة البيان، البلاغ، المسار)
+  ما ليس هنا: أي بيانات جهاز حقيقية، وأي اتصال شبكة، وأي إيموجي (§8.5).
+-->
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>عدينة Odina — محاكاة الواجهة (v1)</title>
+<style>
+/* ── الخطوط من المستودع، لا من الشبكة (§36) ─────────────────────────── */
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-weight: 400;
+  font-display: swap;
+  src: url('../../fonts/vendor/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'IBM Plex Sans Arabic';
+  font-weight: 600;
+  font-display: swap;
+  src: url('../../fonts/vendor/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-600-normal.woff2') format('woff2');
+}
+
+/* ── الرموز: قيم design-system-v1 §2–§5 حرفيًا ─────────────────────── */
+:root {
+  --bg: #F7F8FA;
+  --surface: #FFFFFF;
+  --surface2: #EFF1F4;
+  --text: #14181C;
+  --text2: #4A5560;
+  --text3: #5F6B77;
+  --accent: #0E7C6B;
+  --ok: #157A4B;
+  --warn: #8A5200;
+  --danger: #B3261E;
+  --focus: #0B5FFF;
+  --navy: #0A2540;
+  --gold: #D4AF37;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 24px; --s6: 32px;
+  --radius: 8px; --r-lg: 12px; --btn-h: 44px;
+  --ff-ar: 'IBM Plex Sans Arabic', system-ui, sans-serif;
+  --ff-mono: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  --shadow: 0 18px 48px rgba(10, 37, 64, .28);
+  --desk: radial-gradient(1200px 700px at 30% 10%, #16415f 0%, #0A2540 55%, #071a2c 100%);
+}
+html[data-theme="dark"] {
+  --bg: #1B1D20;
+  --surface: #24272B;
+  --surface2: #2C3035;
+  --text: #F2F4F6;
+  --text2: #B7C0C8;
+  --text3: #8D99A4;
+  --accent: #3FC7B0;
+  --ok: #4ED08A;
+  --warn: #E0A33A;
+  --danger: #FF7B72;
+  --focus: #8AB4FF;
+  --shadow: 0 18px 48px rgba(0, 0, 0, .5);
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: var(--ff-ar);
+  font-size: 16px;
+  color: var(--text);
+  background: var(--desk);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px 84px;
+  gap: 14px;
+}
+
+/* ── شريط أدوات المحاكاة (ليس جزءًا من البرنامج) ───────────────────── */
+.simbar {
+  width: min(1180px, 100%);
+  background: rgba(255, 255, 255, .08);
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: var(--r-lg);
+  padding: 10px 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  backdrop-filter: blur(6px);
+}
+.simbar .lbl {
+  color: #cfd8e3;
+  font-size: 12px;
+  margin-inline-end: 6px;
+  letter-spacing: .02em;
+}
+.simbar button {
+  font: inherit;
+  font-size: 12px;
+  color: #e8eef6;
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .2);
+  border-radius: 999px;
+  padding: 6px 11px;
+  cursor: pointer;
+}
+.simbar button:hover { background: rgba(255, 255, 255, .16); }
+.simbar button[aria-pressed="true"] {
+  background: var(--gold);
+  color: #12233a;
+  border-color: var(--gold);
+  font-weight: 600;
+}
+.simbar .spacer { flex: 1; }
+
+/* ── نافذة ويندوز ──────────────────────────────────────────────────── */
+.win {
+  width: min(1180px, 100%);
+  background: var(--bg);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, .18);
+}
+.titlebar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 8px 0 12px;
+  height: 40px;
+  background: var(--navy);
+  color: #eaf1f8;
+}
+.brand { display: flex; align-items: center; gap: 8px; font-weight: 600; }
+.brand .badge-gate {
+  width: 20px; height: 20px; border-radius: 4px;
+  background: var(--gold); color: #12233a;
+  display: grid; place-items: center; font-size: 12px; font-weight: 700;
+}
+.titlebar .spacer { flex: 1; }
+.winbtns { display: flex; gap: 2px; }
+.winbtns span {
+  width: 34px; height: 30px; display: grid; place-items: center;
+  color: #c9d6e4; font-size: 13px; border-radius: 4px;
+}
+.winbtns span:hover { background: rgba(255, 255, 255, .14); }
+.winbtns .close:hover { background: #c42b1c; color: #fff; }
+
+.appbar {
+  display: flex;
+  align-items: center;
+  gap: var(--s3);
+  padding: 10px var(--s4);
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface2);
+}
+.appbar .spacer { flex: 1; }
+.iconbtn {
+  width: 36px; height: 36px; border-radius: var(--radius);
+  border: 1px solid transparent; background: transparent; color: var(--text2);
+  display: grid; place-items: center; cursor: pointer;
+}
+.iconbtn:hover { background: var(--surface2); color: var(--text); }
+.iconbtn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+.body { display: grid; grid-template-columns: 232px 1fr; min-height: 560px; }
+
+/* ── التنقّل: خمس وجهات (navigation-map) ───────────────────────────── */
+nav {
+  background: var(--surface);
+  border-inline-end: 1px solid var(--surface2);
+  padding: var(--s3);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+nav button {
+  font: inherit; font-size: 15px; text-align: start;
+  color: var(--text2); background: transparent; border: 0;
+  border-radius: var(--radius); padding: 11px 12px;
+  display: flex; align-items: center; gap: 10px; cursor: pointer;
+}
+nav button:hover { background: var(--surface2); color: var(--text); }
+nav button[aria-current="page"] {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--text); font-weight: 600;
+}
+nav button .count {
+  margin-inline-start: auto; font-size: 12px; color: var(--text3);
+  background: var(--surface2); border-radius: 999px; padding: 1px 7px;
+}
+nav .navnote {
+  margin-top: auto; font-size: 12px; color: var(--text3);
+  line-height: 1.7; padding: 8px 4px 0;
+}
+
+/* ── المحتوى ───────────────────────────────────────────────────────── */
+main { padding: var(--s5); display: flex; flex-direction: column; gap: var(--s4); }
+section.scenario { display: none; flex-direction: column; gap: var(--s4); }
+section.scenario.on { display: flex; }
+
+h1 { font-size: 28px; line-height: 1.25; margin: 0; }
+h2 { font-size: 20px; margin: 0; }
+p { margin: 0; line-height: 1.8; color: var(--text2); }
+.small { font-size: 14px; }
+.tiny { font-size: 12px; }
+.muted { color: var(--text3); }
+.mono { font-family: var(--ff-mono); direction: ltr; unicode-bidi: plaintext; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--surface2);
+  border-radius: var(--radius);
+  padding: var(--s4);
+}
+.card.soft { background: var(--surface2); border-color: transparent; }
+.row { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; }
+.row .spacer { flex: 1; }
+.stack { display: flex; flex-direction: column; gap: var(--s2); }
+
+/* العنوان + العمر (D113: الشهر كبير، الإصدار أصغر) */
+.hero { display: flex; flex-direction: column; gap: 6px; }
+.hero .titleline { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.hero .month { font-size: 28px; font-weight: 600; letter-spacing: .01em; }
+.hero .version { font-size: 14px; color: var(--text3); }
+.hero .age-note { font-size: 12px; color: var(--text3); }
+
+/* الشارات */
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 600;
+  padding: 3px 9px; border-radius: 999px;
+  border: 1px solid currentColor;
+}
+.tag.ok { color: var(--ok); }
+.tag.warn { color: var(--warn); }
+.tag.danger { color: var(--danger); }
+.tag.muted { color: var(--text3); }
+
+/* الأزرار */
+button.btn {
+  font: inherit; height: var(--btn-h); padding: 0 20px;
+  border-radius: var(--radius); cursor: pointer;
+  border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px;
+}
+button.btn.primary { background: var(--accent); color: #fff; font-weight: 600; }
+html[data-theme="dark"] button.btn.primary { color: #10221e; }
+button.btn.ghost { background: transparent; border-color: var(--text3); color: var(--text); }
+button.btn.danger { background: var(--danger); color: #fff; font-weight: 600; }
+button.btn.sm { height: 34px; padding: 0 14px; font-size: 14px; }
+button.btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+button.btn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* الشريط الشهري (D117) */
+.updatebar {
+  display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap;
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  border-radius: var(--radius); padding: 12px var(--s4);
+}
+
+/* الجدران */
+.walls { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s3); }
+.wall { display: flex; flex-direction: column; gap: 4px; }
+.wall .nm { font-weight: 600; font-size: 15px; }
+.wall .st { font-size: 13px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-inline-end: 6px; }
+.dot.on { background: var(--ok); }
+.dot.off { background: var(--text3); }
+.dot.paused { background: var(--warn); }
+
+/* قائمة العزل */
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th {
+  text-align: start; font-weight: 600; color: var(--text3);
+  font-size: 12px; padding: 8px 10px; border-bottom: 1px solid var(--surface2);
+}
+td { padding: 11px 10px; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
+tr:last-child td { border-bottom: 0; }
+
+/* شريط التقدّم */
+.progress { height: 8px; border-radius: 999px; background: var(--surface2); overflow: hidden; }
+.progress i { display: block; height: 100%; background: var(--accent); border-radius: 999px; }
+
+/* الحقول */
+label.field { display: flex; align-items: center; gap: 10px; font-size: 15px; }
+input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--accent); }
+dl.payload { margin: 0; display: grid; grid-template-columns: 190px 1fr; gap: 6px 10px; font-size: 14px; }
+dl.payload dt { color: var(--text3); }
+dl.payload dd { margin: 0; color: var(--text); word-break: break-all; }
+
+/* شريط المهام */
+.taskbar {
+  position: fixed; inset-inline: 0; bottom: 0; height: 52px;
+  background: rgba(14, 22, 32, .82);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, .12);
+  display: flex; align-items: center; gap: 10px; padding: 0 14px;
+  color: #dbe4ee; font-size: 13px;
+}
+.taskbar .start {
+  width: 34px; height: 34px; border-radius: 6px; display: grid; place-items: center;
+  background: rgba(255, 255, 255, .1);
+}
+.taskbar .app {
+  display: flex; align-items: center; gap: 8px; padding: 6px 12px;
+  border-radius: 6px; background: rgba(255, 255, 255, .12);
+  border-bottom: 2px solid var(--gold);
+}
+.taskbar .spacer { flex: 1; }
+.taskbar .tray { display: flex; align-items: center; gap: 10px; }
+.taskbar .traytip {
+  background: rgba(0, 0, 0, .55); border: 1px solid rgba(255, 255, 255, .14);
+  border-radius: 6px; padding: 3px 8px; font-size: 12px; color: #e7eef7;
+}
+
+.i { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.i.lg { width: 22px; height: 22px; }
+.i.xl { width: 34px; height: 34px; stroke-width: 1.5; }
+</style>
+</head>
+<body>
+
+<!-- أيقونات خطّية، لا إيموجي (§8.5) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6l7-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-box" viewBox="0 0 24 24"><path d="M3 8l9-4 9 4v9l-9 4-9-4z"/><path d="M3 8l9 4 9-4"/><path d="M12 12v9"/></symbol>
+  <symbol id="i-wall" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M4 9h16M4 15h16M9 4v5M15 9v6M9 15v5"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 9a6 6 0 1112 0v5l2 3H4l2-3V9z"/><path d="M10 20a2 2 0 004 0"/></symbol>
+  <symbol id="i-cog" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6L17 7M7 17l-1.4 1.4"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 4l9 16H3l9-16z"/><path d="M12 10v4M12 17h.01"/></symbol>
+  <symbol id="i-stop" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9h6v6H9z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 9v6M14 9v6"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol>
+  <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l2-5 3 10 2-5h7"/></symbol>
+  <symbol id="i-usb" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M12 15l-3-3M12 15l3-3"/><circle cx="12" cy="18" r="2"/><path d="M8 7h3M13 9h3"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="M12 4v10"/><path d="M8 11l4 4 4-4"/><path d="M5 19h14"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 10-3 6"/><path d="M20 5v5h-5"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s4-6 10-6 10 6 10 6-4 6-10 6S2 12 2 12z"/><circle cx="12" cy="12" r="2.5"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-3-6-7-2z"/></symbol>
+</svg>
+
+<!-- ── أدوات المحاكاة: ليست جزءًا من البرنامج ───────────────────────── -->
+<div class="simbar" role="toolbar" aria-label="أدوات المحاكاة">
+  <span class="lbl">محاكاة · سيناريوهات</span>
+  <button data-go="home">الرئيسية: محمي</button>
+  <button data-go="update">يوجد تحديث (شريط شهري)</button>
+  <button data-go="old">بعد ستة أشهر (شارة)</button>
+  <button data-go="stopped">الحماية متوقفة</button>
+  <button data-go="nodb">بلا قاعدة بيانات</button>
+  <button data-go="scan">جارٍ الفحص</button>
+  <button data-go="clean">نتيجة نظيفة</button>
+  <button data-go="threat">خطر مؤكد</button>
+  <button data-go="quarantine">صندوق العزل</button>
+  <button data-go="exceptions">الاستثناءات</button>
+  <button data-go="usb">وسيط USB</button>
+  <button data-go="report">بلاغ بإذن المستخدم</button>
+  <button data-go="settings">الإعدادات</button>
+  <button data-go="busy">الخدمة مشغولة</button>
+  <span class="spacer"></span>
+  <button id="theme">الوضع الداكن</button>
+</div>
+
+<div class="win">
+  <div class="titlebar">
+    <span class="brand">
+      <span class="badge-gate"><svg class="i" style="width:14px;height:14px"><use href="#i-shield"/></svg></span>
+      عدينة Odina
+    </span>
+    <span class="spacer"></span>
+    <div class="winbtns">
+      <span aria-hidden="true"><svg class="i" style="width:12px;height:12px"><path d="M5 12h14"/></svg></span>
+      <span aria-hidden="true"><svg class="i" style="width:11px;height:11px"><path d="M5 5h14v14H5z"/></svg></span>
+      <span class="close" aria-label="إغلاق"><svg class="i" style="width:12px;height:12px"><path d="M6 6l12 12M18 6L6 18"/></svg></span>
+    </div>
+  </div>
+
+  <div class="appbar">
+    <span class="tag ok" id="statechip"><svg class="i" style="width:14px;height:14px"><use href="#i-shield"/></svg><span>أنت محمي</span></span>
+    <span class="tiny muted" id="stateline">القاعدة نشطة · 2026-11</span>
+    <span class="spacer"></span>
+    <button class="iconbtn" title="اللغة" aria-label="اللغة"><svg class="i lg"><use href="#i-globe"/></svg></button>
+    <button class="iconbtn" title="الإعدادات" aria-label="الإعدادات" data-nav="settings"><svg class="i lg"><use href="#i-cog"/></svg></button>
+  </div>
+
+  <div class="body">
+    <nav aria-label="التنقّل">
+      <button data-nav="home" aria-current="page"><svg class="i"><use href="#i-shield"/></svg> الرئيسية</button>
+      <button data-nav="quarantine"><svg class="i"><use href="#i-box"/></svg> صندوق العزل <span class="count">2</span></button>
+      <button data-nav="walls"><svg class="i"><use href="#i-wall"/></svg> الحماية الاستباقية</button>
+      <button data-nav="alerts"><svg class="i"><use href="#i-bell"/></svg> مركز التنبيهات</button>
+      <button data-nav="settings"><svg class="i"><use href="#i-cog"/></svg> الإعدادات</button>
+      <p class="navnote">الاسم وحده ظاهر. النطاق يظهر عند المرور أو عند رمز المعلومة، لا كنصّ دائم.</p>
+    </nav>
+
+    <main>
+
+      <!-- ── 1) الرئيسية: محمي ─────────────────────────────────────── -->
+      <section class="scenario on" id="sc-home">
+        <div class="hero">
+          <div class="titleline">
+            <h1>أنت محمي</h1>
+            <span class="tag ok" id="homebadge" hidden>يحتاج تحديث</span>
+          </div>
+          <div class="month">2026-11</div>
+          <div class="version">الإصدار 0.1.0</div>
+          <div class="age-note">تاريخ الإصدار يُطبع من البناء نفسه، ولا يُقرأ من طابع ملف.</div>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" data-nav="scan"><svg class="i"><use href="#i-pulse"/></svg> افحص الآن</button>
+          <button class="btn ghost" data-nav="stopped"><svg class="i"><use href="#i-pause"/></svg> إيقاف مؤقت</button>
+        </div>
+
+        <div class="card">
+          <div class="walls">
+            <div class="wall"><span class="nm"><span class="dot on"></span>قاعدة بيانات الملفات</span><span class="st muted small">فعّال · 200 ألف بصمة · آخر تحديث 2026-11</span></div>
+            <div class="wall"><span class="nm"><span class="dot paused"></span>الفحص السلوكي العميق</span><span class="st muted small">غير متاح — يحتاج K3، ولا ندّعي أنه يعمل</span></div>
+            <div class="wall"><span class="nm"><span class="dot on"></span>الحماية الاستباقية</span><span class="st muted small">فعّال · 9 أنشطة</span></div>
+          </div>
+        </div>
+
+        <p class="small muted">لا يُعرض هنا «آخر فحص منذ…»: معلومة عند الطلب، لا سبب لقلق دائم.</p>
+      </section>
+
+      <!-- ── 2) شريط التحديث الشهري (D117) ─────────────────────────── -->
+      <section class="scenario" id="sc-update">
+        <div class="updatebar">
+          <svg class="i lg" style="color:var(--accent)"><use href="#i-down"/></svg>
+          <div class="stack" style="gap:2px">
+            <strong>يوجد إصدار أحدث: 0.2.0 (2026-12)</strong>
+            <span class="small muted">فحص واحد في الشهر · لا يُنزَّل شيء تلقائيًا · لا يُرسَل أي معرّف جهاز</span>
+          </div>
+          <span class="spacer"></span>
+          <button class="btn ghost sm">لاحقًا</button>
+          <button class="btn primary sm">افتح صفحة الإصدار</button>
+        </div>
+        <div class="hero">
+          <div class="titleline"><h1>أنت محمي</h1></div>
+          <div class="month">2026-11</div>
+          <div class="version">الإصدار 0.1.0</div>
+        </div>
+        <p class="small">الشريط يُغلق، ويعود في الشهر التالي فقط. لا نافذة منبثقة، ولا عدّ تنازلي.</p>
+        <div class="card soft">
+          <p class="small"><strong>ما يُرسل في الفحص:</strong> طلب <span class="mono">GET</span> واحد إلى ورقة البيان المنشورة، بلا حمولة وبلا إصدار جهاز. ورقة تالفة = صمت، لا خطأ يزعجك.</p>
+        </div>
+      </section>
+
+      <!-- ── 3) بعد ستة أشهر ───────────────────────────────────────── -->
+      <section class="scenario" id="sc-old">
+        <div class="hero">
+          <div class="titleline">
+            <h1>أنت محمي</h1>
+            <span class="tag warn"><svg class="i" style="width:14px;height:14px"><use href="#i-alert"/></svg>يحتاج تحديث</span>
+          </div>
+          <div class="month">2026-04</div>
+          <div class="version">الإصدار 0.1.0</div>
+          <div class="age-note">الشارة تظهر بعد ستة أشهر، ولا تغيّر سلوك الفحص.</div>
+        </div>
+        <div class="card">
+          <p><strong>لماذا لا نعطّل الحماية؟</strong> قاعدة نيسان ما زالت تلتقط كل بصمة فيها. تعطيل الفحص عقاب لك على تأخّرنا، لا حماية لك.</p>
+          <p class="small muted">اللون <span class="mono">--warn</span> لا <span class="mono">--gold</span>: ألوان الهوية لا تحمل دلالة حالة (design-system §5).</p>
+        </div>
+        <div class="row">
+          <button class="btn primary">افتح صفحة الإصدار</button>
+          <button class="btn ghost">ماذا تغيّر؟</button>
+        </div>
+      </section>
+
+      <!-- ── 4) الحماية متوقفة ─────────────────────────────────────── -->
+      <section class="scenario" id="sc-stopped">
+        <div class="titleline hero">
+          <div class="titleline"><h1 style="color:var(--danger)">الحماية متوقفة</h1><span class="tag danger">لا شيء يعمل الآن</span></div>
+          <div class="version">الإصدار 0.1.0 · 2026-11</div>
+        </div>
+        <div class="card">
+          <p>أوقفتها أنت قبل 3 ساعات، أو توقفت الخدمة. لا ندّعي الحماية أثناء الغياب.</p>
+          <p class="small muted">لا نقول «سليم» عندما لا نفحص. هذا الفرق بين طمأنة كاذبة وسكوت صادق.</p>
+        </div>
+        <div class="row">
+          <button class="btn primary" data-nav="home"><svg class="i"><use href="#i-refresh"/></svg> أعد التشغيل</button>
+          <button class="btn ghost">لماذا توقفت؟</button>
+        </div>
+      </section>
+
+      <!-- ── 5) بلا قاعدة بيانات ───────────────────────────────────── -->
+      <section class="scenario" id="sc-nodb">
+        <div class="hero">
+          <div class="titleline"><h1>تعمل بلا قاعدة</h1><span class="tag warn">تغطية محدودة</span></div>
+          <div class="version">الإصدار 0.1.0 · بذرة داخلية فقط</div>
+        </div>
+        <div class="card soft">
+          <p><strong>البذرة ليست تغطية.</strong> البذرة تثبت أن المسار كامل من الملف إلى الحكم، ولا تكفي لتسمية جهازك «محميًا».</p>
+        </div>
+        <div class="row">
+          <button class="btn primary">كيف أضيف القاعدة؟</button>
+          <button class="btn ghost">ما حجمها؟ 90 ميغابايت</button>
+        </div>
+        <p class="small muted">قبل أي تنزيل كبير تُعرض الرسالة: «هذا التنزيل 90 ميغابايت على اتصال محدود. أجّله أو أكمل بقرارك».</p>
+      </section>
+
+      <!-- ── 6) جارٍ الفحص ─────────────────────────────────────────── -->
+      <section class="scenario" id="sc-scan">
+        <h1>جارٍ الفحص…</h1>
+        <div class="progress"><i style="width:62%"></i></div>
+        <div class="row">
+          <span class="small muted">6,214 من 10,038 ملفًا · 0 نتيجة مؤكدة</span>
+          <span class="spacer"></span>
+          <button class="btn ghost"><svg class="i"><use href="#i-stop"/></svg> توقف</button>
+        </div>
+        <div class="card">
+          <p class="small">المسار المعروض نمط لا مسار: <span class="mono">%USERPROFILE%\Downloads\*.exe</span></p>
+          <p class="tiny muted">اسم المستخدم لا يظهر في الواجهة ولا في أي بلاغ، حتى لو أردت الإبلاغ.</p>
+        </div>
+      </section>
+
+      <!-- ── 7) نتيجة نظيفة ────────────────────────────────────────── -->
+      <section class="scenario" id="sc-clean">
+        <h1>لم نجد شيئًا.</h1>
+        <p>لا نضيف شيئًا. الصمت هو التأكيد.</p>
+        <div class="row">
+          <button class="btn ghost" data-nav="home">رجوع</button>
+        </div>
+      </section>
+
+      <!-- ── 8) خطر مؤكد ───────────────────────────────────────────── -->
+      <section class="scenario" id="sc-threat">
+        <div class="hero">
+          <div class="titleline"><h1 style="color:var(--danger)">مؤكد</h1><span class="tag danger">i-stop</span></div>
+          <div class="version mono">275a021b…651fd0f · 68 بايتًا</div>
+        </div>
+        <div class="card">
+          <p><strong>لماذا هذا الحكم:</strong> بصمة كاملة مطابقة لمرجع K44 (EICAR)، وبصمة الحجم مطابقة.</p>
+          <p class="small muted">الحكم من دليلين مستقلين، لا من الاسم ولا من الشكل.</p>
+        </div>
+        <div class="row">
+          <button class="btn primary"><svg class="i"><use href="#i-box"/></svg> اعزل الآن</button>
+          <button class="btn ghost">اتركه — أنا أعرفه</button>
+        </div>
+        <p class="tiny muted">«اتركه» يُنشئ استثناءً مؤقتًا بحدّ أعلى، ولا يمحو الحكم من الحادثة.</p>
+      </section>
+
+      <!-- ── 9) صندوق العزل ────────────────────────────────────────── -->
+      <section class="scenario" id="sc-quarantine">
+        <h1>صندوق العزل</h1>
+        <div class="card" style="padding:0; overflow:hidden">
+          <table>
+            <thead><tr><th>البصمة</th><th>العائلة</th><th>التاريخ</th><th>الحالة</th><th></th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="mono">275a021b…f651fd0f</td>
+                <td>eicar-test-file</td><td class="mono">2026-11-20</td>
+                <td><span class="tag danger">مؤكد</span></td>
+                <td class="row"><button class="btn sm ghost">استرجاع</button><button class="btn sm ghost">حذف نهائي</button></td>
+              </tr>
+              <tr>
+                <td class="mono">9f2c11aa…40b7c1ee</td>
+                <td>—</td><td class="mono">2026-11-18</td>
+                <td><span class="tag ok">بُرِّئ — استرجاع بضغطة</span></td>
+                <td class="row"><button class="btn sm primary">استرجاع</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="small muted">الاسترجاع لا ينفّذ نفسه: يعرضه المستخدم ويقرره. والتصحيح يُسجَّل في الحادثة، لا يُمحى منها (D110).</p>
+      </section>
+
+      <!-- ── 10) الاستثناءات ───────────────────────────────────────── -->
+      <section class="scenario" id="sc-exceptions">
+        <h1>الاستثناءات</h1>
+        <div class="card">
+          <div class="stack">
+            <div class="row"><span class="tag warn">WSH مسموح بقرارك</span><span class="small muted">ينتهي بعد ساعتين · سجّل من فعّله</span><span class="spacer"></span><button class="btn sm ghost">إبطال</button></div>
+            <div class="row"><span class="tag muted">مسار: <span class="mono">%USERPROFILE%\Projects\*</span></span><span class="small muted">دائم · تدفّق الخبير</span><span class="spacer"></span><button class="btn sm ghost">إبطال</button></div>
+          </div>
+        </div>
+        <p class="small muted">الاستثناء يُخفّف الشكّ ولا يمحو الحكم: ملف مؤكد يبقى مؤكدًا ولو كان في مسار مستثنى.</p>
+      </section>
+
+      <!-- ── 11) وسيط USB ──────────────────────────────────────────── -->
+      <section class="scenario" id="sc-usb">
+        <div class="hero">
+          <div class="titleline"><h1>فحص وسيط</h1><span class="tag muted">ليست جدار سلوك</span></div>
+          <div class="version">USB: KINGSTON · 12 ملفًا مشبوه الشكل</div>
+        </div>
+        <div class="card">
+          <p><strong>ما نفحصه هنا:</strong> قواعد USB الثماني الساكنة (autorun، ملف تشغيل مخفي، امتداد مزدوج…).</p>
+          <p class="small muted">جدار السلوك غير متاح حتى K3، ولا نسمّي هذا فحصًا سلوكيًا.</p>
+        </div>
+        <div class="row"><button class="btn primary">افحص الوسيط</button><button class="btn ghost">لا تشغّل شيئًا من الوسيط</button></div>
+      </section>
+
+      <!-- ── 12) البلاغ بإذن المستخدم (D119 · D121) ─────────────────── -->
+      <section class="scenario" id="sc-report">
+        <h1>ما سيُرسل بالضبط</h1>
+        <p>تقرأه حرفيًا قبل الموافقة. لا نرسل شيئًا لم تره.</p>
+        <div class="card">
+          <dl class="payload">
+            <dt>sha256</dt><dd class="mono">275a021b…f651fd0f</dd>
+            <dt>size</dt><dd class="mono">68</dd>
+            <dt>header_hash</dt><dd class="mono">b3f1…9c02</dd>
+            <dt>tail_hash</dt><dd class="mono">b3f1…9c02</dd>
+            <dt>pe_hash</dt><dd class="muted">— (ليس ملف PE)</dd>
+            <dt>tlsh</dt><dd class="muted">—</dd>
+            <dt>name_pattern</dt><dd class="mono">????????.exe</dd>
+            <dt>path_pattern</dt><dd class="mono">%USERPROFILE%\Downloads\*.exe</dd>
+            <dt>attributes</dt><dd class="mono">32</dd>
+            <dt>behavior_score</dt><dd class="mono">90</dd>
+            <dt>behaviors</dt><dd class="mono">writes_autorun;drops_temp</dd>
+            <dt>family</dt><dd>eicar-test-file <span class="tiny muted">(اسم الخطر، لا اسم الملف)</span></dd>
+            <dt>app_version</dt><dd class="mono">0.1.0</dd>
+            <dt>db_version</dt><dd class="mono">7</dd>
+            <dt>ts</dt><dd class="mono">1766000000</dd>
+            <dt>ui_lang</dt><dd class="mono">ar</dd>
+          </dl>
+        </div>
+        <div class="card soft">
+          <p class="small"><strong>ما لا يُرسل أبدًا:</strong> محتوى الملف · المسار الكامل · اسم المستخدم · اسم الملف · لغة النظام · المنطقة · أي معرّف جهاز.</p>
+        </div>
+        <div class="row">
+          <button class="btn primary"><svg class="i"><use href="#i-send"/></svg> أرسل البلاغ</button>
+          <button class="btn ghost">إلغاء</button>
+        </div>
+        <p class="tiny muted">بلاغك ليس «أصلًا مستقلًا» في القبول: يُحتاج مصدر ثانٍ قبل أن يدخل أي ملف القاعدة.</p>
+      </section>
+
+      <!-- ── 13) الإعدادات ─────────────────────────────────────────── -->
+      <section class="scenario" id="sc-settings">
+        <h1>الإعدادات</h1>
+        <div class="card">
+          <div class="stack">
+            <div class="row"><strong>قاعدة البيانات</strong><span class="spacer"></span><span class="small muted">الجيل 7 · 90 ميغابايت · 2026-11</span></div>
+            <p class="small muted">تُحدَّث شهريًا بحزمة موقّعة من صفحة الإصدار. لا تنزيل تلقائي، ولا اتصال دائم.</p>
+            <div class="row"><button class="btn sm ghost">تحقّق الآن</button><button class="btn sm ghost">افتح صفحة الإصدار</button></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="stack">
+            <div class="row"><strong>الخصوصية</strong><span class="spacer"></span><label class="field"><input type="checkbox" checked> اسمح بالتحقق الشهري من التحديث</label></div>
+            <p class="small muted">التحقق طلب واحد بلا حمولة. إغلاقه لا يعطّل الحماية.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="stack">
+            <div class="row"><strong>اللهجة واللغة</strong><span class="spacer"></span><span class="small">العربية</span></div>
+            <p class="small muted">عشر لغات، بخطوط مضمّنة في البرنامج: لا خط يُحمَّل من الإنترنت.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── 14) الخدمة مشغولة ─────────────────────────────────────── -->
+      <section class="scenario" id="sc-busy">
+        <div class="hero">
+          <div class="titleline"><h1>الخدمة مشغولة</h1><span class="tag warn">ليست «سليمًا»</span></div>
+          <div class="version">أعد المحاولة بعد لحظات</div>
+        </div>
+        <div class="card soft">
+          <p class="small">«مشغولة» عقد لا خطأ: تعني «لا جواب الآن»، ولا تعني «لا شيء موجود». لا نعرض نتيجة نظيفة لطلب لم يُنفَّذ.</p>
+        </div>
+        <div class="row"><button class="btn primary" data-nav="home">أعد المحاولة</button></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="taskbar">
+  <span class="start">⊞</span>
+  <span class="app"><svg class="i" style="color:var(--gold)"><use href="#i-shield"/></svg> عدينة</span>
+  <span class="traytip" id="traytip">أنت محمي · 2026-11</span>
+  <span class="spacer"></span>
+  <span class="tray">
+    <svg class="i" style="color:var(--gold)"><use href="#i-shield"/></svg>
+    <span id="clock">٢٠ نوفمبر ٢٠٢٦ · ١١:٤٢ ص</span>
+  </span>
+</div>
+
+<script>
+// سيناريو واحد ظاهر في كل مرة. الواجهة الحقيقية ستحصل على هذه الحالة من
+// خدمة التشغيل، لا من ملف مثل هذا.
+const screens = {
+  home:      { el: 'sc-home',       chip: 'أنت محمي',            cls: 'ok',     line: 'القاعدة نشطة · 2026-11',        tip: 'أنت محمي · 2026-11' },
+  update:    { el: 'sc-update',     chip: 'أنت محمي',            cls: 'ok',     line: 'يوجد إصدار أحدث: 0.2.0 (2026-12)', tip: 'يوجد إصدار أحدث' },
+  old:       { el: 'sc-old',        chip: 'أنت محمي',            cls: 'ok',     line: 'الإصدار 2026-04 · يحتاج تحديث',  tip: 'يحتاج تحديث' },
+  stopped:   { el: 'sc-stopped',    chip: 'الحماية متوقفة',      cls: 'danger', line: 'لا فحص الآن',                    tip: 'الحماية متوقفة' },
+  nodb:      { el: 'sc-nodb',       chip: 'تغطية محدودة',        cls: 'warn',   line: 'بذرة داخلية فقط',                tip: 'تغطية محدودة' },
+  scan:      { el: 'sc-scan',       chip: 'جارٍ الفحص',          cls: 'warn',   line: '6,214 من 10,038',                tip: 'جارٍ الفحص…' },
+  clean:     { el: 'sc-clean',      chip: 'أنت محمي',            cls: 'ok',     line: 'لم نجد شيئًا',                   tip: 'لم نجد شيئًا' },
+  threat:    { el: 'sc-threat',     chip: 'مؤكد',                cls: 'danger', line: 'EICAR · 68 بايتًا',              tip: 'خطر مؤكد — يحتاج قرارك' },
+  quarantine:{ el: 'sc-quarantine', chip: 'صندوق العزل',         cls: 'warn',   line: 'عنصران',                         tip: 'صندوق العزل: عنصران' },
+  exceptions:{ el: 'sc-exceptions', chip: 'الاستثناءات',         cls: 'warn',   line: 'استثناءان نشطان',                tip: 'استثناءان نشطان' },
+  usb:       { el: 'sc-usb',        chip: 'فحص وسيط',            cls: 'muted',  line: 'USB: KINGSTON',                  tip: 'فحص وسيط' },
+  report:    { el: 'sc-report',     chip: 'بلاغ',                cls: 'warn',   line: 'تنتظر موافقتك',                  tip: 'بلاغ ينتظر موافقتك' },
+  settings:  { el: 'sc-settings',   chip: 'أنت محمي',            cls: 'ok',     line: 'الإعدادات',                      tip: 'أنت محمي · 2026-11' },
+  busy:      { el: 'sc-busy',       chip: 'الخدمة مشغولة',       cls: 'warn',   line: 'لا جواب الآن',                   tip: 'الخدمة مشغولة' }
+};
+
+const navMap = {
+  home: 'home', quarantine: 'quarantine', walls: 'exceptions',
+  alerts: 'threat', settings: 'settings', scan: 'scan', stopped: 'stopped'
+};
+
+function show(key) {
+  const view = screens[key] || screens.home;
+  document.querySelectorAll('section.scenario').forEach(s => s.classList.remove('on'));
+  const el = document.getElementById(view.el);
+  if (el) { el.classList.add('on'); el.scrollIntoView({ block: 'nearest' }); }
+
+  const chip = document.getElementById('statechip');
+  chip.className = 'tag ' + (view.cls === 'muted' ? 'muted' : view.cls);
+  chip.querySelector('span').textContent = view.chip;
+  document.getElementById('stateline').textContent = view.line;
+  document.getElementById('traytip').textContent = view.tip;
+
+  document.querySelectorAll('.simbar button[data-go]').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.go === key));
+  });
+}
+
+document.querySelectorAll('.simbar button[data-go]').forEach(btn => {
+  btn.addEventListener('click', () => show(btn.dataset.go));
+});
+
+document.querySelectorAll('[data-nav]').forEach(btn => {
+  btn.addEventListener('click', () => show(navMap[btn.dataset.nav] || btn.dataset.nav));
+});
+
+document.getElementById('theme').addEventListener('click', (e) => {
+  const html = document.documentElement;
+  const dark = html.dataset.theme !== 'dark';
+  html.dataset.theme = dark ? 'dark' : 'light';
+  e.currentTarget.textContent = dark ? 'الوضع الفاتح' : 'الوضع الداكن';
+});
+
+show('home');
+</script>
+</body>
+</html>
