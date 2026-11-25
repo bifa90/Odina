@@ -53,7 +53,21 @@ jobs:
 
       - name: build
         shell: pwsh
+        env:
+          # D113: the release month is baked in at compile time, so the age the
+          # UI prints cannot be moved without a new signed build. Never read
+          # from a file's modification time.
+          ODINA_RELEASE_MONTH: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || '' }}
         run: |
+          # An explicit tag wins when one was given; otherwise the month of the
+          # commit being built. Same format either way: YYYY-MM.
+          $month = if ($env:ODINA_RELEASE_MONTH -match '\d{4}-\d{2}') {
+            $env:ODINA_RELEASE_MONTH.Substring(0, 7)
+          } else {
+            git show -s --format=%cd --date=format:%Y-%m HEAD
+          }
+          $env:ODINA_RELEASE_MONTH = $month
+          Write-Output "release month: $month"
           # `${{ matrix.features }}` is empty for the public build, and an empty
           # argument must not become a stray word on the command line.
           if ("${{ matrix.kind }}" -eq "check") {

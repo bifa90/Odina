@@ -89,6 +89,55 @@ mod resident {
         }
     }
 
+    /// `status` answers `busy` while the first inventory is still draining.
+    /// That is a state the product reports on purpose — it is never `clean` —
+    /// so the test waits for an answer instead of treating the state as a
+    /// failure. The assertions below still run on the settled answer.
+    fn status_now(name: &str) -> String {
+        let by = Instant::now() + Duration::from_secs(20);
+        loop {
+            let out = Command::new(BIN)
+                .args(["status", "--service", name])
+                .output()
+                .unwrap();
+            let text = format!(
+                "{}{}",
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+            if !text.contains(r#""error":"busy""#) {
+                assert_eq!(out.status.code(), Some(0), "{text}");
+                return text;
+            }
+            assert!(Instant::now() < by, "status stayed busy: {text}");
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+
+    /// `scan-now` and `stop` refuse to interleave with a running pass and
+    /// answer `busy` (exit 1). That refusal is the contract — it is never a
+    /// silent queue — so the test retries instead of treating it as an error.
+    fn control_ok(name: &str, op: &str) -> String {
+        let by = Instant::now() + Duration::from_secs(20);
+        loop {
+            let out = Command::new(BIN)
+                .args([op, "--service", name])
+                .output()
+                .unwrap();
+            let text = format!(
+                "{}{}",
+                String::from_utf8_lossy(&out.stdout),
+                String::from_utf8_lossy(&out.stderr)
+            );
+            if !text.contains(r#""error":"busy""#) {
+                assert_eq!(out.status.code(), Some(0), "{text}");
+                return String::from_utf8(out.stdout).unwrap();
+            }
+            assert!(Instant::now() < by, "{op} stayed busy: {text}");
+            thread::sleep(Duration::from_millis(10));
+        }
+    }
+
     fn wait_for(mut query: impl FnMut() -> String, expected: &str) -> String {
         let by = Instant::now() + Duration::from_secs(20);
         loop {
@@ -137,11 +186,6 @@ mod resident {
             "the service never announced itself"
         );
 
-        let control = |op: &str| {
-            let mut c = Command::new(BIN);
-            c.args([op, "--service", &name]);
-            c
-        };
         let verdict = |rel: &str| {
             run(
                 Command::new(BIN).args(["verdict", rel, "--service", &name]),
@@ -154,12 +198,12 @@ mod resident {
         // `last_exit` record, and the exit code comes from `Totals::exit_code`
         // in odina-scan — the same function the public CLI would call.
         assert!(
-            run(&mut control("status"), 0).contains(r#""last_exit":null"#),
+            status_now(&name).contains(r#""last_exit":null"#),
             "nothing has been scanned yet, so nothing may claim an exit code"
         );
-        let accepted = run(&mut control("scan-now"), 0);
+        let accepted = control_ok(&name, "scan-now");
         assert!(accepted.contains("accepted"), "got: {accepted}");
-        let status = wait_for(|| run(&mut control("status"), 0), r#""completed":1"#);
+        let status = wait_for(|| status_now(&name), r#""completed":1"#);
         assert!(
             status.contains(r#""last_exit":2"#),
             "the found vector must raise the code to 2: {status}"
@@ -180,7 +224,7 @@ mod resident {
             "an ordinary file must reach a verdict, not stay unknown: {clean}"
         );
 
-        run(&mut control("stop"), 0);
+        control_ok(&name, "stop");
         assert!(guard.0.wait().unwrap().success(), "the service must exit 0");
 
         // The index the public path seals is the same file format the lab path

@@ -46,6 +46,7 @@ pub(crate) struct State {
     baseline: bool, // complete inventory in this epoch
     fenced: bool,   // kernel stream drained through the end-of-inventory wake
     covered: bool,  // also replayed changes from the inventory window
+    pub(super) suspended: bool,
     epoch: u64,
     seq: u64,
     full_scans: u64,
@@ -67,6 +68,9 @@ pub(crate) enum Task {
     Verify(PathBuf, Revision, Channel),
 }
 impl State {
+    pub(super) fn pending_len(&self) -> usize {
+        self.pending.len()
+    }
     fn invalidate_scope(&mut self) {
         self.loss_incidents += 1;
         self.epoch += 1;
@@ -213,6 +217,8 @@ impl State {
         let backend = crate::watch::BACKEND;
         let phase = if self.full_busy || self.manual_busy || self.verify_busy {
             "scanning"
+        } else if self.suspended {
+            "suspended"
         } else if self.active_delta || !self.pending.is_empty() {
             "processing"
         } else if self.covered {

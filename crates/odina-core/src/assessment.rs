@@ -2,8 +2,8 @@
 // Copyright (c) 2026 bifa90 — Odina
 //! One decision from path features and supplied content evidence. No I/O.
 use crate::{
-    g1_reference, guess_path_flags, name_shape, path_score, score_with_known_bad, Evidence,
-    FileHashes, Indicator, Score, Thresholds,
+    g1_reference, guess_path_flags, name_shape, path_score, score_with_known_bad, signature_db,
+    Evidence, FileHashes, Indicator, Score, Thresholds,
 };
 use std::path::{Path, PathBuf};
 
@@ -33,7 +33,11 @@ pub fn assess(path: &Path, hashes: FileHashes) -> Assessment {
     // Indicators 5-8 and 10 need a database or a parser that does not exist
     // yet. They stay at zero — an unmeasured indicator is not evidence.
 
-    let known_bad = g1_reference::matches(&hashes);
+    // Two exact-digest sources, one verdict: the pinned K44 vector and the seed
+    // catalogue (D104). The seed only ever warns; "protected" needs a signed
+    // full catalogue, so a seed hit here can raise a score but never bless a
+    // machine. Neither source is coverage on its own.
+    let known_bad = g1_reference::matches(&hashes) || signature_db::seed_matches(&hashes);
 
     let score = score_with_known_bad(&evidence, &Thresholds::default(), None, known_bad);
 

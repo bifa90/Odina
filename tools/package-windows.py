@@ -11,6 +11,8 @@ from zipfile import ZIP_DEFLATED, ZipFile, ZipInfo
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = Path('components/repair/odina-repair-v1.tsv')
 PIN = Path('crates/odina-core/src/repair-v1.sha256')
+SEED = Path('crates/odina-core/data/seed-v1.tsv')
+SEED_CAP = 2 * 1024 * 1024  # mirrors SEED_MAX_BYTES in signature_db.rs (D104)
 STANDALONE = 'odina-repair-v1-r1.zip'
 LIMIT = 100_000_000  # decimal MB of the complete downloadable ZIP, inclusive
 NOTE = f'''Repair data (schema v1, revision 1; training families only)
@@ -29,6 +31,22 @@ def sidecar(path):
     Path(str(path) + '.sha256').write_text(f'{digest.hexdigest()}  {path.name}\n', encoding='ascii')
 
 
+def seed_bytes(root=ROOT):
+    """The seed is compiled into the executable, so this guard is about honesty:
+    a published size cap (D104) and rows we are allowed to ship (D102)."""
+    data = (root / SEED).read_bytes()
+    if len(data) > SEED_CAP:
+        raise ValueError(f'seed catalogue is {len(data)} bytes, cap is {SEED_CAP}')
+    rows = [line for line in data.decode('utf-8').splitlines() if line.strip() and not line.lstrip().startswith('#')]
+    if not rows or rows[0] != 'odina-seed/v1\t1':
+        raise ValueError('seed catalogue header is not odina-seed/v1')
+    for row in rows[1:]:
+        columns = row.split('\t')
+        if len(columns) != 5 or columns[3] != 'cc0-1.0':
+            raise ValueError('seed row is not a CC0-1.0 row of five columns')
+    return data
+
+
 def package(stage, exe, output, *, limit=LIMIT, root=ROOT):
     entries = [exe] if exe == 'odina.exe' else [exe, 'READ-ME-FIRST.txt']
     if exe not in ('odina.exe', 'odina-check.exe') or not all((stage / name).is_file() for name in entries):
@@ -37,6 +55,7 @@ def package(stage, exe, output, *, limit=LIMIT, root=ROOT):
     pin = (root / PIN).read_text(encoding='ascii').strip()
     if hashlib.sha256(data).hexdigest() != pin:
         raise ValueError('repair catalog does not match the program pin')
+    seed_bytes(root)
     notices = {name: (root / name).read_bytes() for name in ('LICENSE', 'NOTICE')}
     separate = output.with_name(STANDALONE)
     with ZipFile(separate, 'w', ZIP_DEFLATED) as z:
@@ -74,3 +93,4 @@ if __name__ == '__main__':
     ap.add_argument('output', type=Path)
     args = ap.parse_args()
     print('Repair data:', 'bundled' if package(args.stage, args.exe, args.output) else STANDALONE)
+    print('Seed catalogue:', f'{len((ROOT / SEED).read_bytes())} of {SEED_CAP} bytes (inside the executable)')
