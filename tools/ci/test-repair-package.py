@@ -65,6 +65,25 @@ class PackageTest(unittest.TestCase):
             (root / pack['PIN']).write_text(hashlib.sha256(data).hexdigest())
             with self.assertRaisesRegex(ValueError, 'pin'):
                 pack['package'](stage, exe, zipfile, root=root)
+            # The shipped seed is checked too: cap, header, and CC0 rows only.
+            (root / key).write_bytes(data)
+            (root / pack['PIN']).write_text(hashlib.sha256(data).hexdigest())
+            for name in ('LICENSE', 'NOTICE'):
+                (root / name).write_bytes((pack['ROOT'] / name).read_bytes())
+            seed = root / pack['SEED']
+            seed.parent.mkdir(parents=True, exist_ok=True)
+            seed.write_text('odina-seed/v1\t1\n' + 'aa' * 32 + '\t68\tfam\tcc0-1.0\tsrc\n', encoding='utf-8')
+            self.assertTrue(pack['package'](stage, exe, zipfile, root=root))
+            self.assertEqual(pack['SEED_CAP'], 2 * 1024 * 1024)
+            for bad, message in [
+                ('odina-seed/v2\t1\n', 'header'),
+                ('odina-seed/v1\t1\n' + 'aa' * 32 + '\t68\tfam\tgpl-2.0\tsrc\n', 'CC0'),
+                ('odina-seed/v1\t1\n' + 'aa' * 32 + '\t68\tfam\n', 'five columns'),
+                ('# ' + 'x' * pack['SEED_CAP'] + '\n', 'cap'),
+            ]:
+                seed.write_text(bad, encoding='utf-8')
+                with self.assertRaisesRegex(ValueError, message):
+                    pack['package'](stage, exe, zipfile, root=root)
 
 
 if __name__ == '__main__':
