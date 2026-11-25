@@ -79,6 +79,25 @@ select{padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border)
 .shield .label{font-size:22px;font-weight:600}
 .shield .sub{font-size:13px;color:var(--text2)}
 
+/* ── حالة التحديث والعمر (D122 · D113) ───────────────────────────────
+   الشريحة تجلس بجانب العنوان: «أنت محمي» أو «قاعدتك قديمة». دائمة ما دام
+   تحديث متاح، ومختصرة، وبلا أي إشعار منبثق. لا تُخفي الحالة ولا تحلّ محلها. */
+.shield .labelrow{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.updchip{display:none;align-items:center;gap:6px;font:inherit;font-size:13px;font-weight:600;
+  color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);
+  border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);border-radius:99px;
+  padding:4px 10px;cursor:pointer}
+.updchip:hover{background:color-mix(in srgb,var(--warn) 20%,transparent)}
+.updchip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.updchip .i{width:14px;height:14px}
+.shield[data-update="on"] .updchip{display:inline-flex}
+.shield .ageblock{display:flex;flex-direction:column;align-items:center;gap:1px;margin-top:2px}
+.shield .ageblock .month{font-size:26px;font-weight:600;line-height:1.15;letter-spacing:.01em}
+.shield .ageblock .ver{font-size:13px;color:var(--text3)}
+.shield .label[data-old]{display:none}
+.shield[data-stale="on"] .label[data-new]{display:none}
+.shield[data-stale="on"] .label[data-old]{display:block;color:var(--warn)}
+
 .walls{display:flex;flex-direction:column;gap:2px;border-top:1px solid var(--border);padding-top:8px}
 .wall{display:flex;align-items:center;gap:12px;padding:12px 6px;border-radius:var(--r-sm)}
 .wall:hover{background:var(--surface2)}
@@ -635,6 +654,11 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
     </div>
     <h2><svg class="i"><use href="#i-shield"/></svg><span data-k="sec.main">1 · الشاشة الرئيسية</span></h2>
     <p class="hint" data-k="sec.main.hint">≤ 8 عناصر · 3 جدران · زرّان · لا مصطلحات تقنية</p>
+    <div class="seg hint" role="group" aria-label="حالة الشاشة (محاكاة تصميم)">
+      <button type="button" data-statedemo="ok" aria-pressed="true">محمي</button>
+      <button type="button" data-statedemo="upd" aria-pressed="false">يوجد تحديث</button>
+      <button type="button" data-statedemo="stale" aria-pressed="false">قاعدتك قديمة</button>
+    </div>
 
     <div class="app">
       <div class="shield">
@@ -644,7 +668,18 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
           <path d="M452 520 L494 562 L576 470" fill="none" stroke="var(--ok)" stroke-width="58"
                 stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <div class="label" data-k="state.protected">أنت محمي</div>
+        <div class="labelrow">
+          <div class="label" data-k="state.protected" data-new>أنت محمي</div>
+          <div class="label" data-k="state.stale" data-old>قاعدتك قديمة</div>
+          <button type="button" class="updchip" data-goto="settings" title="الإصدار الجديد متاح على صفحة الإصدار">
+            <svg class="i"><use href="#i-arrow-r"/></svg>
+            <span data-k="update.chip" data-k-args='{"v":"1.02"}'>يوجد إصدار جديد 1.02</span>
+          </button>
+        </div>
+        <div class="ageblock">
+          <span class="month">2026-11</span>
+          <span class="ver" data-k="home.version">الإصدار 0.1.0</span>
+        </div>
         <div class="sub" data-k="shield.sub" data-tmpl="shield.sub"
              data-k-args='{"n":3}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
       </div>
@@ -1816,15 +1851,49 @@ document.getElementById('popout').addEventListener('click', ()=>{
 document.body.classList.add('real');
 if (new URLSearchParams(location.search).get('v') === 'app') document.getElementById('mode').style.display='none';
 
-const themeBtn = document.getElementById('theme');
-themeBtn.addEventListener('click', ()=>{
-  const root = document.documentElement;
-  const dark = root.dataset.theme === 'dark';
-  root.dataset.theme = dark ? 'light' : 'dark';
-  themeBtn.dataset.k = dark ? 'settings.theme_dark' : 'settings.theme_light';
-  themeBtn.textContent = window.ODINA_STRINGS[currentLang()][themeBtn.dataset.k];
-  renderPalette();
+/* ══════════ حالة الشاشة الرئيسية (محاكاة) ══════════
+   ثلاثة أوضاع: محمي · يوجد تحديث · قاعدتك قديمة. يتغيّر النص والشريحة فقط،
+   ولا يُضاف إشعار ولا تُخفى الحالة. */
+const homeShield = document.querySelector('#screen-home .shield');
+function showState(mode){
+  homeShield.dataset.update = (mode === 'upd' || mode === 'stale') ? 'on' : 'off';
+  homeShield.dataset.stale = mode === 'stale' ? 'on' : 'off';
+  document.querySelectorAll('[data-statedemo]').forEach(b=>{
+    b.setAttribute('aria-pressed', String(b.dataset.statedemo === mode));
+  });
+}
+document.querySelectorAll('[data-statedemo]').forEach(b=>{
+  b.addEventListener('click', ()=> showState(b.dataset.statedemo));
 });
+showState('ok');
+
+/* ══════════ المظهر: يتبع النظام افتراضيًا، والزرّ تجاوز محفوظ (D123) ══════════
+   بلا اختيار محفوظ ⇒ نتبع prefers-color-scheme ونتغيّر معه أثناء العمل.
+   باختيار صريح ⇒ يُحفظ ويُحترم، ولا يغيّره تغيّر النظام. */
+const themeBtn = document.getElementById('theme');
+const systemDark = window.matchMedia('(prefers-color-scheme: dark)');
+function storedTheme(){
+  try { return localStorage.getItem('odina.theme'); } catch (e) { return null; }
+}
+function applyTheme(explicit){
+  const root = document.documentElement;
+  const theme = explicit || (systemDark.matches ? 'dark' : 'light');
+  root.dataset.theme = theme;
+  const dark = theme === 'dark';
+  themeBtn.dataset.k = dark ? 'settings.theme_light' : 'settings.theme_dark';
+  const dict = (window.ODINA_STRINGS && window.ODINA_STRINGS[currentLang()]) || {};
+  themeBtn.textContent = dict[themeBtn.dataset.k] || (dark ? 'الوضع الفاتح' : 'الوضع الداكن');
+  renderPalette();
+}
+applyTheme(storedTheme());
+themeBtn.addEventListener('click', ()=>{
+  const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('odina.theme', next); } catch (e) {}
+  applyTheme(next);
+});
+if (systemDark.addEventListener){
+  systemDark.addEventListener('change', ()=>{ if (!storedTheme()) applyTheme(null); });
+}
 
 
 
