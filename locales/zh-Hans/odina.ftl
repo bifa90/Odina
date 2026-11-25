@@ -511,3 +511,8 @@ browser.stillSuspect = 本次扫描未能确认感染，文件未被更改。
 browser.close = 关闭
 browser.working = 正在本地核对…
 browser.quarantine = 移至隔离区
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = 威胁库已过时
+update.chip = 有新版本 { $v } 可用
+home.version = 版本 0.1.0

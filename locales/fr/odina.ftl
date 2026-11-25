@@ -511,3 +511,8 @@ browser.stillSuspect = L’analyse n’a pas confirmé d’infection. Le fichier
 browser.close = Fermer
 browser.working = Vérification locale en cours…
 browser.quarantine = Mettre en quarantaine
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Votre liste de menaces est obsolète
+update.chip = Nouvelle version { $v } disponible
+home.version = Version 0.1.0

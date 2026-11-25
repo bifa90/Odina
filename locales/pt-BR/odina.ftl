@@ -511,3 +511,8 @@ browser.stillSuspect = A verificação não confirmou infecção. O arquivo perm
 browser.close = Fechar
 browser.working = Verificando localmente…
 browser.quarantine = Mover para quarentena
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Sua lista de ameaças está desatualizada
+update.chip = Nova versão { $v } disponível
+home.version = Versão 0.1.0

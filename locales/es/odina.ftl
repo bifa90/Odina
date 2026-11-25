@@ -511,3 +511,8 @@ browser.stillSuspect = El análisis no confirmó ninguna infección. El archivo 
 browser.close = Cerrar
 browser.working = Verificando localmente…
 browser.quarantine = Mover a cuarentena
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Tu lista de amenazas está desactualizada
+update.chip = Nueva versión { $v } disponible
+home.version = Versión 0.1.0

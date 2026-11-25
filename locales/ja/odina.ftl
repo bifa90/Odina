@@ -511,3 +511,8 @@ browser.stillSuspect = 感染は確認されませんでした。ファイルは
 browser.close = 閉じる
 browser.working = 端末内で確認しています…
 browser.quarantine = 隔離する
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = 脅威データが古くなっています
+update.chip = 新しいバージョン { $v } があります
+home.version = バージョン 0.1.0

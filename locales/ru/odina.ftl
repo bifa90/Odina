@@ -511,3 +511,8 @@ browser.stillSuspect = Заражение не подтверждено. Фай�
 browser.close = Закрыть
 browser.working = Идёт локальная проверка…
 browser.quarantine = В карантин
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Ваша база угроз устарела
+update.chip = Доступна новая версия { $v }
+home.version = Версия 0.1.0

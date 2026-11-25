@@ -550,3 +550,8 @@ browser.stillSuspect = انتهى الفحص ولم تتأكد الإصابة. �
 browser.close = إغلاق
 browser.working = جارٍ التحقق محليًا…
 browser.quarantine = انقله إلى العزل
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = قاعدتك قديمة
+update.chip = يوجد إصدار جديد { $v }
+home.version = الإصدار 0.1.0

@@ -542,3 +542,8 @@ browser.stillSuspect = The scan did not confirm an infection. The file is unchan
 browser.close = Close
 browser.working = Verifying locally…
 browser.quarantine = Move to quarantine
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Your threat list is out of date
+update.chip = New version { $v } available
+home.version = Version 0.1.0

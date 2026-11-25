@@ -511,3 +511,8 @@ browser.stillSuspect = जाँच में संक्रमण की प�
 browser.close = बंद करें
 browser.working = स्थानीय जाँच जारी है…
 browser.quarantine = क्वारंटीन में भेजें
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = आपकी ख़तरा सूची पुरानी है
+update.chip = नया संस्करण { $v } उपलब्ध है
+home.version = संस्करण 0.1.0
