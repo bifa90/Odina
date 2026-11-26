@@ -20,10 +20,9 @@ jobs:
         run: |
           cargo fmt --all
           git diff --color=never > /tmp/fmt.diff || true
-          n=0
-          while IFS= read -r line; do
-            n=$((n+1))
-            if [ "$n" -gt 55 ]; then echo "::error title=fmt::truncated"; break; fi
-            echo "::error title=fmt::${line}"
-          done < /tmp/fmt.diff
-          echo "diff lines: $(wc -l < /tmp/fmt.diff)"
+          python3 - <<'PY'
+          import pathlib
+          text = pathlib.Path('/tmp/fmt.diff').read_text()
+          text = text.replace('%', '%25').replace('\r', '').replace('\n', '%0A')
+          print('::error title=fmt::' + text[:60000])
+          PY
