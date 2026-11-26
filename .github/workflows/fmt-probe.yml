@@ -1,5 +1,9 @@
 name: fmt-probe
-on: workflow_dispatch
+on:
+  push:
+    paths:
+      - ".github/workflows/fmt-probe.yml"
+  workflow_dispatch
 jobs:
   probe:
     runs-on: ubuntu-latest
