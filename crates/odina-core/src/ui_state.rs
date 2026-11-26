@@ -7,6 +7,8 @@
 //! - Never reports "clean" when the service is stopped or disconnected.
 //! - Offline RTL/LTR direction resolution for supported languages.
 
+use crate::messages;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum ServiceHealth {
     Active,
@@ -46,13 +48,19 @@ impl UiState {
         }
     }
 
-    pub fn tray_and_toast_summary(&self) -> &'static str {
+    /// The one state line, as a key the locale files resolve.
+    ///
+    /// The keys were `status.*`, which no `.ftl` file defines: the tests passed
+    /// because they compared a key with itself, and a screen would have shown an
+    /// empty label. They are the `state.*` keys now, and `messages::UI_KEYS`
+    /// holds them so a missing translation fails the build instead of the user.
+    pub fn state_key(&self) -> &'static str {
         match self.health {
-            ServiceHealth::Stopped => "status.stopped",
-            ServiceHealth::Disconnected => "status.disconnected",
-            ServiceHealth::Suspended => "status.suspended",
-            ServiceHealth::Active if self.active_alerts > 0 => "status.attention_needed",
-            ServiceHealth::Active => "status.protected",
+            ServiceHealth::Stopped => messages::STATE_UNPROTECTED,
+            ServiceHealth::Disconnected => messages::STATE_UNTRUSTED,
+            ServiceHealth::Suspended => messages::STATE_PAUSED,
+            ServiceHealth::Active if self.active_alerts > 0 => messages::STATE_ATTENTION,
+            ServiceHealth::Active => messages::STATE_PROTECTED,
         }
     }
 }
@@ -60,6 +68,7 @@ impl UiState {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::messages;
 
     #[test]
     fn rtl_and_ltr_resolve_offline() {
@@ -74,24 +83,35 @@ mod tests {
     }
 
     #[test]
-    fn tray_and_toast_never_claim_protected_when_stopped_or_disconnected() {
+    fn the_state_line_never_claims_protected_when_stopped_or_disconnected() {
         assert_eq!(
-            UiState::new(ServiceHealth::Stopped, "ar").tray_and_toast_summary(),
-            "status.stopped"
+            UiState::new(ServiceHealth::Stopped, "ar").state_key(),
+            "state.unprotected"
         );
         assert_eq!(
-            UiState::new(ServiceHealth::Disconnected, "en").tray_and_toast_summary(),
-            "status.disconnected"
+            UiState::new(ServiceHealth::Disconnected, "en").state_key(),
+            "state.untrusted"
         );
         assert_eq!(
-            UiState::new(ServiceHealth::Suspended, "en").tray_and_toast_summary(),
-            "status.suspended"
+            UiState::new(ServiceHealth::Suspended, "en").state_key(),
+            "state.paused"
         );
         let mut alert_state = UiState::new(ServiceHealth::Active, "ar");
         alert_state.active_alerts = 2;
+        assert_eq!(alert_state.state_key(), "state.attention");
         assert_eq!(
-            alert_state.tray_and_toast_summary(),
-            "status.attention_needed"
+            UiState::new(ServiceHealth::Active, "ar").state_key(),
+            "state.protected"
         );
+        // Every answer is a key the locale files actually define.
+        for health in [
+            ServiceHealth::Active,
+            ServiceHealth::Suspended,
+            ServiceHealth::Stopped,
+            ServiceHealth::Disconnected,
+        ] {
+            let key = UiState::new(health, "ar").state_key();
+            assert!(messages::UI_KEYS.contains(&key), "{key} not in UI_KEYS");
+        }
     }
 }
