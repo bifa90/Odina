@@ -86,7 +86,8 @@ select{padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border)
 .updchip{display:none;align-items:center;gap:6px;font:inherit;font-size:13px;font-weight:600;
   color:var(--warn);background:color-mix(in srgb,var(--warn) 12%,transparent);
   border:1px solid color-mix(in srgb,var(--warn) 45%,transparent);border-radius:99px;
-  padding:4px 10px;cursor:pointer}
+  padding:4px 10px;cursor:pointer;max-width:100%;white-space:normal;
+  line-height:1.35;text-align:start}
 .updchip:hover{background:color-mix(in srgb,var(--warn) 20%,transparent)}
 .updchip:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
 .updchip .i{width:14px;height:14px}
@@ -94,6 +95,13 @@ select{padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border)
 .shield .ageblock{display:flex;flex-direction:column;align-items:center;gap:1px;margin-top:2px}
 .shield .ageblock .month{font-size:26px;font-weight:600;line-height:1.15;letter-spacing:.01em}
 .shield .ageblock .ver{font-size:13px;color:var(--text3)}
+/* على هاتف ٣٢٠ بكسل تبقى الشريحة بجانب العنوان ما أمكن؛ وإن ضاق الصفّ لُفّت
+   إلى سطر ثانٍ بدل أن تُقتطع (D122: قصيرة، لكن لا تُخفى). */
+@media(max-width:380px){
+  .shield .labelrow{gap:6px}
+  .shield .ageblock .month{font-size:22px}
+  .updchip{font-size:12px;padding:3px 8px}
+}
 .shield .label[data-old]{display:none}
 .shield[data-stale="on"] .label[data-new]{display:none}
 .shield[data-stale="on"] .label[data-old]{display:block;color:var(--warn)}
