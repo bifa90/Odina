@@ -3,7 +3,9 @@ on:
   push:
     paths:
       - ".github/workflows/fmt-probe.yml"
-  workflow_dispatch
+permissions:
+  checks: write
+  contents: read
 jobs:
   probe:
     runs-on: ubuntu-latest
@@ -15,7 +17,6 @@ jobs:
       - name: report the exact formatting diff
         run: |
           cargo fmt --all
-          git diff --color=never --stat
           git diff --color=never > /tmp/fmt.diff || true
           n=0
           while IFS= read -r line; do
@@ -23,3 +24,4 @@ jobs:
             if [ "$n" -gt 55 ]; then echo "::error title=fmt::truncated"; break; fi
             echo "::error title=fmt::${line}"
           done < /tmp/fmt.diff
+          echo "diff lines: $(wc -l < /tmp/fmt.diff)"
