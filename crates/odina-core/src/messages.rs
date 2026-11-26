@@ -44,9 +44,7 @@ pub const UI_KEYS: &[&str] = &[
 /// than Fluent, because a pattern that also accepted attributes or terms would
 /// also accept a typo.
 pub fn defines(source: &str, key: &str) -> bool {
-    source
-        .lines()
-        .any(|line| line.split_once(" = ").is_some_and(|(name, _)| name.trim() == key))
+    source.lines().any(|line| line.split_once(" = ").is_some_and(|(name, _)| name.trim() == key))
 }
 
 #[cfg(test)]
