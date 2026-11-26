@@ -97,6 +97,34 @@ pub fn title_key(age: ReleaseAge) -> Option<&'static str> {
     }
 }
 
+/// The month this run happens in, from the system clock. Day arithmetic is
+/// enough: a timezone moves the day, and only within hours of a month boundary
+/// the month — and a badge that waits six months does not hinge on it.
+pub fn current_month() -> Option<ReleaseMonth> {
+    let elapsed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()?;
+    let days = i64::try_from(elapsed.as_secs() / 86_400).ok()?;
+    let (year, month, _) = civil_from_days(days);
+    ReleaseMonth::parse(&format!("{year:04}-{month:02}")).ok()
+}
+
+/// Days since 1970-01-01 to a civil date, by Howard Hinnant's algorithm.
+fn civil_from_days(days: i64) -> (i64, i64, i64) {
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 };
+    let era = era / 146_097;
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let leap_adjust = if month <= 2 { 1 } else { 0 };
+    let year = yoe + era * 400 + leap_adjust;
+    (year, month, day)
+}
+
 pub fn release_age(months: u32) -> ReleaseAge {
     if months >= NEEDS_UPDATE_AFTER_MONTHS {
         ReleaseAge::NeedsUpdate
@@ -169,6 +197,17 @@ mod tests {
         // There is no snooze and no strict state to fall into: the only two
         // answers are "current" and "still working, needs update".
         assert_eq!(NEEDS_UPDATE_AFTER_MONTHS, 6);
+    }
+
+    #[test]
+    fn a_day_count_becomes_the_same_year_and_month_a_date_would() {
+        assert_eq!(civil_from_days(0), (1970, 1, 1));
+        assert_eq!(civil_from_days(20_782), (2026, 11, 25));
+        // The clock is only ever asked for a month, and a bad clock is quiet.
+        if let Some(month) = current_month() {
+            assert!((2000..3000).contains(&month.year), "{}", month.year);
+            assert!((1..=12).contains(&month.month), "{}", month.month);
+        }
     }
 
     #[test]

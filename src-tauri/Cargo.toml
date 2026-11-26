@@ -1,0 +1,28 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+#
+# The desktop window. It is kept OUT of the root workspace on purpose: Tauri
+# brings its own dependency tree, the root lock file is generated with `cargo`
+# on a machine that has one, and adding a member here would break `--locked`
+# for every other crate until that lock is committed. This crate therefore
+# declares its own empty [workspace] and builds on its own.
+
+[package]
+name = "odina-shell"
+description = "The Odina window: the state the resident reports, drawn once, in ten languages."
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.77"
+license = "AGPL-3.0-or-later"
+publish = false
+
+[workspace]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+odina-core = { path = "../crates/odina-core" }
+odina-resident = { path = "../crates/odina-resident" }

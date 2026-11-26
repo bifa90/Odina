@@ -40,43 +40,22 @@ pub const UI_KEYS: &[&str] = &[
 ];
 
 /// Whether a locale text defines `key`. Public because the shell and the CLI
-/// will ask the same question at runtime; the pattern is deliberately narrower
-/// than Fluent, because a pattern that also accepted attributes or terms would
-/// also accept a typo.
+/// ask the same question at runtime; the reader lives in [`crate::l10n`].
 pub fn defines(source: &str, key: &str) -> bool {
-    source.lines().any(|line| {
-        let Some((name, _)) = line.split_once(" = ") else {
-            return false;
-        };
-        name.trim() == key
-    })
+    crate::l10n::value(source, key).is_some()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    const LOCALES: &[(&str, &str)] = &[
-        ("ar", include_str!("../../../locales/ar/odina.ftl")),
-        ("de", include_str!("../../../locales/de/odina.ftl")),
-        ("en", include_str!("../../../locales/en/odina.ftl")),
-        ("es", include_str!("../../../locales/es/odina.ftl")),
-        ("fr", include_str!("../../../locales/fr/odina.ftl")),
-        ("hi", include_str!("../../../locales/hi/odina.ftl")),
-        ("ja", include_str!("../../../locales/ja/odina.ftl")),
-        ("pt-BR", include_str!("../../../locales/pt-BR/odina.ftl")),
-        ("ru", include_str!("../../../locales/ru/odina.ftl")),
-        (
-            "zh-Hans",
-            include_str!("../../../locales/zh-Hans/odina.ftl"),
-        ),
-    ];
+    use crate::l10n;
 
     #[test]
     fn every_key_the_engine_emits_exists_in_all_ten_locales() {
-        for &(lang, source) in LOCALES {
+        for &lang in l10n::LANGS {
+            let text = l10n::source(lang).unwrap();
             for &key in UI_KEYS {
-                assert!(defines(source, key), "{lang} has no {key}");
+                assert!(defines(text, key), "{lang} has no {key}");
             }
         }
     }

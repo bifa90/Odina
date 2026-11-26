@@ -41,6 +41,7 @@ pub mod k41_allowlist_ceiling;
 pub mod k42_scan_completeness;
 pub mod k43_public_isolation;
 pub mod k44_eicar_vector;
+pub mod l10n;
 pub mod link_guard;
 pub mod messages;
 pub mod network_scope;

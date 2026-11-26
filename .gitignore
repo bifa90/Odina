@@ -37,3 +37,8 @@ __pycache__/
 
 # Local B9 comparison outputs (not a dataset to publish)
 odina-b9-*/
+
+# Desktop shell: fonts are copied from fonts/vendor by tools/fetch-shell-fonts.py
+src-tauri/ui/fonts/
+src-tauri/gen/
+src-tauri/Cargo.lock

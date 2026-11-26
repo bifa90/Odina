@@ -515,4 +515,4 @@ browser.quarantine = In Quarantäne verschieben
 ## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
 state.stale = Ihre Bedrohungsliste ist veraltet
 update.chip = Neue Version { $v } verfügbar
-home.version = Version 0.1.0
+home.version = Version { $v }

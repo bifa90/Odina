@@ -515,4 +515,4 @@ browser.quarantine = 移至隔离区
 ## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
 state.stale = 威胁库已过时
 update.chip = 有新版本 { $v } 可用
-home.version = 版本 0.1.0
+home.version = 版本 { $v }
