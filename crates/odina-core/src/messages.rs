@@ -39,10 +39,11 @@ pub const UI_KEYS: &[&str] = &[
     HOME_VERSION,
 ];
 
-/// A Fluent line is `key = value` at the start of a line. This is deliberately
-/// narrower than Fluent: the keys here are flat, and a pattern that also
-/// accepted attributes or terms would also accept a typo.
-fn defines(source: &str, key: &str) -> bool {
+/// Whether a locale text defines `key`. Public because the shell and the CLI
+/// will ask the same question at runtime; the pattern is deliberately narrower
+/// than Fluent, because a pattern that also accepted attributes or terms would
+/// also accept a typo.
+pub fn defines(source: &str, key: &str) -> bool {
     source
         .lines()
         .any(|line| line.split_once(" = ").is_some_and(|(name, _)| name.trim() == key))

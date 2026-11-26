@@ -1,0 +1,21 @@
+name: fmt-probe
+on: workflow_dispatch
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - name: report the exact formatting diff
+        run: |
+          cargo fmt --all
+          git diff --color=never --stat
+          git diff --color=never > /tmp/fmt.diff || true
+          n=0
+          while IFS= read -r line; do
+            n=$((n+1))
+            if [ "$n" -gt 55 ]; then echo "::error title=fmt::truncated"; break; fi
+            echo "::error title=fmt::${line}"
+          done < /tmp/fmt.diff
