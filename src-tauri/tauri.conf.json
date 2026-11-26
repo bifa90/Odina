@@ -26,12 +26,16 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["deb", "nsis"],
+    "targets": [
+      "deb",
+      "nsis"
+    ],
     "icon": [
-      "../assets/logo/png/dark/odina-32.png",
-      "../assets/logo/png/dark/odina-128.png",
-      "../assets/logo/png/dark/odina-256.png",
-      "../assets/logo/odina.ico"
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.png",
+      "icons/icon.ico"
     ]
   }
 }
