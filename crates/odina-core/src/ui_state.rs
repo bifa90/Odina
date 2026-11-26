@@ -67,8 +67,8 @@ impl UiState {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use crate::messages;
+    use super::*;
 
     #[test]
     fn rtl_and_ltr_resolve_offline() {

@@ -53,16 +53,16 @@ mod tests {
     use super::*;
 
     const LOCALES: &[(&str, &str)] = &[
-        ("ar", include_str!("../../locales/ar/odina.ftl")),
-        ("de", include_str!("../../locales/de/odina.ftl")),
-        ("en", include_str!("../../locales/en/odina.ftl")),
-        ("es", include_str!("../../locales/es/odina.ftl")),
-        ("fr", include_str!("../../locales/fr/odina.ftl")),
-        ("hi", include_str!("../../locales/hi/odina.ftl")),
-        ("ja", include_str!("../../locales/ja/odina.ftl")),
-        ("pt-BR", include_str!("../../locales/pt-BR/odina.ftl")),
-        ("ru", include_str!("../../locales/ru/odina.ftl")),
-        ("zh-Hans", include_str!("../../locales/zh-Hans/odina.ftl")),
+        ("ar", include_str!("../../../locales/ar/odina.ftl")),
+        ("de", include_str!("../../../locales/de/odina.ftl")),
+        ("en", include_str!("../../../locales/en/odina.ftl")),
+        ("es", include_str!("../../../locales/es/odina.ftl")),
+        ("fr", include_str!("../../../locales/fr/odina.ftl")),
+        ("hi", include_str!("../../../locales/hi/odina.ftl")),
+        ("ja", include_str!("../../../locales/ja/odina.ftl")),
+        ("pt-BR", include_str!("../../../locales/pt-BR/odina.ftl")),
+        ("ru", include_str!("../../../locales/ru/odina.ftl")),
+        ("zh-Hans", include_str!("../../../locales/zh-Hans/odina.ftl")),
     ];
 
     #[test]
@@ -93,7 +93,10 @@ mod tests {
         assert_eq!(seen.len(), UI_KEYS.len(), "a key is listed twice");
         for &key in UI_KEYS {
             assert!(key.contains('.'), "{key} is not dotted");
-            assert!(key.chars().all(|c| ALLOWED.contains(c)), "{key} bad char");
+            assert!(
+                key.chars().all(|c| ALLOWED.contains(c)),
+                "{key} bad char"
+            );
         }
     }
 }
