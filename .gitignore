@@ -41,4 +41,3 @@ odina-b9-*/
 # Desktop shell: fonts are copied from fonts/vendor by tools/fetch-shell-fonts.py
 src-tauri/ui/fonts/
 src-tauri/gen/
-src-tauri/Cargo.lock
