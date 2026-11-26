@@ -38,7 +38,7 @@ pub fn source(lang: &str) -> Option<&'static str> {
 }
 
 /// The raw value of `key` in one file, without substituting anything.
-pub fn value(source: &str, key: &str) -> Option<&str> {
+pub fn value<'a>(source: &'a str, key: &str) -> Option<&'a str> {
     for line in source.lines() {
         let Some((name, rest)) = line.split_once(" = ") else {
             continue;

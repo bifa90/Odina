@@ -1,0 +1,37 @@
+# Copyright (c) 2026 bifa90 — Odina
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Temporary: reports the exact rustfmt diff for both workspaces in one annotation.
+name: fmt-report
+on:
+  push:
+    paths:
+      - ".github/workflows/fmt-report.yml"
+permissions:
+  checks: write
+  contents: read
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+      - name: webkit and friends
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev \
+            librsvg2-dev libxdo-dev libssl-dev
+      - name: diff
+        run: |
+          python3 tools/fetch-shell-fonts.py
+          cargo fmt --all
+          (cd src-tauri && cargo fmt)
+          git diff --color=never > /tmp/fmt.diff || true
+          echo "lines: $(wc -l < /tmp/fmt.diff)"
+          python3 - <<'PY'
+          import pathlib
+          text = pathlib.Path('/tmp/fmt.diff').read_text()
+          text = text.replace('%', '%25').replace('\r', '').replace('\n', '%0A')
+          print('::error title=fmt::' + text[:60000])
+          PY
