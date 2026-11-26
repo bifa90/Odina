@@ -126,14 +126,20 @@ mod tests {
         let age = Some((month("2025-01"), ReleaseAge::NeedsUpdate));
         let home = view("ar", ServiceHealth::Stopped, age);
         assert!(home.stale, "the age is still reported");
-        assert_eq!(home.title, l10n::translate("ar", messages::STATE_UNPROTECTED).unwrap());
+        assert_eq!(
+            home.title,
+            l10n::translate("ar", messages::STATE_UNPROTECTED).unwrap()
+        );
     }
 
     #[test]
     fn a_running_old_guard_says_its_list_is_old() {
         let age = Some((month("2025-01"), ReleaseAge::NeedsUpdate));
         let home = view("ar", ServiceHealth::Active, age);
-        assert_eq!(home.title, l10n::translate("ar", messages::STATE_STALE).unwrap());
+        assert_eq!(
+            home.title,
+            l10n::translate("ar", messages::STATE_STALE).unwrap()
+        );
     }
 
     #[test]
@@ -141,7 +147,10 @@ mod tests {
         let home = view("ar", ServiceHealth::Active, None);
         assert_eq!(home.month, None);
         assert!(!home.stale);
-        assert_eq!(home.title, l10n::translate("ar", messages::STATE_PROTECTED).unwrap());
+        assert_eq!(
+            home.title,
+            l10n::translate("ar", messages::STATE_PROTECTED).unwrap()
+        );
     }
 
     #[test]

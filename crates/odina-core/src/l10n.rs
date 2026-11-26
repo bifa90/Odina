@@ -117,7 +117,12 @@ mod tests {
 
     #[test]
     fn all_ten_files_define_every_key_the_shell_asks_for() {
-        let keys = ["state.protected", "state.stale", "update.chip", "home.version"];
+        let keys = [
+            "state.protected",
+            "state.stale",
+            "update.chip",
+            "home.version",
+        ];
         for &lang in LANGS {
             let text = source(lang).unwrap();
             for key in keys {
