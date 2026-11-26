@@ -52,12 +52,9 @@ jobs:
           cargo clippy --all-targets -- -D warnings > /tmp/clippy.log 2>&1
           status=$?
           if [ "$status" -ne 0 ]; then
-            n=0
-            while IFS= read -r line; do
-              n=$((n+1))
-              if [ "$n" -gt 40 ]; then echo "::error title=clippy::truncated"; break; fi
-              echo "::error title=clippy::${line}"
-            done < /tmp/clippy.log
+            grep -iE "error(\[|:)|^error|-->|panicked|cannot|expected|mismatched" /tmp/clippy.log \
+              | head -30 | sed 's/^/::error title=clippy::/'
+            tail -12 /tmp/clippy.log | sed 's/^/::error title=clippy-tail::/'
           fi
           exit "$status"
       - name: test
