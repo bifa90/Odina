@@ -44,7 +44,18 @@ jobs:
         run: python3 ../tools/fetch-shell-fonts.py
       - name: format
         if: runner.os == 'Linux'
-        run: cargo fmt -- --check
+        shell: bash
+        run: |
+          if cargo fmt -- --check; then exit 0; fi
+          cargo fmt
+          git diff --color=never > /tmp/fmt.diff
+          python3 - <<'PY'
+          import pathlib
+          text = pathlib.Path('/tmp/fmt.diff').read_text()
+          text = text.replace('%', '%25').replace('\r', '').replace('\n', '%0A')
+          print('::error title=fmt::' + text[:60000])
+          PY
+          exit 1
       - name: clippy
         shell: bash
         run: |
