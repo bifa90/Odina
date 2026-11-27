@@ -185,7 +185,10 @@ mod tests {
     #[test]
     fn the_screen_says_why_the_service_is_silent_and_why_a_month_is_missing() {
         let off = view("ar", ServiceHealth::Disconnected, None, Some("2026-11"));
-        assert_eq!(off.detail, l10n::translate("ar", messages::HOME_SERVICE_OFF));
+        assert_eq!(
+            off.detail,
+            l10n::translate("ar", messages::HOME_SERVICE_OFF)
+        );
         let dev = view("ar", ServiceHealth::Active, None, None);
         assert_eq!(dev.detail, l10n::translate("ar", messages::HOME_DEV_BUILD));
     }
@@ -195,6 +198,9 @@ mod tests {
         let home = view("xx", ServiceHealth::Active, None, Some("2026-11"));
         assert_eq!(home.lang, "ar");
         assert_eq!(home.dir, "rtl");
-        assert_eq!(view("en", ServiceHealth::Active, None, Some("2026-11")).dir, "ltr");
+        assert_eq!(
+            view("en", ServiceHealth::Active, None, Some("2026-11")).dir,
+            "ltr"
+        );
     }
 }
