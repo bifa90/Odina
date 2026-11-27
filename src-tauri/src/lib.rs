@@ -135,7 +135,7 @@ pub fn measured_health() -> ServiceHealth {
 
 /// Every shipped language, each named in its own script.
 #[tauri::command]
-pub fn languages() -> Vec<Language> {
+fn languages() -> Vec<Language> {
     l10n::LANGS
         .iter()
         .map(|&code| Language {
