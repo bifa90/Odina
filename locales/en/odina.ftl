@@ -551,3 +551,7 @@ home.version = Version { $v }
 ## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
 home.service_off = The protection service is not running
 home.dev_build = A development build has no release month
+
+## ── اسم اللغة في لغتها، ووسم «بلا مراجعة ناطق» (D82) ─────────────
+lang.self = English
+lang.draft = Draft

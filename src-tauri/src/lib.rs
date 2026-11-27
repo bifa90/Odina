@@ -33,6 +33,22 @@ pub struct Home {
     pub health: String,
 }
 
+/// One row of the language screen: the language in its own script, and whether
+/// a native speaker has reviewed it (D82). An unreviewed language ships with
+/// the mark, never without it.
+#[derive(Debug, Clone, Serialize)]
+pub struct Language {
+    pub code: String,
+    pub name: String,
+    pub draft: bool,
+    pub rtl: bool,
+}
+
+/// Languages with no native review yet. The list is data, not a translation:
+/// it is the same in every interface language, which is why it lives here and
+/// not in the `.ftl` files.
+const DRAFT: &[&str] = &["de", "fr", "pt-BR"];
+
 fn health_word(health: ServiceHealth) -> &'static str {
     match health {
         ServiceHealth::Active => "active",
@@ -117,6 +133,35 @@ pub fn measured_health() -> ServiceHealth {
     }
 }
 
+/// Every shipped language, each named in its own script.
+pub fn languages() -> Vec<Language> {
+    l10n::LANGS
+        .iter()
+        .map(|&code| Language {
+            code: code.to_string(),
+            name: l10n::translate(code, messages::LANG_SELF).unwrap_or_else(|| code.to_string()),
+            draft: DRAFT.contains(&code),
+            rtl: UiState::new(ServiceHealth::Active, code).direction() == TextDirection::Rtl,
+        })
+        .collect()
+}
+
+/// The fixed labels the window needs outside the state line, resolved once per
+/// language change. Kept as a list of keys, never as strings.
+pub fn window_strings(lang: &str) -> std::collections::BTreeMap<String, String> {
+    const KEYS: &[&str] = &[
+        messages::LANG_TITLE,
+        messages::LANG_SUB,
+        messages::THEME_LIGHT,
+        messages::THEME_DARK,
+        messages::LANG_DRAFT,
+    ];
+    let code = if l10n::source(lang).is_some() { lang } else { "ar" };
+    KEYS.iter()
+        .filter_map(|&key| l10n::translate(code, key).map(|text| (key.to_string(), text)))
+        .collect()
+}
+
 #[tauri::command]
 fn home(lang: String) -> Home {
     let age = release_age::current_month().and_then(release_age::age_from_build);
@@ -125,7 +170,7 @@ fn home(lang: String) -> Home {
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![home])
+        .invoke_handler(tauri::generate_handler![home, languages, window_strings])
         .run(tauri::generate_context!())
         .expect("the window did not start");
 }
@@ -191,6 +236,31 @@ mod tests {
         );
         let dev = view("ar", ServiceHealth::Active, None, None);
         assert_eq!(dev.detail, l10n::translate("ar", messages::HOME_DEV_BUILD));
+    }
+
+    #[test]
+    fn the_window_labels_come_from_the_locale_files_in_every_language() {
+        for &lang in l10n::LANGS {
+            let strings = window_strings(lang);
+            assert_eq!(strings.len(), 5, "{lang} is missing a label");
+            assert!(strings.values().all(|text| !text.is_empty()), "{lang}");
+        }
+        assert_eq!(window_strings("xx").len(), 5, "an unknown language falls back");
+    }
+
+    #[test]
+    fn every_language_names_itself_in_its_own_script_and_declares_its_review() {
+        let all = languages();
+        assert_eq!(all.len(), l10n::LANGS.len());
+        for row in &all {
+            assert!(!row.name.is_empty(), "{}", row.code);
+            assert_ne!(row.name, row.code, "{} was not translated", row.code);
+        }
+        let arabic = all.iter().find(|r| r.code == "ar").unwrap();
+        assert!(arabic.rtl);
+        assert_eq!(arabic.draft, false);
+        let german = all.iter().find(|r| r.code == "de").unwrap();
+        assert!(german.draft, "an unreviewed language says so");
     }
 
     #[test]

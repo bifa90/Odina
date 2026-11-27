@@ -26,6 +26,16 @@ pub const STATE_STALE: &str = "state.stale";
 pub const UPDATE_CHIP: &str = "update.chip";
 pub const HOME_VERSION: &str = "home.version";
 
+/// The language screen: each language names itself, and an unreviewed one says so.
+pub const LANG_SELF: &str = "lang.self";
+pub const LANG_DRAFT: &str = "lang.draft";
+pub const LANG_TITLE: &str = "lang.title";
+pub const LANG_SUB: &str = "lang.sub";
+
+/// The two theme labels; the button shows the one it will switch to.
+pub const THEME_LIGHT: &str = "settings.theme_light";
+pub const THEME_DARK: &str = "settings.theme_dark";
+
 /// Why the window shows what it shows, when the answer is not in the state line.
 pub const HOME_SERVICE_OFF: &str = "home.service_off";
 pub const HOME_DEV_BUILD: &str = "home.dev_build";
@@ -43,6 +53,12 @@ pub const UI_KEYS: &[&str] = &[
     HOME_VERSION,
     HOME_SERVICE_OFF,
     HOME_DEV_BUILD,
+    LANG_SELF,
+    LANG_DRAFT,
+    LANG_TITLE,
+    LANG_SUB,
+    THEME_LIGHT,
+    THEME_DARK,
 ];
 
 /// Whether a locale text defines `key`. Public because the shell and the CLI

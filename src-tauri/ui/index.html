@@ -13,25 +13,35 @@
 </head>
 <body>
 <main class="wrap">
-  <section class="shield" id="shield" aria-live="polite">
-    <svg class="mark" width="76" height="76" viewBox="0 0 1024 1024" aria-hidden="true">
-      <path d="M512 176 C622 214 788 320 788 500 L788 688 C788 794 664 852 512 852 C360 852 236 794 236 688 L236 500 C236 320 402 214 512 176 Z"
-            fill="none" stroke="var(--state)" stroke-width="104" stroke-linejoin="round" stroke-linecap="round"/>
-      <path id="tick" d="M452 520 L494 562 L576 470" fill="none" stroke="var(--state)" stroke-width="58"
-            stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <div class="labelrow">
-      <p class="label" id="title" data-k="state.untrusted"></p>
-      <button type="button" class="chip" id="chip" hidden></button>
-    </div>
-    <div class="ageblock">
-      <span class="month" id="month" hidden></span>
-      <span class="ver" id="version"></span>
-      <p class="why" id="detail" hidden></p>
+  <section class="screen" id="screen-home">
+    <div class="shield" id="shield" aria-live="polite">
+      <svg class="mark" width="76" height="76" viewBox="0 0 1024 1024" aria-hidden="true">
+        <path d="M512 176 C622 214 788 320 788 500 L788 688 C788 794 664 852 512 852 C360 852 236 794 236 688 L236 500 C236 320 402 214 512 176 Z"
+              fill="none" stroke="var(--state)" stroke-width="104" stroke-linejoin="round" stroke-linecap="round"/>
+        <path d="M452 520 L494 562 L576 470" fill="none" stroke="var(--state)" stroke-width="58"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="labelrow">
+        <p class="label" id="title"></p>
+        <button type="button" class="chip" id="chip" hidden></button>
+      </div>
+      <div class="ageblock">
+        <span class="month" id="month" hidden></span>
+        <span class="ver" id="version"></span>
+        <p class="why" id="detail" hidden></p>
+      </div>
     </div>
   </section>
 
+  <section class="screen" id="screen-lang" hidden>
+    <h2 class="h" id="lang-title"></h2>
+    <p class="sub" id="lang-sub"></p>
+    <ul class="langs" id="langs"></ul>
+    <p class="sub" id="lang-note"></p>
+  </section>
+
   <footer class="foot">
+    <button type="button" class="link" id="to-lang"></button>
     <button type="button" class="link" id="theme" aria-pressed="false"></button>
   </footer>
 </main>
