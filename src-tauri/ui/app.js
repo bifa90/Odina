@@ -75,7 +75,7 @@ function systemTheme() {
 
 async function loadStrings(lang) {
   if (!invoke) return;
-  strings = await invoke('window_strings', { lang });
+  strings = await invoke('strings', { lang });
   el.langTitle.textContent = strings['lang.title'] || '';
   el.langSub.textContent = strings['lang.sub'] || '';
   el.langNote.textContent = strings['lang.draft'] || '';

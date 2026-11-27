@@ -134,6 +134,7 @@ pub fn measured_health() -> ServiceHealth {
 }
 
 /// Every shipped language, each named in its own script.
+#[tauri::command]
 pub fn languages() -> Vec<Language> {
     l10n::LANGS
         .iter()
@@ -162,6 +163,13 @@ pub fn window_strings(lang: &str) -> std::collections::BTreeMap<String, String> 
         .collect()
 }
 
+/// The window labels for one language. Borrowed input stays out of the command
+/// signature: the shell passes an owned `String` across the IPC boundary.
+#[tauri::command]
+fn strings(lang: String) -> std::collections::BTreeMap<String, String> {
+    window_strings(&lang)
+}
+
 #[tauri::command]
 fn home(lang: String) -> Home {
     let age = release_age::current_month().and_then(release_age::age_from_build);
@@ -170,7 +178,7 @@ fn home(lang: String) -> Home {
 
 pub fn run() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![home, languages, window_strings])
+        .invoke_handler(tauri::generate_handler![home, languages, strings])
         .run(tauri::generate_context!())
         .expect("the window did not start");
 }
