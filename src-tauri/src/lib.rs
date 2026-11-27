@@ -157,7 +157,11 @@ pub fn window_strings(lang: &str) -> std::collections::BTreeMap<String, String> 
         messages::THEME_DARK,
         messages::LANG_DRAFT,
     ];
-    let code = if l10n::source(lang).is_some() { lang } else { "ar" };
+    let code = if l10n::source(lang).is_some() {
+        lang
+    } else {
+        "ar"
+    };
     KEYS.iter()
         .filter_map(|&key| l10n::translate(code, key).map(|text| (key.to_string(), text)))
         .collect()
@@ -253,7 +257,11 @@ mod tests {
             assert_eq!(strings.len(), 5, "{lang} is missing a label");
             assert!(strings.values().all(|text| !text.is_empty()), "{lang}");
         }
-        assert_eq!(window_strings("xx").len(), 5, "an unknown language falls back");
+        assert_eq!(
+            window_strings("xx").len(),
+            5,
+            "an unknown language falls back"
+        );
     }
 
     #[test]
@@ -266,7 +274,7 @@ mod tests {
         }
         let arabic = all.iter().find(|r| r.code == "ar").unwrap();
         assert!(arabic.rtl);
-        assert_eq!(arabic.draft, false);
+        assert!(!arabic.draft);
         let german = all.iter().find(|r| r.code == "de").unwrap();
         assert!(german.draft, "an unreviewed language says so");
     }
