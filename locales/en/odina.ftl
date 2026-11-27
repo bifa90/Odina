@@ -542,3 +542,16 @@ browser.stillSuspect = The scan did not confirm an infection. The file is unchan
 browser.close = Close
 browser.working = Verifying locally…
 browser.quarantine = Move to quarantine
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Your threat list is out of date
+update.chip = New version { $v } available
+home.version = Version { $v }
+
+## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
+home.service_off = The protection service is not running
+home.dev_build = A development build has no release month
+
+## ── اسم اللغة في لغتها، ووسم «بلا مراجعة ناطق» (D82) ─────────────
+lang.self = English
+lang.draft = Draft

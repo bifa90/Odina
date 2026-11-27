@@ -511,3 +511,16 @@ browser.stillSuspect = El análisis no confirmó ninguna infección. El archivo 
 browser.close = Cerrar
 browser.working = Verificando localmente…
 browser.quarantine = Mover a cuarentena
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = Tu lista de amenazas está desactualizada
+update.chip = Nueva versión { $v } disponible
+home.version = Versión { $v }
+
+## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
+home.service_off = El servicio de protección no está en marcha
+home.dev_build = Una versión de desarrollo no tiene mes de publicación
+
+## ── اسم اللغة في لغتها، ووسم «بلا مراجعة ناطق» (D82) ─────────────
+lang.self = Español
+lang.draft = Borrador

@@ -11,7 +11,9 @@
 //!
 //! * the home page prints the release month in plain sight (`2026-04`), so the
 //!   age is visible without a nagging dialog;
-//! * from the sixth month on, a badge reads «يحتاج تحديث» beside «محمي».
+//! * from the sixth month on, the state title switches to the locale key
+//!   `state.stale` («قاعدتك قديمة») and the update chip keeps its place beside
+//!   it (D122). The wording lives in `locales/*/odina.ftl`, not here.
 //!
 //! The month is **compiled in from the release**, never read from a file's
 //! modification time: mtime is one API call away from being forged, and the
@@ -80,17 +82,47 @@ impl ReleaseMonth {
 pub enum ReleaseAge {
     /// Under six months: nothing is shown beside «محمي».
     Current,
-    /// Six months or older: the badge appears; scanning does not change.
+    /// Six months or older: the title switches to `state.stale`; the scanning
+    /// result and the behaviour do not change.
     NeedsUpdate,
 }
 
-/// The badge text, or nothing. A single source for the string so the UI cannot
-/// soften it and the translation cannot drop «تحديث» from it.
-pub fn badge(age: ReleaseAge) -> Option<&'static str> {
+/// The message key that replaces the state title, or nothing. The text itself
+/// is in the locale files (`state.stale`), so the screen has one wording in ten
+/// languages and no Arabic string is compiled into the binary (18.2.9).
+pub fn title_key(age: ReleaseAge) -> Option<&'static str> {
     match age {
         ReleaseAge::Current => None,
-        ReleaseAge::NeedsUpdate => Some("يحتاج تحديث"),
+        ReleaseAge::NeedsUpdate => Some("state.stale"),
     }
+}
+
+/// The month this run happens in, from the system clock. Day arithmetic is
+/// enough: a timezone moves the day, and only within hours of a month boundary
+/// the month — and a badge that waits six months does not hinge on it.
+pub fn current_month() -> Option<ReleaseMonth> {
+    let elapsed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .ok()?;
+    let days = i64::try_from(elapsed.as_secs() / 86_400).ok()?;
+    let (year, month, _) = civil_from_days(days);
+    ReleaseMonth::parse(&format!("{year:04}-{month:02}")).ok()
+}
+
+/// Days since 1970-01-01 to a civil date, by Howard Hinnant's algorithm.
+fn civil_from_days(days: i64) -> (i64, i64, i64) {
+    let z = days + 719_468;
+    let era = if z >= 0 { z } else { z - 146_096 };
+    let era = era / 146_097;
+    let doe = z - era * 146_097;
+    let yoe = (doe - doe / 1_460 + doe / 36_524 - doe / 146_096) / 365;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let day = doy - (153 * mp + 2) / 5 + 1;
+    let month = if mp < 10 { mp + 3 } else { mp - 9 };
+    let leap_adjust = if month <= 2 { 1 } else { 0 };
+    let year = yoe + era * 400 + leap_adjust;
+    (year, month, day)
 }
 
 pub fn release_age(months: u32) -> ReleaseAge {
@@ -155,16 +187,27 @@ mod tests {
     }
 
     #[test]
-    fn the_badge_appears_at_six_months_and_changes_nothing_else() {
+    fn the_title_switches_at_six_months_and_changes_nothing_else() {
         assert_eq!(release_age(0), ReleaseAge::Current);
         assert_eq!(release_age(5), ReleaseAge::Current);
         assert_eq!(release_age(6), ReleaseAge::NeedsUpdate);
         assert_eq!(release_age(60), ReleaseAge::NeedsUpdate);
-        assert_eq!(badge(ReleaseAge::Current), None);
-        assert_eq!(badge(ReleaseAge::NeedsUpdate), Some("يحتاج تحديث"));
+        assert_eq!(title_key(ReleaseAge::Current), None);
+        assert_eq!(title_key(ReleaseAge::NeedsUpdate), Some("state.stale"));
         // There is no snooze and no strict state to fall into: the only two
         // answers are "current" and "still working, needs update".
         assert_eq!(NEEDS_UPDATE_AFTER_MONTHS, 6);
+    }
+
+    #[test]
+    fn a_day_count_becomes_the_same_year_and_month_a_date_would() {
+        assert_eq!(civil_from_days(0), (1970, 1, 1));
+        assert_eq!(civil_from_days(20_782), (2026, 11, 25));
+        // The clock is only ever asked for a month, and a bad clock is quiet.
+        if let Some(month) = current_month() {
+            assert!((2000..3000).contains(&month.year), "{}", month.year);
+            assert!((1..=12).contains(&month.month), "{}", month.month);
+        }
     }
 
     #[test]

@@ -511,3 +511,16 @@ browser.stillSuspect = 本次扫描未能确认感染，文件未被更改。
 browser.close = 关闭
 browser.working = 正在本地核对…
 browser.quarantine = 移至隔离区
+
+## ── عمر الإصدار وإعلام التحديث (D113 · D122) ─────────────────────
+state.stale = 威胁库已过时
+update.chip = 有新版本 { $v } 可用
+home.version = 版本 { $v }
+
+## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
+home.service_off = 保护服务未运行
+home.dev_build = 开发版本没有发布月份
+
+## ── اسم اللغة في لغتها، ووسم «بلا مراجعة ناطق» (D82) ─────────────
+lang.self = 简体中文
+lang.draft = 草稿
