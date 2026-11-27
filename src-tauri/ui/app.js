@@ -11,6 +11,7 @@ const el = {
   chip: document.getElementById('chip'),
   month: document.getElementById('month'),
   version: document.getElementById('version'),
+  detail: document.getElementById('detail'),
   theme: document.getElementById('theme'),
   shield: document.getElementById('shield'),
 };
@@ -77,6 +78,12 @@ async function refresh() {
     el.month.hidden = false;
   } else {
     el.month.hidden = true;
+  }
+  if (home.detail) {
+    el.detail.textContent = home.detail;
+    el.detail.hidden = false;
+  } else {
+    el.detail.hidden = true;
   }
   if (home.chip) {
     el.chip.textContent = home.chip;

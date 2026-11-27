@@ -516,3 +516,7 @@ browser.quarantine = 移至隔离区
 state.stale = 威胁库已过时
 update.chip = 有新版本 { $v } 可用
 home.version = 版本 { $v }
+
+## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
+home.service_off = 保护服务未运行
+home.dev_build = 开发版本没有发布月份

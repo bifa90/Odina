@@ -516,3 +516,7 @@ browser.quarantine = 隔離する
 state.stale = 脅威データが古くなっています
 update.chip = 新しいバージョン { $v } があります
 home.version = バージョン { $v }
+
+## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
+home.service_off = 保護サービスが起動していません
+home.dev_build = 開発版にはリリース月がありません

@@ -26,6 +26,10 @@ pub const STATE_STALE: &str = "state.stale";
 pub const UPDATE_CHIP: &str = "update.chip";
 pub const HOME_VERSION: &str = "home.version";
 
+/// Why the window shows what it shows, when the answer is not in the state line.
+pub const HOME_SERVICE_OFF: &str = "home.service_off";
+pub const HOME_DEV_BUILD: &str = "home.dev_build";
+
 /// Every key this crate may emit. The order is the order a reviewer reads them.
 pub const UI_KEYS: &[&str] = &[
     STATE_PROTECTED,
@@ -37,6 +41,8 @@ pub const UI_KEYS: &[&str] = &[
     STATE_STALE,
     UPDATE_CHIP,
     HOME_VERSION,
+    HOME_SERVICE_OFF,
+    HOME_DEV_BUILD,
 ];
 
 /// Whether a locale text defines `key`. Public because the shell and the CLI

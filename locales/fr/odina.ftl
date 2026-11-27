@@ -516,3 +516,7 @@ browser.quarantine = Mettre en quarantaine
 state.stale = Votre liste de menaces est obsolète
 update.chip = Nouvelle version { $v } disponible
 home.version = Version { $v }
+
+## ── نافذة سطح المكتب: لماذا الشاشة بهذا الشكل (D125) ─────────────
+home.service_off = Le service de protection n'est pas démarré
+home.dev_build = Une version de développement n'a pas de mois de publication

@@ -26,6 +26,9 @@ pub struct Home {
     pub chip: Option<String>,
     pub month: Option<String>,
     pub version: String,
+    /// Why the screen looks the way it does, when the state line cannot say it:
+    /// the service is not running, or this build carries no release month.
+    pub detail: Option<String>,
     pub stale: bool,
     pub health: String,
 }
@@ -40,8 +43,13 @@ fn health_word(health: ServiceHealth) -> &'static str {
 }
 
 /// The state from a run: the language the window asked for, the health it
-/// measured, and the age of the build (if the build carries a month).
-pub fn view(lang: &str, health: ServiceHealth, age: Option<(ReleaseMonth, ReleaseAge)>) -> Home {
+/// measured, the age of the build, and the release month the build carries.
+pub fn view(
+    lang: &str,
+    health: ServiceHealth,
+    age: Option<(ReleaseMonth, ReleaseAge)>,
+    release_month: Option<&str>,
+) -> Home {
     let lang = if l10n::source(lang).is_some() {
         lang.to_string()
     } else {
@@ -66,6 +74,14 @@ pub fn view(lang: &str, health: ServiceHealth, age: Option<(ReleaseMonth, Releas
     let version_args = [("v", odina_core::VERSION)];
     let version = l10n::translate_args(&lang, messages::HOME_VERSION, &version_args)
         .unwrap_or_else(|| odina_core::VERSION.to_string());
+    let detail_key = if health == ServiceHealth::Disconnected {
+        Some(messages::HOME_SERVICE_OFF)
+    } else if age.is_none() && release_month.is_none() {
+        Some(messages::HOME_DEV_BUILD)
+    } else {
+        None
+    };
+    let detail = detail_key.and_then(|key| l10n::translate(&lang, key));
     let dir = match state.direction() {
         TextDirection::Rtl => "rtl",
         TextDirection::Ltr => "ltr",
@@ -80,6 +96,7 @@ pub fn view(lang: &str, health: ServiceHealth, age: Option<(ReleaseMonth, Releas
         chip: None,
         month,
         version,
+        detail,
         stale,
         health: health_word(health).to_string(),
     }
@@ -103,7 +120,7 @@ pub fn measured_health() -> ServiceHealth {
 #[tauri::command]
 fn home(lang: String) -> Home {
     let age = release_age::current_month().and_then(release_age::age_from_build);
-    view(&lang, measured_health(), age)
+    view(&lang, measured_health(), age, release_age::RELEASE_MONTH)
 }
 
 pub fn run() {
@@ -124,7 +141,7 @@ mod tests {
     #[test]
     fn a_stopped_guard_is_never_renamed_into_a_stale_one() {
         let age = Some((month("2025-01"), ReleaseAge::NeedsUpdate));
-        let home = view("ar", ServiceHealth::Stopped, age);
+        let home = view("ar", ServiceHealth::Stopped, age, Some("2025-01"));
         assert!(home.stale, "the age is still reported");
         assert_eq!(
             home.title,
@@ -135,7 +152,7 @@ mod tests {
     #[test]
     fn a_running_old_guard_says_its_list_is_old() {
         let age = Some((month("2025-01"), ReleaseAge::NeedsUpdate));
-        let home = view("ar", ServiceHealth::Active, age);
+        let home = view("ar", ServiceHealth::Active, age, Some("2025-01"));
         assert_eq!(
             home.title,
             l10n::translate("ar", messages::STATE_STALE).unwrap()
@@ -144,9 +161,10 @@ mod tests {
 
     #[test]
     fn no_release_month_means_no_date_rather_than_a_guess() {
-        let home = view("ar", ServiceHealth::Active, None);
+        let home = view("ar", ServiceHealth::Active, None, Some("2026-11"));
         assert_eq!(home.month, None);
         assert!(!home.stale);
+        assert_eq!(home.detail, None, "a dated build explains nothing away");
         assert_eq!(
             home.title,
             l10n::translate("ar", messages::STATE_PROTECTED).unwrap()
@@ -156,7 +174,7 @@ mod tests {
     #[test]
     fn the_three_lines_come_from_the_locale_files_in_every_language() {
         for &lang in l10n::LANGS {
-            let home = view(lang, ServiceHealth::Active, None);
+            let home = view(lang, ServiceHealth::Active, None, Some("2026-11"));
             assert_eq!(home.lang, lang);
             assert!(!home.title.is_empty(), "{lang} title");
             assert!(home.version.contains(odina_core::VERSION), "{lang} version");
@@ -165,10 +183,21 @@ mod tests {
     }
 
     #[test]
+    fn the_screen_says_why_the_service_is_silent_and_why_a_month_is_missing() {
+        let off = view("ar", ServiceHealth::Disconnected, None, Some("2026-11"));
+        assert_eq!(
+            off.detail,
+            l10n::translate("ar", messages::HOME_SERVICE_OFF)
+        );
+        let dev = view("ar", ServiceHealth::Active, None, None);
+        assert_eq!(dev.detail, l10n::translate("ar", messages::HOME_DEV_BUILD));
+    }
+
+    #[test]
     fn an_unknown_language_falls_back_to_arabic_and_the_direction_follows_it() {
-        let home = view("xx", ServiceHealth::Active, None);
+        let home = view("xx", ServiceHealth::Active, None, Some("2026-11"));
         assert_eq!(home.lang, "ar");
         assert_eq!(home.dir, "rtl");
-        assert_eq!(view("en", ServiceHealth::Active, None).dir, "ltr");
+        assert_eq!(view("en", ServiceHealth::Active, None, Some("2026-11")).dir, "ltr");
     }
 }

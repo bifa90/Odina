@@ -95,6 +95,7 @@ select{padding:8px 10px;border-radius:var(--r-sm);border:1px solid var(--border)
 .shield .ageblock{display:flex;flex-direction:column;align-items:center;gap:1px;margin-top:2px}
 .shield .ageblock .month{font-size:26px;font-weight:600;line-height:1.15;letter-spacing:.01em}
 .shield .ageblock .ver{font-size:13px;color:var(--text3)}
+.shield .ageblock .why{font-size:12px;color:var(--text2);text-align:center;max-width:34ch;margin-top:4px}
 /* على هاتف ٣٢٠ بكسل تبقى الشريحة بجانب العنوان ما أمكن؛ وإن ضاق الصفّ لُفّت
    إلى سطر ثانٍ بدل أن تُقتطع (D122: قصيرة، لكن لا تُخفى). */
 @media(max-width:380px){
@@ -662,6 +663,8 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
     </div>
     <h2><svg class="i"><use href="#i-shield"/></svg><span data-k="sec.main">1 · الشاشة الرئيسية</span></h2>
     <p class="hint" data-k="sec.main.hint">≤ 8 عناصر · 3 جدران · زرّان · لا مصطلحات تقنية</p>
+    <!-- التطبيق لا المعاينة: لماذا لا يظهر شهر حين لا يكون في البناء شهر (D125) -->
+    <p class="hint" data-k="home.dev_build">نسخة تطوير بلا شهر إصدار</p>
     <div class="seg hint" role="group" aria-label="حالة الشاشة (محاكاة تصميم)">
       <button type="button" data-statedemo="ok" aria-pressed="true">محمي</button>
       <button type="button" data-statedemo="upd" aria-pressed="false">يوجد تحديث</button>
@@ -688,6 +691,7 @@ html{scroll-padding-block-start:var(--toolbar-height,0px)}
         <div class="ageblock">
           <span class="month">2026-11</span>
           <span class="ver" data-k="home.version" data-k-args='{"v":"0.1.0"}'>الإصدار 0.1.0</span>
+          <span class="why" data-k="home.service_off">خدمة الحماية غير مشغّلة — شغّلها ليبدأ الفحص</span>
         </div>
         <div class="sub" data-k="shield.sub" data-tmpl="shield.sub"
              data-k-args='{"n":3}'>٣ جدران فعّالة · قاعدة التهديدات محدّثة</div>
